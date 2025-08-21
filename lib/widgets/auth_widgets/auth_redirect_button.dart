@@ -23,7 +23,7 @@ class AuthRedirectTextButton extends StatelessWidget {
           text: TextSpan(
             text: "$prompt ",
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: Colors.black87,
+              color: secondary,
               fontSize: 15,
               fontWeight: FontWeight.w600,
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/profile_option_model.dart';
+import 'package:roadfix/widgets/themes.dart'; // contains secondary, altSecondary, inputFill
 
 class ProfileOptionTile extends StatelessWidget {
   final ProfileOption option;
@@ -8,35 +9,31 @@ class ProfileOptionTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return InkWell(
-      onTap: option.onTap,
-      child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
-        child: Row(
-          children: [
-            CircleAvatar(
-              radius: 14,
-              backgroundColor: option.iconBackgroundColor,
-              child: Icon(option.icon, color: Colors.white, size: 12),
-            ),
-            const SizedBox(width: 8),
-            Expanded(
-              child: Text(
-                option.label,
-                style:
-                    option.labelStyle?.copyWith(fontSize: 14) ??
-                    const TextStyle(
-                      fontSize: 14,
-                      color: Color.fromRGBO(0, 0, 0, 0.867),
-                    ),
+    final textTheme = Theme.of(context).textTheme;
+
+    final TextStyle labelStyle =
+        option.labelStyle ??
+        textTheme.bodyMedium!.copyWith(fontSize: 14, color: secondary);
+
+    return Material(
+      color: transparent, // Let parent color (e.g., inputFill) show
+      child: InkWell(
+        onTap: option.onTap,
+        borderRadius: BorderRadius.circular(10),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+          child: Row(
+            children: [
+              CircleAvatar(
+                radius: 14,
+                backgroundColor: option.iconBackgroundColor,
+                child: Icon(option.icon, color: Colors.white, size: 12),
               ),
-            ),
-            const Icon(
-              Icons.chevron_right,
-              size: 20,
-              color: Color.fromARGB(255, 9, 9, 9),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Expanded(child: Text(option.label, style: labelStyle)),
+              const Icon(Icons.chevron_right, size: 20, color: altSecondary),
+            ],
+          ),
         ),
       ),
     );

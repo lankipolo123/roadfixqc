@@ -6,13 +6,13 @@ class SocialDivider extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 15.0),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: 15.0),
       child: Row(
         children: [
           Expanded(child: Divider(color: primary, thickness: 1.5)),
           Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+            padding: EdgeInsets.symmetric(horizontal: 8.0),
             child: Text(
               "or",
               style: TextStyle(

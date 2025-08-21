@@ -1,28 +1,63 @@
 name: roadfix
-description: "A new Flutter project."
+description: "Road Reporting Mobile App."
 publish_to: 'none'
 
 version: 1.0.0+1
 
 environment:
-  sdk: ^3.8.1
+  sdk: ">=3.8.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
-  flutter_svg: ^2.0.0
-  cupertino_icons: ^1.0.8
+  ultralytics_yolo: ^0.1.34
+  image_picker: ^1.0.4
+  permission_handler: ^11.4.0
+  camera: ^0.10.6
+  path_provider: ^2.1.1
+  image: ^4.1.3
+  logging: ^1.2.0
+  bounding_box_annotation: ^0.1.2
+  firebase_core: ^4.0.0
+  firebase_auth: ^6.0.1
+  cloud_firestore: ^6.0.0
+  google_sign_in: ^6.3.0
+  geolocator: ^10.1.1
+  geocoding: ^2.2.2
+  http: ^1.5.0
+  crypto: ^3.0.3  
+  mime: ^1.0.4  
+  http_parser: ^4.1.2
+  
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^5.0.0
+  flutter_lints: ^3.0.2
+  flutter_launcher_icons: ^0.14.4
 
 flutter:
   uses-material-design: true
   assets:
-    - assets\images\google_logo.webp
     - assets/images/road_fix_logo.webp
     - assets/images/roadwidget2.webp
     - assets/images/roadwidget4.webp
-    -  assets\images\header_widget.webp
+    - assets/images/pothole_report.webp
+    - assets/images/utility_pole_report.webp
+    - assets/images/road_concerns.webp
+    - assets/images/roadfix_logo_alt.webp
+    - assets/images/roadfix_logo_alt2.webp
+    - assets/labels.txt
+    - assets/images/icons/roadFixLogo.png
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: false
+  image_path: "assets/images/icons/roadFixLogo.png"
+ 
+  adaptive_icon_background: "#FFFFFF" 
+  adaptive_icon_foreground: "assets/images/icons/roadFixLogo.png"
+
+  min_sdk_android: 21
+
+  remove_alpha_ios: true

@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:roadfix/widgets/logo_widget.dart';
+import 'package:roadfix/widgets/common_widgets/logo_widget.dart';
 import 'package:roadfix/widgets/auth_widgets/title_widget.dart';
 
 class LoginTopContent extends StatelessWidget {

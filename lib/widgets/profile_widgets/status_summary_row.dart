@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/profile_summary.dart';
+import 'package:roadfix/widgets/themes.dart';
 
 class StatusSummaryRow extends StatelessWidget {
   final ProfileSummary user;
@@ -10,9 +11,9 @@ class StatusSummaryRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Row(
       children: [
-        _statusBox('Reports', user.reportsCount, const Color(0xFFFF5252)),
-        _statusBox('Pending', user.pendingCount, const Color(0xFFFFAB40)),
-        _statusBox('Resolved', user.resolvedCount, const Color(0xFF4CAF50)),
+        _statusBox('Reports', user.reportsCount, statusDanger),
+        _statusBox('Pending', user.pendingCount, statusWarning),
+        _statusBox('Resolved', user.resolvedCount, statusSuccess),
       ],
     );
   }

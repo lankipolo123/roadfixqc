@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/screens/auth_screens/forgot_password_screen.dart';
 
 class ForgotPasswordButton extends StatelessWidget {
   const ForgotPasswordButton({super.key});
@@ -9,12 +11,17 @@ class ForgotPasswordButton extends StatelessWidget {
       alignment: Alignment.centerRight,
       child: TextButton(
         onPressed: () {
-          // TODO: Implement forgot password logic
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const ForgotPasswordScreen(),
+            ),
+          );
         },
         child: Text(
           'Forgot Password?',
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: const Color.fromARGB(255, 219, 16, 16),
+            color: statusDanger,
             fontWeight: FontWeight.w600,
             fontSize: 12,
           ),

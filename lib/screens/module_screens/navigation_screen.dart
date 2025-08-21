@@ -3,7 +3,7 @@ import 'package:roadfix/screens/module_screens/report_type_screen.dart';
 import 'home_screen.dart';
 
 // Give alias to prevent ProfileScreen conflict
-import 'report_screen.dart';
+import 'user_report_screen.dart';
 import 'profile_screen.dart' as profile;
 
 import 'package:roadfix/widgets/bottom_navbar_widgets/navigation_widget.dart';
@@ -36,7 +36,7 @@ class _NavigationScreenState extends State<NavigationScreen> {
       color: primary, // prevent white background
       child: Scaffold(
         extendBody: true,
-        backgroundColor: Colors.transparent,
+        backgroundColor: transparent,
         body: _screens[_currentIndex],
         bottomNavigationBar: NavigationWidget(
           currentIndex: _currentIndex,

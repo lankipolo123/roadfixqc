@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "354522160966",
+    "project_id": "roadfixqc-admin",
+    "storage_bucket": "roadfixqc-admin.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:354522160966:android:b0bf682e679f7942f78f47",
+        "android_client_info": {
+          "package_name": "com.example.roadfix"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "354522160966-fmh33iu8prlpehnkpngkte8mh3u7qpdt.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAK2Mm0Gr2m4OwTL2rwN8yckWbTIKVbqQ8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "354522160966-fmh33iu8prlpehnkpngkte8mh3u7qpdt.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
