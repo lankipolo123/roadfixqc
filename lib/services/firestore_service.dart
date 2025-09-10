@@ -1,4 +1,4 @@
-// lib/services/firestore_service.dart (CLEAN - NO DUPLICATE TRANSACTIONS)
+// lib/services/firestore_service.dart (UPDATED WITH TOTP METHODS)
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roadfix/models/user_model.dart';
@@ -183,8 +183,51 @@ class FirestoreService {
     }
   }
 
-  // ✅ REMOVED ALL TRANSACTION METHODS
-  // ReportService handles all user count updates in its own transaction
+  // TOTP Methods
+  Future<void> enableTotp({
+    required String uid,
+    required String totpSecret,
+  }) async {
+    try {
+      await _db.collection(_usersCollection).doc(uid).update({
+        'totpEnabled': true,
+        'totpSecret': totpSecret,
+        'totpEnabledAt': FieldValue.serverTimestamp(),
+      });
+    } catch (e) {
+      throw Exception('Failed to enable TOTP: $e');
+    }
+  }
+
+  Future<void> disableTotp(String uid) async {
+    try {
+      await _db.collection(_usersCollection).doc(uid).update({
+        'totpEnabled': false,
+        'totpSecret': null,
+        'totpEnabledAt': null,
+      });
+    } catch (e) {
+      throw Exception('Failed to disable TOTP: $e');
+    }
+  }
+
+  Future<bool> isTotpEnabled(String uid) async {
+    try {
+      final user = await getUser(uid);
+      return user?.totpEnabled ?? false;
+    } catch (e) {
+      throw Exception('Failed to check TOTP status: $e');
+    }
+  }
+
+  Future<String?> getTotpSecret(String uid) async {
+    try {
+      final user = await getUser(uid);
+      return user?.totpSecret;
+    } catch (e) {
+      throw Exception('Failed to get TOTP secret: $e');
+    }
+  }
 
   // Simple update method (no transaction - for direct updates only)
   Future<void> updateUserReportCounts({

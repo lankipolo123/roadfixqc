@@ -3,7 +3,6 @@ import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/widgets/home_widgets/recent_report_section.dart';
 import 'package:roadfix/widgets/profile_widgets/status_summary_row.dart';
 import 'package:roadfix/widgets/themes.dart';
-import 'package:roadfix/mock_datas/mock_recent_reports.dart';
 import 'package:roadfix/widgets/home_widgets/home_header_widgets/home_header.dart';
 import 'package:roadfix/widgets/home_widgets/jumbotron.dart';
 import 'package:roadfix/services/user_service.dart';
@@ -83,6 +82,7 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      //parent layout
       backgroundColor: primary,
       body: StreamBuilder<ProfileSummary?>(
         stream: _userService.getCurrentUserProfileSummaryStream(),
@@ -100,10 +100,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       children: [
                         // Reports Summary
                         _buildReportSummary(snapshot),
-                        const SizedBox(height: 20),
-                        const Jumbotron(),
-                        const SizedBox(height: 20),
-                        RecentReportsSection(reports: mockRecentReports),
+                        const SizedBox(height: 20), //spacing
+                        const Jumbotron(), //need graphics designer jumbotron/hero
+                        const SizedBox(height: 20), //spacing
+                        const RecentReportsSection(), // Fixed: removed mock data
                         const SizedBox(height: 12),
                       ],
                     ),

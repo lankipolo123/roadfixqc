@@ -1,3 +1,4 @@
+// lib/services/auth_service.dart (UPDATED WITH TOTP SUPPORT - USING YOUR AUTHRESULT)
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:roadfix/constant/auth_constant.dart';
@@ -215,6 +216,18 @@ class AuthService {
     }
   }
 
+  // Check if user has TOTP enabled
+  Future<bool> requiresTotpVerification() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) return false;
+
+      return await _firestoreService.isTotpEnabled(user.uid);
+    } catch (e) {
+      return false; // If error occurs, skip TOTP
+    }
+  }
+
   // Private helper methods
   Future<void> _createUserInFirestore(User user, UserModel userData) async {
     UserModel newUser = userData.copyWith(uid: user.uid, isActive: false);
@@ -243,7 +256,15 @@ class AuthService {
       ).toMap();
     }
 
-    // Skip 2FA check - go directly to success
+    // Check if TOTP is required
+    final requiresTotp = await requiresTotpVerification();
+    if (requiresTotp) {
+      return AuthResult.createSuccessWith2FA(
+        phoneNumber: '', // Not used for TOTP but required by your method
+        message: 'TOTP verification required',
+      ).toMap();
+    }
+
     return AuthResult.createSuccess(
       message: AuthConstants.signinSuccessful,
     ).toMap();

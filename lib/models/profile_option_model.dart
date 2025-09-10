@@ -1,3 +1,4 @@
+// lib/models/profile_option_model.dart
 import 'package:flutter/material.dart';
 
 class ProfileOption {
@@ -6,6 +7,7 @@ class ProfileOption {
   final Color iconBackgroundColor;
   final VoidCallback onTap;
   final TextStyle? labelStyle;
+  final Widget? trailing; // Added trailing parameter
 
   ProfileOption({
     required this.icon,
@@ -13,5 +15,6 @@ class ProfileOption {
     required this.iconBackgroundColor,
     required this.onTap,
     this.labelStyle,
+    this.trailing, // Added trailing parameter
   });
 }

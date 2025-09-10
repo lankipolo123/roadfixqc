@@ -1,0 +1,45 @@
+// lib/widgets/auth_widgets/auth_loading_widget.dart
+import 'package:flutter/material.dart';
+import 'package:roadfix/widgets/themes.dart';
+
+class AuthLoadingWidget extends StatelessWidget {
+  final String? message;
+  final Color? backgroundColor;
+
+  const AuthLoadingWidget({
+    super.key,
+    this.message,
+    this.backgroundColor,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: backgroundColor ?? inputFill,
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+            ),
+            if (message != null) ...[
+              const SizedBox(height: 24),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 32),
+                child: Text(
+                  message!,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
+  }
+}

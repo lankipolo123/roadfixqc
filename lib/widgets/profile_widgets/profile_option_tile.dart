@@ -1,6 +1,7 @@
+// lib/widgets/profile_widgets/profile_option_tile.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/profile_option_model.dart';
-import 'package:roadfix/widgets/themes.dart'; // contains secondary, altSecondary, inputFill
+import 'package:roadfix/widgets/themes.dart';
 
 class ProfileOptionTile extends StatelessWidget {
   final ProfileOption option;
@@ -16,7 +17,7 @@ class ProfileOptionTile extends StatelessWidget {
         textTheme.bodyMedium!.copyWith(fontSize: 14, color: secondary);
 
     return Material(
-      color: transparent, // Let parent color (e.g., inputFill) show
+      color: transparent,
       child: InkWell(
         onTap: option.onTap,
         borderRadius: BorderRadius.circular(10),
@@ -31,7 +32,13 @@ class ProfileOptionTile extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(child: Text(option.label, style: labelStyle)),
-              const Icon(Icons.chevron_right, size: 20, color: altSecondary),
+              // Show trailing widget if provided, otherwise show default chevron
+              option.trailing ??
+                  const Icon(
+                    Icons.chevron_right,
+                    size: 20,
+                    color: altSecondary,
+                  ),
             ],
           ),
         ),

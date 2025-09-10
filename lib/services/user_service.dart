@@ -1,4 +1,4 @@
-// lib/services/user_service.dart (FIXED TO MATCH YOUR DATABASE)
+// lib/services/user_service.dart (FIXED TO WORK WITH YOUR USERMODEL)
 import 'package:roadfix/models/user_model.dart';
 import 'package:roadfix/models/profile_summary.dart';
 import 'package:roadfix/services/firestore_service.dart';
@@ -20,7 +20,7 @@ class UserService {
     return _firestoreService.getCurrentUserStream();
   }
 
-  // Convert UserModel to ProfileSummary (for profile screen specifically)
+  // Convert UserModel to ProfileSummary with REAL report counts from database
   ProfileSummary userToProfileSummary(UserModel user) {
     return ProfileSummary(
       name: user.fullName,
@@ -29,10 +29,12 @@ class UserService {
           ? user.contactNumber
           : 'No phone number',
       location: user.address.isNotEmpty ? user.address : 'No address provided',
-      imageUrl: user.userProfile, // ✅ CHANGED: Using userProfile field
-      reportsCount: 0,
-      pendingCount: 0,
-      resolvedCount: 0,
+      imageUrl: user.userProfile,
+      // ✅ FIXED: Use real counts from UserModel (now includes approvedCount)
+      reportsCount: user.reportsCount,
+      pendingCount: user.pendingCount,
+      approvedCount: user.approvedCount,
+      resolvedCount: user.resolvedCount,
     );
   }
 
@@ -55,7 +57,7 @@ class UserService {
     });
   }
 
-  // ✅ FIXED: Update profile method to use userProfile field
+  // Update profile method to use userProfile field
   Future<void> updateProfile({
     String? firstName,
     String? lastName,
@@ -75,8 +77,7 @@ class UserService {
         mi: middleInitial,
         contactNumber: contactNumber,
         address: address,
-        userProfile:
-            imageUrl, // ✅ CHANGED: Map imageUrl parameter to userProfile field
+        userProfile: imageUrl, // Map imageUrl parameter to userProfile field
       );
     } catch (e) {
       throw Exception('Failed to update profile: $e');

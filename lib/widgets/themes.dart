@@ -10,7 +10,7 @@ const Color inputFill = Color.fromRGBO(255, 255, 255, 1);
 
 // Status Colors (Used in reports, profile, etc.)
 const Color statusDanger = Color(0xFFFF5252); // For rejected, error
-const Color statusWarning = Color(0xFFFFAB40); // For pending
+const Color statusWarning = Color.fromRGBO(255, 171, 64, 1); // For pending
 const Color statusSuccess = Color(0xFF4CAF50); // For resolved
 
 // Additional Theme Colors (Reusable across app)

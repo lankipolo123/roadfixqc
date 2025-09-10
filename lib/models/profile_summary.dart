@@ -1,3 +1,4 @@
+// lib/models/profile_summary.dart
 class ProfileSummary {
   final String name;
   final String email;
@@ -6,6 +7,7 @@ class ProfileSummary {
   final String imageUrl;
   final int reportsCount;
   final int pendingCount;
+  final int approvedCount;
   final int resolvedCount;
 
   const ProfileSummary({
@@ -16,6 +18,7 @@ class ProfileSummary {
     required this.imageUrl,
     required this.reportsCount,
     required this.pendingCount,
+    required this.approvedCount,
     required this.resolvedCount,
   });
 
@@ -29,6 +32,7 @@ class ProfileSummary {
       imageUrl: json['imageUrl'] ?? '',
       reportsCount: json['reportsCount'] ?? 0,
       pendingCount: json['pendingCount'] ?? 0,
+      approvedCount: json['approvedCount'] ?? 0,
       resolvedCount: json['resolvedCount'] ?? 0,
     );
   }
@@ -43,6 +47,7 @@ class ProfileSummary {
       'imageUrl': imageUrl,
       'reportsCount': reportsCount,
       'pendingCount': pendingCount,
+      'approvedCount': approvedCount,
       'resolvedCount': resolvedCount,
     };
   }

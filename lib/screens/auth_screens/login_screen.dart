@@ -1,3 +1,4 @@
+// lib/screens/auth_screens/login_screen.dart (UPDATED WITH TOTP SUPPORT - USING YOUR AUTHRESULT)
 import 'package:flutter/material.dart';
 import 'package:roadfix/layouts/auth_scaffold.dart';
 import 'package:roadfix/widgets/auth_widgets/login_top_content.dart';
@@ -6,12 +7,14 @@ import 'package:roadfix/widgets/common_widgets/big_button.dart';
 import 'package:roadfix/widgets/auth_widgets/social_divider.dart';
 import 'package:roadfix/widgets/auth_widgets/google_signin_button.dart';
 import 'package:roadfix/widgets/auth_widgets/auth_redirect_button.dart';
+import 'package:roadfix/widgets/dialog_widgets/totp_verfication_dialog.dart';
 import 'package:roadfix/screens/module_screens/navigation_screen.dart';
 import 'package:roadfix/screens/auth_screens/signup_screen.dart';
 import 'package:roadfix/screens/auth_screens/email_verification_screen.dart';
 import 'package:roadfix/screens/auth_screens/forgot_password_screen.dart';
 import 'package:roadfix/utils/focus_helper.dart';
 import 'package:roadfix/services/auth_service.dart';
+import 'package:roadfix/services/connectivity_service.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -30,6 +33,14 @@ class _LoginScreenState extends State<LoginScreen> {
   final _authService = AuthService();
 
   bool _isLoading = false;
+  bool _isInitialLoading = true;
+  bool _hasConnection = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkInitialConnectivity();
+  }
 
   @override
   void dispose() {
@@ -38,6 +49,62 @@ class _LoginScreenState extends State<LoginScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  Future<void> _checkInitialConnectivity() async {
+    try {
+      await Future.wait([
+        ConnectivityService.hasInternetConnection(),
+        Future.delayed(const Duration(milliseconds: 1500)),
+      ]).then((results) {
+        _hasConnection = results[0] as bool;
+      });
+
+      if (mounted) {
+        setState(() => _isInitialLoading = false);
+
+        if (!_hasConnection) {
+          Future.delayed(const Duration(milliseconds: 300), () {
+            if (mounted) {
+              SnackbarUtils.showError(
+                context,
+                'No internet connection. Please check your network and try again.',
+              );
+            }
+          });
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        setState(() {
+          _hasConnection = false;
+          _isInitialLoading = false;
+        });
+
+        Future.delayed(const Duration(milliseconds: 300), () {
+          if (mounted) {
+            SnackbarUtils.showError(
+              context,
+              'Connection error. Please try again.',
+            );
+          }
+        });
+      }
+    }
+  }
+
+  Future<bool> _checkConnectivityBeforeAction() async {
+    final hasConnection = await ConnectivityService.hasInternetConnection();
+
+    if (!hasConnection && mounted) {
+      SnackbarUtils.showError(
+        context,
+        'No internet connection. Please check your network.',
+      );
+      return false;
+    }
+
+    return hasConnection;
   }
 
   Future<void> _handleLogin() async {
@@ -58,6 +125,8 @@ class _LoginScreenState extends State<LoginScreen> {
       return;
     }
 
+    if (!await _checkConnectivityBeforeAction()) return;
+
     setState(() => _isLoading = true);
 
     try {
@@ -70,18 +139,20 @@ class _LoginScreenState extends State<LoginScreen> {
         if (result['success'] != true) {
           SnackbarUtils.showError(context, result['message'] ?? 'Login failed');
         } else {
-          // Check email verification status after successful login
-          final user = _authService.currentUser;
-          if (user != null && !user.emailVerified) {
-            // User logged in but email not verified - go to verification screen
+          // Check what type of success we got
+          if (result['requiresEmailVerification'] == true) {
+            // Email verification required
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(
                 builder: (_) => const EmailVerificationScreen(),
               ),
             );
+          } else if (result['requires2FA'] == true) {
+            // TOTP verification required
+            await _handleTotpVerification();
           } else {
-            // User verified - go to main app
+            // Complete success - go to main app
             Navigator.pushReplacement(
               context,
               MaterialPageRoute(builder: (_) => const NavigationScreen()),
@@ -100,6 +171,36 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _handleTotpVerification() async {
+    try {
+      final totpResult = await TotpVerificationDialog.show(context);
+
+      if (totpResult == true && mounted) {
+        // TOTP verification successful - proceed to main app
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const NavigationScreen()),
+        );
+      } else if (totpResult == false && mounted) {
+        // User cancelled TOTP verification - sign them out for security
+        await _authService.signOut();
+        SnackbarUtils.showError(
+          context,
+          'Two-factor authentication is required. Please try again.',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        // TOTP verification failed - sign out for security
+        await _authService.signOut();
+        SnackbarUtils.showError(
+          context,
+          'Authentication failed. Please try again.',
+        );
+      }
+    }
+  }
+
   void _handleForgotPassword() {
     Navigator.push(
       context,
@@ -108,6 +209,8 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleGoogleSignIn() async {
+    if (!await _checkConnectivityBeforeAction()) return;
+
     setState(() => _isLoading = true);
 
     try {
@@ -120,10 +223,15 @@ class _LoginScreenState extends State<LoginScreen> {
             result['message'] ?? 'Google Sign-In failed',
           );
         } else {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (_) => const NavigationScreen()),
-          );
+          // Check if Google user needs TOTP (unlikely but possible)
+          if (result['requires2FA'] == true) {
+            await _handleTotpVerification();
+          } else {
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (_) => const NavigationScreen()),
+            );
+          }
         }
       }
     } catch (e) {
@@ -137,8 +245,7 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
+  Widget _buildLoginForm() {
     return AuthScaffold(
       topPadding: 30,
       topContent: const LoginTopContent(),
@@ -202,5 +309,35 @@ class _LoginScreenState extends State<LoginScreen> {
         const SizedBox(height: 16),
       ],
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (_isInitialLoading) {
+      return const AuthScaffold(
+        topPadding: 30,
+        topContent: LoginTopContent(),
+        children: [
+          SizedBox(height: 100),
+          Center(
+            child: Column(
+              children: [
+                CircularProgressIndicator(
+                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                ),
+                SizedBox(height: 24),
+                Text(
+                  'Checking connection...',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    return _buildLoginForm();
   }
 }

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/widgets/themes.dart';
 
 class ReportFilterTabs extends StatelessWidget {
   final int selectedIndex;
-  final Function(int) onChanged;
+  final ValueChanged<int> onChanged;
 
   const ReportFilterTabs({
     super.key,
@@ -12,16 +13,38 @@ class ReportFilterTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SegmentedButton<int>(
-      showSelectedIcon: false,
-      segments: const [
-        ButtonSegment(value: 0, label: Text('All')),
-        ButtonSegment(value: 1, label: Text('Pending')),
-        ButtonSegment(value: 2, label: Text('Resolved')),
-        ButtonSegment(value: 3, label: Text('Rejected')),
-      ],
-      selected: {selectedIndex},
-      onSelectionChanged: (values) => onChanged(values.first),
+    final filters = ['All', 'Pending', 'Approved', 'Resolved', 'Rejected'];
+
+    return Row(
+      children: filters.asMap().entries.map((entry) {
+        final index = entry.key;
+        final label = entry.value;
+
+        return Expanded(
+          // 🔑 each filter takes equal width
+          child: GestureDetector(
+            onTap: () => onChanged(index),
+            child: Container(
+              margin: const EdgeInsets.symmetric(horizontal: 4),
+              padding: const EdgeInsets.symmetric(vertical: 10),
+              decoration: BoxDecoration(
+                color: selectedIndex == index ? primary : Colors.transparent,
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Center(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: selectedIndex == index ? secondary : Colors.black87,
+                    fontWeight: FontWeight.w600,
+                    fontSize: 14,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        );
+      }).toList(),
     );
   }
 }

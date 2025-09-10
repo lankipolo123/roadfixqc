@@ -1,3 +1,4 @@
+// lib/widgets/profile_widgets/status_summary_row.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/profile_summary.dart';
 import 'package:roadfix/widgets/themes.dart';
@@ -13,7 +14,8 @@ class StatusSummaryRow extends StatelessWidget {
       children: [
         _statusBox('Reports', user.reportsCount, statusDanger),
         _statusBox('Pending', user.pendingCount, statusWarning),
-        _statusBox('Resolved', user.resolvedCount, statusSuccess),
+        _statusBox('Approved', user.approvedCount, statusSuccess),
+        _statusBox('Resolved', user.resolvedCount, primary),
       ],
     );
   }

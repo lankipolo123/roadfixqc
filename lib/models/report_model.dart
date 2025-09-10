@@ -17,7 +17,7 @@ class ReportModel {
   final String fullName;
   final String phoneNumber;
   final Timestamp reportedAt;
-  final String status; // pending/resolved/rejected
+  final String status; // pending/approved/resolved/rejected
 
   // Admin-only fields (empty initially)
   final String adminNotes;
@@ -163,6 +163,7 @@ class ReportModel {
 
   // Helper getters
   bool get isPending => status == 'pending';
+  bool get isApproved => status == 'approved';
   bool get isResolved => status == 'resolved';
   bool get isRejected => status == 'rejected';
 
@@ -193,10 +194,11 @@ class ReportModel {
 // Enum-like constants for better type safety
 class ReportStatus {
   static const String pending = 'pending';
+  static const String approved = 'approved';
   static const String resolved = 'resolved';
   static const String rejected = 'rejected';
 
-  static const List<String> all = [pending, resolved, rejected];
+  static const List<String> all = [pending, approved, resolved, rejected];
 }
 
 class ReportPriority {

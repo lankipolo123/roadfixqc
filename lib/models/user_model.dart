@@ -1,4 +1,4 @@
-// lib/models/user_model.dart (UPDATED WITH REPORT COUNTS)
+// lib/models/user_model.dart (UPDATED WITH TOTP FIELDS)
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
@@ -14,9 +14,15 @@ class UserModel {
   final String userProfile;
   final Timestamp? joinedAt;
 
+  // TOTP fields
+  final bool totpEnabled;
+  final String? totpSecret;
+  final Timestamp? totpEnabledAt;
+
   // Report counts (updated when reports are submitted/status changed)
   final int reportsCount;
   final int pendingCount;
+  final int approvedCount;
   final int resolvedCount;
   final int rejectedCount;
 
@@ -32,8 +38,12 @@ class UserModel {
     this.role = 'user',
     this.userProfile = '',
     this.joinedAt,
+    this.totpEnabled = false,
+    this.totpSecret,
+    this.totpEnabledAt,
     this.reportsCount = 0,
     this.pendingCount = 0,
+    this.approvedCount = 0,
     this.resolvedCount = 0,
     this.rejectedCount = 0,
   });
@@ -54,8 +64,12 @@ class UserModel {
       role: data['role'] ?? 'user',
       userProfile: data['userProfile'] ?? '',
       joinedAt: data['joinedAt'],
+      totpEnabled: data['totpEnabled'] ?? false,
+      totpSecret: data['totpSecret'],
+      totpEnabledAt: data['totpEnabledAt'],
       reportsCount: data['reportsCount'] ?? 0,
       pendingCount: data['pendingCount'] ?? 0,
+      approvedCount: data['approvedCount'] ?? 0,
       resolvedCount: data['resolvedCount'] ?? 0,
       rejectedCount: data['rejectedCount'] ?? 0,
     );
@@ -74,8 +88,12 @@ class UserModel {
       'role': role,
       'userProfile': userProfile,
       'joinedAt': joinedAt ?? FieldValue.serverTimestamp(),
+      'totpEnabled': totpEnabled,
+      'totpSecret': totpSecret,
+      'totpEnabledAt': totpEnabledAt,
       'reportsCount': reportsCount,
       'pendingCount': pendingCount,
+      'approvedCount': approvedCount,
       'resolvedCount': resolvedCount,
       'rejectedCount': rejectedCount,
     };
@@ -94,8 +112,12 @@ class UserModel {
     String? role,
     String? userProfile,
     Timestamp? joinedAt,
+    bool? totpEnabled,
+    String? totpSecret,
+    Timestamp? totpEnabledAt,
     int? reportsCount,
     int? pendingCount,
+    int? approvedCount,
     int? resolvedCount,
     int? rejectedCount,
   }) {
@@ -111,8 +133,12 @@ class UserModel {
       role: role ?? this.role,
       userProfile: userProfile ?? this.userProfile,
       joinedAt: joinedAt ?? this.joinedAt,
+      totpEnabled: totpEnabled ?? this.totpEnabled,
+      totpSecret: totpSecret ?? this.totpSecret,
+      totpEnabledAt: totpEnabledAt ?? this.totpEnabledAt,
       reportsCount: reportsCount ?? this.reportsCount,
       pendingCount: pendingCount ?? this.pendingCount,
+      approvedCount: approvedCount ?? this.approvedCount,
       resolvedCount: resolvedCount ?? this.resolvedCount,
       rejectedCount: rejectedCount ?? this.rejectedCount,
     );
@@ -126,7 +152,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, fullName: $fullName, email: $email, reportsCount: $reportsCount)';
+    return 'UserModel(uid: $uid, fullName: $fullName, email: $email, reportsCount: $reportsCount, totpEnabled: $totpEnabled)';
   }
 
   @override

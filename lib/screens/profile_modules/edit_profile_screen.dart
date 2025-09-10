@@ -1,4 +1,4 @@
-// lib/screens/profile_modules/edit_profile_screen.dart (CLEAN - NO DEBUG)
+// lib/screens/profile_modules/edit_profile_screen.dart (FIXED - UPLOAD ON SAVE)
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -29,8 +29,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   // State variables
   bool _isLoading = true;
   bool _isSaving = false;
-  bool _isUploadingImage = false;
-  String? _profileImageUrl;
+  String? _originalProfileImageUrl; // Store original URL from database
+  File? _selectedImageFile; // Store selected image file (not uploaded yet)
+  bool _hasImageChanged = false; // Track if image was changed
 
   @override
   void initState() {
@@ -55,7 +56,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         setState(() {
           _contactNumberController.text = user.contactNumber;
           _addressController.text = user.address;
-          _profileImageUrl = user.userProfile;
+          _originalProfileImageUrl = user.userProfile;
           _isLoading = false;
         });
       }
@@ -64,7 +65,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         setState(() {
           _isLoading = false;
         });
-
         _showErrorSnackBar('Failed to load profile: $e');
       }
     }
@@ -72,7 +72,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _showErrorSnackBar(String message) {
     if (!mounted) return;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -84,7 +83,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
   void _showSuccessSnackBar(String message) {
     if (!mounted) return;
-
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
@@ -94,16 +92,13 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  Future<void> _pickAndUploadImage() async {
+  /// Pick image and show local preview (NO UPLOAD YET)
+  Future<void> _pickImage() async {
     if (!mounted) return;
 
     try {
       final source = await ImageSourceDialog.show(context);
       if (source == null || !mounted) return;
-
-      setState(() {
-        _isUploadingImage = true;
-      });
 
       final pickedFile = await _imagePicker.pickImage(
         source: source,
@@ -112,69 +107,61 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         imageQuality: 85,
       );
 
-      if (pickedFile == null) {
-        if (mounted) {
-          setState(() {
-            _isUploadingImage = false;
-          });
-        }
-        return;
-      }
-
-      await _uploadImage(File(pickedFile.path));
-    } catch (e) {
-      if (mounted) {
+      if (pickedFile != null && mounted) {
         setState(() {
-          _isUploadingImage = false;
+          _selectedImageFile = File(pickedFile.path);
+          _hasImageChanged = true;
         });
 
+        _showSuccessSnackBar(
+          'Image selected! Tap Save to upload and confirm changes.',
+        );
+      }
+    } catch (e) {
+      if (mounted) {
         _showErrorSnackBar('Failed to select image: $e');
       }
     }
   }
 
-  Future<void> _uploadImage(File imageFile) async {
-    if (!mounted) return;
-
-    try {
-      final response = await _imageKitService.uploadProfileImage(imageFile);
-
-      if (mounted) {
-        setState(() {
-          _profileImageUrl = response.fileUrl;
-          _isUploadingImage = false;
-        });
-
-        _showSuccessSnackBar('Image uploaded! Now tap Save to confirm.');
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isUploadingImage = false;
-        });
-
-        _showErrorSnackBar('Failed to upload image: $e');
-      }
+  /// Get the image to display (local file or network URL)
+  ImageProvider? _getImageProvider() {
+    if (_selectedImageFile != null) {
+      return FileImage(_selectedImageFile!); // Show local preview
+    } else if (_originalProfileImageUrl != null &&
+        _originalProfileImageUrl!.isNotEmpty) {
+      return NetworkImage(
+        _originalProfileImageUrl!,
+      ); // Show current from database
     }
+    return null;
   }
 
   Future<void> _saveProfile() async {
     if (!mounted || !_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isSaving = true;
-    });
+    setState(() => _isSaving = true);
 
     try {
+      String? finalImageUrl = _originalProfileImageUrl; // Default to original
+
+      // Upload new image if one was selected
+      if (_hasImageChanged && _selectedImageFile != null) {
+        final response = await _imageKitService.uploadProfileImage(
+          _selectedImageFile!,
+        );
+        finalImageUrl = response.fileUrl;
+      }
+
+      // Update profile with all data
       await _userService.updateProfile(
         contactNumber: _contactNumberController.text.trim(),
         address: _addressController.text.trim(),
-        imageUrl: _profileImageUrl,
+        imageUrl: finalImageUrl,
       );
 
       if (mounted) {
         _showSuccessSnackBar('Profile updated successfully!');
-
         await Future.delayed(const Duration(milliseconds: 500));
 
         if (mounted) {
@@ -185,9 +172,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       _showErrorSnackBar('Failed to update profile: $e');
     } finally {
       if (mounted) {
-        setState(() {
-          _isSaving = false;
-        });
+        setState(() => _isSaving = false);
       }
     }
   }
@@ -227,15 +212,8 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     ),
                                     child: CircleAvatar(
                                       radius: 60,
-                                      key: ValueKey(_profileImageUrl),
-                                      backgroundImage:
-                                          _profileImageUrl != null &&
-                                              _profileImageUrl!.isNotEmpty
-                                          ? NetworkImage(_profileImageUrl!)
-                                          : null,
-                                      child:
-                                          _profileImageUrl == null ||
-                                              _profileImageUrl!.isEmpty
+                                      backgroundImage: _getImageProvider(),
+                                      child: _getImageProvider() == null
                                           ? const Icon(
                                               Icons.person,
                                               size: 60,
@@ -245,18 +223,21 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                     ),
                                   ),
 
-                                  if (_isUploadingImage)
-                                    Positioned.fill(
+                                  // Change indicator for selected image
+                                  if (_hasImageChanged)
+                                    Positioned(
+                                      top: 5,
+                                      right: 5,
                                       child: Container(
+                                        padding: const EdgeInsets.all(4),
                                         decoration: const BoxDecoration(
-                                          color: secondary,
+                                          color: statusSuccess,
                                           shape: BoxShape.circle,
                                         ),
-                                        child: const Center(
-                                          child: CircularProgressIndicator(
-                                            color: inputFill,
-                                            strokeWidth: 3,
-                                          ),
+                                        child: const Icon(
+                                          Icons.check,
+                                          color: Colors.white,
+                                          size: 16,
                                         ),
                                       ),
                                     ),
@@ -284,9 +265,9 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           color: inputFill,
                                           size: 20,
                                         ),
-                                        onPressed: _isUploadingImage
+                                        onPressed: _isSaving
                                             ? null
-                                            : _pickAndUploadImage,
+                                            : _pickImage,
                                       ),
                                     ),
                                   ),
@@ -296,12 +277,19 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
 
                             const SizedBox(height: 16),
 
-                            const Text(
-                              'Tap the camera icon to change your profile picture',
+                            Text(
+                              _hasImageChanged
+                                  ? 'New image selected! Tap Save to upload.'
+                                  : 'Tap the camera icon to change your profile picture',
                               textAlign: TextAlign.center,
                               style: TextStyle(
                                 fontSize: 14,
-                                color: altSecondary,
+                                color: _hasImageChanged
+                                    ? statusSuccess
+                                    : altSecondary,
+                                fontWeight: _hasImageChanged
+                                    ? FontWeight.w600
+                                    : FontWeight.normal,
                               ),
                             ),
 
@@ -330,9 +318,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             SizedBox(
                               height: 50,
                               child: ElevatedButton(
-                                onPressed: (_isSaving || _isUploadingImage)
-                                    ? null
-                                    : _saveProfile,
+                                onPressed: _isSaving ? null : _saveProfile,
                                 style: ElevatedButton.styleFrom(
                                   backgroundColor: primary,
                                   foregroundColor: inputFill,
@@ -349,9 +335,11 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                                           strokeWidth: 2,
                                         ),
                                       )
-                                    : const Text(
-                                        'Save Changes',
-                                        style: TextStyle(
+                                    : Text(
+                                        _hasImageChanged
+                                            ? 'Save & Upload Image'
+                                            : 'Save Changes',
+                                        style: const TextStyle(
                                           fontSize: 16,
                                           fontWeight: FontWeight.w600,
                                         ),
@@ -363,7 +351,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
                             SizedBox(
                               height: 50,
                               child: OutlinedButton(
-                                onPressed: (_isSaving || _isUploadingImage)
+                                onPressed: _isSaving
                                     ? null
                                     : () {
                                         if (mounted) {
