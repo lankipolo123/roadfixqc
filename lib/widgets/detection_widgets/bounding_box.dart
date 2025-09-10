@@ -17,7 +17,7 @@ class BoundingBoxPainter extends CustomPainter {
     final paint = Paint()
       ..color = statusDanger
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 3;
+      ..strokeWidth = 8; // Made thicker
 
     for (var detection in detections) {
       // Convert normalized coordinates to screen coordinates

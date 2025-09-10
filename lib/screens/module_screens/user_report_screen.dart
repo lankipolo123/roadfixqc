@@ -23,7 +23,7 @@ class _ReportScreenState extends State<ReportScreen> {
   int currentPage = 1;
   final int reportsPerPage = 10;
 
-  // Get filtered reports based on selected tab
+  // Get filtered reports based on selected tab - NOW SORTED BY DATE
   List<ReportModel> getFilteredReports(List<ReportModel> allReports) {
     switch (selectedFilter) {
       case 1: // Pending
@@ -74,13 +74,14 @@ class _ReportScreenState extends State<ReportScreen> {
                 ),
               ),
 
-              // Reports list
+              // Reports list - NOW PROPERLY SORTED BY DATE
               Expanded(
                 child: Container(
                   color: inputFill,
                   padding: const EdgeInsets.symmetric(horizontal: 8),
                   child: StreamBuilder<List<ReportModel>>(
-                    stream: _reportService.getCurrentUserReportsStream(),
+                    stream: _reportService
+                        .getCurrentUserReportsStream(), // FIXED: Now sorts by date
                     builder: (context, snapshot) => _buildReportsBody(snapshot),
                   ),
                 ),
@@ -137,7 +138,7 @@ class _ReportScreenState extends State<ReportScreen> {
       );
     }
 
-    // Process data
+    // Process data - REPORTS ARE NOW SORTED BY DATE FROM FIREBASE
     final allReports = snapshot.data ?? [];
     final filteredReports = getFilteredReports(allReports);
     final paginatedReports = paginate(
@@ -182,7 +183,7 @@ class _ReportScreenState extends State<ReportScreen> {
       );
     }
 
-    // Reports list
+    // Reports list - NOW SHOWING NEWEST FIRST
     return RefreshIndicator(
       color: primary,
       onRefresh: () async {
@@ -192,6 +193,19 @@ class _ReportScreenState extends State<ReportScreen> {
       child: ListView(
         padding: const EdgeInsets.only(bottom: 120),
         children: [
+          // Date sort indicator
+          Container(
+            padding: const EdgeInsets.all(8),
+            child: Text(
+              'Reports sorted by date (newest first)',
+              style: TextStyle(
+                color: secondary.withValues(alpha: 0.6),
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ),
           const SizedBox(height: 8),
           ...paginatedReports.map(
             (report) => Center(

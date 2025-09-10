@@ -42,31 +42,36 @@ class DetectionBottomCard extends StatelessWidget {
 
   Widget _buildDetectionTags() {
     if (detections.isNotEmpty) {
+      // Group detections by className and count quantities
+      final Map<String, int> detectionCounts = {};
+      for (var detection in detections) {
+        detectionCounts[detection.className] =
+            (detectionCounts[detection.className] ?? 0) + 1;
+      }
+
       return Wrap(
         spacing: 8,
         runSpacing: 8,
-        children: detections
-            .map(
-              (detection) => Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.red[200]!),
-                ),
-                child: Text(
-                  'Tag: ${detection.className} (${(detection.confidence * 100).toStringAsFixed(0)}%)',
-                  style: const TextStyle(
-                    color: statusDanger,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
+        children: detectionCounts.entries.map((entry) {
+          final className = entry.key;
+          final count = entry.value;
+
+          return Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            decoration: BoxDecoration(
+              color: Colors.red[50],
+              borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: Colors.red[200]!),
+            ),
+            child: Text(
+              'Quantity: $count $className${count > 1 ? 's' : ''}',
+              style: const TextStyle(
+                color: statusDanger,
+                fontWeight: FontWeight.w600,
               ),
-            )
-            .toList(),
+            ),
+          );
+        }).toList(),
       );
     } else {
       return Container(

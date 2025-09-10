@@ -82,7 +82,7 @@ class DetectionService {
         '🔍 Parsed: xc=$xc yc=$yc w=$w h=$h conf=$conf class=$className',
       );
 
-      if (conf < 0.5) continue;
+      if (conf < 0.3) continue;
 
       results.add(
         DetectionResult(

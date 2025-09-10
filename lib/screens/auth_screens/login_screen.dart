@@ -135,32 +135,32 @@ class _LoginScreenState extends State<LoginScreen> {
         password: password,
       );
 
-      if (mounted) {
-        if (result['success'] != true) {
-          SnackbarUtils.showError(context, result['message'] ?? 'Login failed');
+      debugPrint('🔍 Auth result: $result');
+      debugPrint('🔍 success: ${result['success']}');
+      debugPrint('🔍 requires2FA: ${result['requires2FA']}');
+      debugPrint(
+        '🔍 requiresEmailVerification: ${result['requiresEmailVerification']}',
+      );
+
+      if (!mounted) return;
+
+      if (result['success'] != true) {
+        SnackbarUtils.showError(context, result['message'] ?? 'Login failed');
+      } else {
+        // Check what type of success we got
+        if (result['requiresEmailVerification'] == true) {
+          debugPrint('🔍 Navigating to email verification');
+          _navigateToEmailVerification();
+        } else if (result['requires2FA'] == true) {
+          debugPrint('🔍 TOTP required - showing verification dialog');
+          await _handleTotpVerification();
         } else {
-          // Check what type of success we got
-          if (result['requiresEmailVerification'] == true) {
-            // Email verification required
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(
-                builder: (_) => const EmailVerificationScreen(),
-              ),
-            );
-          } else if (result['requires2FA'] == true) {
-            // TOTP verification required
-            await _handleTotpVerification();
-          } else {
-            // Complete success - go to main app
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const NavigationScreen()),
-            );
-          }
+          debugPrint('🔍 Complete success - navigating to main app');
+          _navigateToMainApp();
         }
       }
     } catch (e) {
+      debugPrint('🔍 Login error: $e');
       if (mounted) {
         SnackbarUtils.showError(context, 'An unexpected error occurred');
       }
@@ -172,27 +172,32 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _handleTotpVerification() async {
-    try {
-      final totpResult = await TotpVerificationDialog.show(context);
+    if (!mounted) return;
 
-      if (totpResult == true && mounted) {
-        // TOTP verification successful - proceed to main app
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (_) => const NavigationScreen()),
-        );
-      } else if (totpResult == false && mounted) {
-        // User cancelled TOTP verification - sign them out for security
+    try {
+      debugPrint('🔍 Showing TOTP dialog');
+      final totpResult = await TotpVerificationDialog.show(context);
+      debugPrint('🔍 TOTP result: $totpResult');
+
+      if (!mounted) return;
+
+      if (totpResult == true) {
+        debugPrint('🔍 TOTP successful - navigating to main app');
+        _navigateToMainApp();
+      } else if (totpResult == false) {
+        debugPrint('🔍 TOTP cancelled - signing out');
         await _authService.signOut();
-        SnackbarUtils.showError(
-          context,
-          'Two-factor authentication is required. Please try again.',
-        );
+        if (mounted) {
+          SnackbarUtils.showError(
+            context,
+            'Two-factor authentication is required. Please try again.',
+          );
+        }
       }
     } catch (e) {
+      debugPrint('🔍 TOTP error: $e');
+      await _authService.signOut();
       if (mounted) {
-        // TOTP verification failed - sign out for security
-        await _authService.signOut();
         SnackbarUtils.showError(
           context,
           'Authentication failed. Please try again.',
@@ -201,11 +206,33 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  void _navigateToMainApp() {
+    if (mounted) {
+      debugPrint('🔍 Navigating to NavigationScreen');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const NavigationScreen()),
+      );
+    }
+  }
+
+  void _navigateToEmailVerification() {
+    if (mounted) {
+      debugPrint('🔍 Navigating to EmailVerificationScreen');
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (_) => const EmailVerificationScreen()),
+      );
+    }
+  }
+
   void _handleForgotPassword() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
-    );
+    if (mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+      );
+    }
   }
 
   Future<void> _handleGoogleSignIn() async {
@@ -216,25 +243,26 @@ class _LoginScreenState extends State<LoginScreen> {
     try {
       final result = await _authService.signInWithGoogle();
 
-      if (mounted) {
-        if (result['success'] != true) {
-          SnackbarUtils.showError(
-            context,
-            result['message'] ?? 'Google Sign-In failed',
-          );
+      debugPrint('🔍 Google sign-in result: $result');
+
+      if (!mounted) return;
+
+      if (result['success'] != true) {
+        SnackbarUtils.showError(
+          context,
+          result['message'] ?? 'Google Sign-In failed',
+        );
+      } else {
+        // Check if Google user needs TOTP and has it enabled
+        if (result['requires2FA'] == true) {
+          debugPrint('🔍 Google user requires TOTP');
+          await _handleTotpVerification();
         } else {
-          // Check if Google user needs TOTP (unlikely but possible)
-          if (result['requires2FA'] == true) {
-            await _handleTotpVerification();
-          } else {
-            Navigator.pushReplacement(
-              context,
-              MaterialPageRoute(builder: (_) => const NavigationScreen()),
-            );
-          }
+          _navigateToMainApp();
         }
       }
     } catch (e) {
+      debugPrint('🔍 Google sign-in error: $e');
       if (mounted) {
         SnackbarUtils.showError(context, 'Google Sign-In failed');
       }
@@ -242,6 +270,15 @@ class _LoginScreenState extends State<LoginScreen> {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  void _handleSignUpNavigation() {
+    if (!_isLoading && mounted) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const SignUpScreen()),
+      );
     }
   }
 
@@ -297,14 +334,7 @@ class _LoginScreenState extends State<LoginScreen> {
         AuthRedirectTextButton(
           prompt: "Don't have an account?",
           action: "Sign Up",
-          onPressed: () {
-            if (!_isLoading) {
-              Navigator.push(
-                context,
-                MaterialPageRoute(builder: (_) => const SignUpScreen()),
-              );
-            }
-          },
+          onPressed: _handleSignUpNavigation,
         ),
         const SizedBox(height: 16),
       ],

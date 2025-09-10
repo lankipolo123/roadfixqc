@@ -1,4 +1,4 @@
-// lib/services/report_service.dart (CLEAN REWRITE)
+// lib/services/report_service.dart (COMPLETE FIX)
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -85,7 +85,16 @@ class ReportService {
   Stream<List<ReportModel>> getCurrentUserReportsStream() {
     final currentUser = _auth.currentUser;
     if (currentUser == null) return Stream.value([]);
-    return getUserReportsStream(currentUser.uid);
+    return _db
+        .collection(_reportsCollection)
+        .where('userId', isEqualTo: currentUser.uid)
+        .orderBy('reportedAt', descending: true)
+        .snapshots()
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => ReportModel.fromFirestore(doc))
+              .toList(),
+        );
   }
 
   // GET REPORTS - By User
@@ -94,6 +103,7 @@ class ReportService {
       final querySnapshot = await _db
           .collection(_reportsCollection)
           .where('userId', isEqualTo: userId)
+          .orderBy('reportedAt', descending: true)
           .get();
 
       return querySnapshot.docs
@@ -108,6 +118,7 @@ class ReportService {
     return _db
         .collection(_reportsCollection)
         .where('userId', isEqualTo: userId)
+        .orderBy('reportedAt', descending: true)
         .snapshots()
         .map(
           (snapshot) => snapshot.docs
@@ -126,6 +137,7 @@ class ReportService {
           .collection(_reportsCollection)
           .where('userId', isEqualTo: userId)
           .where('status', isEqualTo: status)
+          .orderBy('reportedAt', descending: true)
           .get();
 
       return querySnapshot.docs

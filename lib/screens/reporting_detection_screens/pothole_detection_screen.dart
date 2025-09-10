@@ -114,10 +114,16 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
     if (!mounted) return;
     CompactLoadingModal.hide(context);
 
-    final detectionTags = _detections
-        .map(
-          (d) => '${d.className} (${(d.confidence * 100).toStringAsFixed(0)}%)',
-        )
+    // ✅ FIXED: Group detections by className and show quantities
+    final Map<String, int> detectionCounts = {};
+    for (var detection in _detections) {
+      detectionCounts[detection.className] =
+          (detectionCounts[detection.className] ?? 0) + 1;
+    }
+
+    // Create tags showing quantities instead of percentages
+    final detectionTags = detectionCounts.entries
+        .map((entry) => '${entry.key}: ${entry.value}')
         .toList();
 
     if (processedImagePath != null) {

@@ -4,7 +4,7 @@ import 'package:roadfix/widgets/home_widgets/recent_report_section.dart';
 import 'package:roadfix/widgets/profile_widgets/status_summary_row.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/home_widgets/home_header_widgets/home_header.dart';
-import 'package:roadfix/widgets/home_widgets/jumbotron.dart';
+import 'package:roadfix/widgets/home_widgets/banner_widget.dart';
 import 'package:roadfix/services/user_service.dart';
 import 'package:roadfix/models/profile_summary.dart';
 
@@ -101,7 +101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         // Reports Summary
                         _buildReportSummary(snapshot),
                         const SizedBox(height: 20), //spacing
-                        const Jumbotron(), //need graphics designer jumbotron/hero
+                        const BannerWidget(), //need graphics designer jumbotron/hero
                         const SizedBox(height: 20), //spacing
                         const RecentReportsSection(), // Fixed: removed mock data
                         const SizedBox(height: 12),
