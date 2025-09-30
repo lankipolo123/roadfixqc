@@ -1,11 +1,12 @@
-// lib/screens/profile_modules/edit_profile_screen.dart (FIXED - UPLOAD ON SAVE)
+// lib/screens/profile_modules/edit_profile_screen.dart
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/services/imagekit_services.dart';
-import 'package:roadfix/widgets/common_widgets/module_header.dart';
 import 'package:roadfix/widgets/common_widgets/custom_text_field.dart';
+import 'package:roadfix/widgets/common_widgets/user_avatar.dart';
 import 'package:roadfix/services/user_service.dart';
+import 'package:roadfix/models/user_model.dart';
 import 'package:roadfix/widgets/dialog_widgets/image_source_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -27,47 +28,15 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
   final _addressController = TextEditingController();
 
   // State variables
-  bool _isLoading = true;
   bool _isSaving = false;
-  String? _originalProfileImageUrl; // Store original URL from database
-  File? _selectedImageFile; // Store selected image file (not uploaded yet)
-  bool _hasImageChanged = false; // Track if image was changed
-
-  @override
-  void initState() {
-    super.initState();
-    _loadUserData();
-  }
+  File? _selectedImageFile;
+  bool _hasImageChanged = false;
 
   @override
   void dispose() {
     _contactNumberController.dispose();
     _addressController.dispose();
     super.dispose();
-  }
-
-  Future<void> _loadUserData() async {
-    if (!mounted) return;
-
-    try {
-      final user = await _userService.getCurrentUser();
-
-      if (user != null && mounted) {
-        setState(() {
-          _contactNumberController.text = user.contactNumber;
-          _addressController.text = user.address;
-          _originalProfileImageUrl = user.userProfile;
-          _isLoading = false;
-        });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoading = false;
-        });
-        _showErrorSnackBar('Failed to load profile: $e');
-      }
-    }
   }
 
   void _showErrorSnackBar(String message) {
@@ -92,7 +61,6 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     );
   }
 
-  /// Pick image and show local preview (NO UPLOAD YET)
   Future<void> _pickImage() async {
     if (!mounted) return;
 
@@ -118,62 +86,46 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
         );
       }
     } catch (e) {
-      if (mounted) {
-        _showErrorSnackBar('Failed to select image: $e');
-      }
+      if (mounted) _showErrorSnackBar('Failed to select image: $e');
     }
   }
 
-  /// Get the image to display (local file or network URL)
-  ImageProvider? _getImageProvider() {
-    if (_selectedImageFile != null) {
-      return FileImage(_selectedImageFile!); // Show local preview
-    } else if (_originalProfileImageUrl != null &&
-        _originalProfileImageUrl!.isNotEmpty) {
-      return NetworkImage(
-        _originalProfileImageUrl!,
-      ); // Show current from database
-    }
-    return null;
-  }
-
-  Future<void> _saveProfile() async {
+  Future<void> _saveProfile(UserModel user) async {
     if (!mounted || !_formKey.currentState!.validate()) return;
-
     setState(() => _isSaving = true);
 
     try {
-      String? finalImageUrl = _originalProfileImageUrl; // Default to original
+      String? finalImageUrl = user.userProfile;
 
-      // Upload new image if one was selected
+      // Upload new image if selected
       if (_hasImageChanged && _selectedImageFile != null) {
         final response = await _imageKitService.uploadProfileImage(
           _selectedImageFile!,
         );
-        finalImageUrl = response.fileUrl;
+        final rawUrl = (response.fileUrl).trim();
+        finalImageUrl = rawUrl
+            .split('?')
+            .first; // Clean URL without query params
       }
 
-      // Update profile with all data
+      final lastUpdated = DateTime.now().millisecondsSinceEpoch;
+
       await _userService.updateProfile(
         contactNumber: _contactNumberController.text.trim(),
         address: _addressController.text.trim(),
-        imageUrl: finalImageUrl,
+        userProfile: finalImageUrl,
+        lastUpdated: lastUpdated,
       );
 
       if (mounted) {
         _showSuccessSnackBar('Profile updated successfully!');
         await Future.delayed(const Duration(milliseconds: 500));
-
-        if (mounted) {
-          Navigator.pop(context, true);
-        }
+        if (mounted) Navigator.pop(context, true);
       }
     } catch (e) {
       _showErrorSnackBar('Failed to update profile: $e');
     } finally {
-      if (mounted) {
-        setState(() => _isSaving = false);
-      }
+      if (mounted) setState(() => _isSaving = false);
     }
   }
 
@@ -183,204 +135,241 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
       backgroundColor: primary,
       body: Column(
         children: [
-          const ModuleHeader(title: 'Edit Profile', showBack: true),
           Expanded(
             child: Container(
               color: inputFill,
-              child: _isLoading
-                  ? const Center(
-                      child: CircularProgressIndicator(color: primary),
-                    )
-                  : SingleChildScrollView(
-                      padding: const EdgeInsets.all(16),
-                      child: Form(
-                        key: _formKey,
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.stretch,
-                          children: [
-                            // Profile Image Section
-                            Center(
-                              child: Stack(
-                                children: [
-                                  Container(
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      border: Border.all(
-                                        color: primary.withValues(alpha: 0.2),
-                                        width: 3,
-                                      ),
-                                    ),
-                                    child: CircleAvatar(
-                                      radius: 60,
-                                      backgroundImage: _getImageProvider(),
-                                      child: _getImageProvider() == null
-                                          ? const Icon(
-                                              Icons.person,
-                                              size: 60,
-                                              color: secondary,
-                                            )
-                                          : null,
-                                    ),
-                                  ),
-
-                                  // Change indicator for selected image
-                                  if (_hasImageChanged)
-                                    Positioned(
-                                      top: 5,
-                                      right: 5,
-                                      child: Container(
-                                        padding: const EdgeInsets.all(4),
-                                        decoration: const BoxDecoration(
-                                          color: statusSuccess,
-                                          shape: BoxShape.circle,
-                                        ),
-                                        child: const Icon(
-                                          Icons.check,
-                                          color: Colors.white,
-                                          size: 16,
-                                        ),
-                                      ),
-                                    ),
-
-                                  Positioned(
-                                    bottom: 0,
-                                    right: 0,
-                                    child: Container(
-                                      decoration: BoxDecoration(
-                                        color: primary,
-                                        shape: BoxShape.circle,
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: secondary.withValues(
-                                              alpha: 0.2,
-                                            ),
-                                            blurRadius: 8,
-                                            offset: const Offset(0, 2),
-                                          ),
-                                        ],
-                                      ),
-                                      child: IconButton(
-                                        icon: const Icon(
-                                          Icons.camera_alt,
-                                          color: inputFill,
-                                          size: 20,
-                                        ),
-                                        onPressed: _isSaving
-                                            ? null
-                                            : _pickImage,
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-
-                            const SizedBox(height: 16),
-
-                            Text(
-                              _hasImageChanged
-                                  ? 'New image selected! Tap Save to upload.'
-                                  : 'Tap the camera icon to change your profile picture',
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 14,
-                                color: _hasImageChanged
-                                    ? statusSuccess
-                                    : altSecondary,
-                                fontWeight: _hasImageChanged
-                                    ? FontWeight.w600
-                                    : FontWeight.normal,
-                              ),
-                            ),
-
-                            const SizedBox(height: 32),
-
-                            PhoneTextField(
-                              controller: _contactNumberController,
-                              label: 'Contact Number',
-                            ),
-                            const SizedBox(height: 16),
-
-                            CustomTextField(
-                              controller: _addressController,
-                              label: 'Address',
-                              hintText: 'Enter your complete address',
-                              maxLines: 3,
-                              validator: (value) {
-                                if (value == null || value.trim().isEmpty) {
-                                  return 'Address is required';
-                                }
-                                return null;
-                              },
-                            ),
-                            const SizedBox(height: 32),
-
-                            SizedBox(
-                              height: 50,
-                              child: ElevatedButton(
-                                onPressed: _isSaving ? null : _saveProfile,
-                                style: ElevatedButton.styleFrom(
-                                  backgroundColor: primary,
-                                  foregroundColor: inputFill,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
-                                child: _isSaving
-                                    ? const SizedBox(
-                                        height: 20,
-                                        width: 20,
-                                        child: CircularProgressIndicator(
-                                          color: inputFill,
-                                          strokeWidth: 2,
-                                        ),
-                                      )
-                                    : Text(
-                                        _hasImageChanged
-                                            ? 'Save & Upload Image'
-                                            : 'Save Changes',
-                                        style: const TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                              ),
-                            ),
-                            const SizedBox(height: 16),
-
-                            SizedBox(
-                              height: 50,
-                              child: OutlinedButton(
-                                onPressed: _isSaving
-                                    ? null
-                                    : () {
-                                        if (mounted) {
-                                          Navigator.pop(context);
-                                        }
-                                      },
-                                style: OutlinedButton.styleFrom(
-                                  foregroundColor: primary,
-                                  side: const BorderSide(color: primary),
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(25),
-                                  ),
-                                ),
-                                child: const Text(
-                                  'Cancel',
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
+              child: StreamBuilder<UserModel?>(
+                stream: _userService.getCurrentUserStream(),
+                builder: (context, snapshot) => _buildBody(snapshot),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildBody(AsyncSnapshot<UserModel?> snapshot) {
+    // Handle loading state
+    if (snapshot.connectionState == ConnectionState.waiting) {
+      return const Center(child: CircularProgressIndicator(color: primary));
+    }
+
+    // Handle error state
+    if (snapshot.hasError) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(Icons.error_outline, size: 64, color: statusDanger),
+            const SizedBox(height: 16),
+            const Text(
+              'Failed to load profile',
+              style: TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+                color: altSecondary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Go Back'),
+            ),
+          ],
+        ),
+      );
+    }
+
+    // Handle no user data
+    if (!snapshot.hasData) {
+      return const Center(
+        child: Text(
+          'No user data found',
+          style: TextStyle(
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+            color: altSecondary,
+          ),
+        ),
+      );
+    }
+
+    final user = snapshot.data!;
+
+    // Initialize controllers with user data if they're empty
+    if (_contactNumberController.text.isEmpty) {
+      _contactNumberController.text = user.contactNumber;
+    }
+    if (_addressController.text.isEmpty) {
+      _addressController.text = user.address;
+    }
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(
+        30,
+        80,
+        30,
+        30,
+      ), // Added 80px top padding
+      child: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Profile Image Section
+            Center(
+              child: Stack(
+                children: [
+                  Container(
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: primary.withValues(alpha: 51),
+                        width: 3,
+                      ),
+                    ),
+                    child: _selectedImageFile != null
+                        ? CircleAvatar(
+                            radius: 60,
+                            backgroundImage: FileImage(_selectedImageFile!),
+                          )
+                        : UserAvatar(
+                            imageUrl: user.userProfile,
+                            radius: 60,
+                            lastUpdated: user.lastUpdated,
+                          ),
+                  ),
+                  if (_hasImageChanged)
+                    Positioned(
+                      top: 30,
+                      right: 5,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: const BoxDecoration(
+                          color: statusSuccess,
+                          shape: BoxShape.circle,
+                        ),
+                        child: const Icon(
+                          Icons.check,
+                          color: Colors.white,
+                          size: 16,
+                        ),
+                      ),
+                    ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: primary,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: secondary.withValues(alpha: 51),
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: IconButton(
+                        icon: const Icon(
+                          Icons.camera_alt,
+                          color: inputFill,
+                          size: 20,
+                        ),
+                        onPressed: _isSaving ? null : _pickImage,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SizedBox(height: 50),
+            Text(
+              _hasImageChanged
+                  ? 'New image selected! Tap Save to upload.'
+                  : 'Tap the camera icon to change your profile picture',
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 14,
+                color: _hasImageChanged ? statusSuccess : altSecondary,
+                fontWeight: _hasImageChanged
+                    ? FontWeight.w600
+                    : FontWeight.normal,
+              ),
+            ),
+
+            const SizedBox(height: 32),
+            PhoneTextField(
+              controller: _contactNumberController,
+              label: 'Contact Number',
+            ),
+            const SizedBox(height: 16),
+
+            CustomTextField(
+              controller: _addressController,
+              label: 'Address',
+              hintText: 'Enter your complete address',
+              maxLines: 3,
+              validator: (value) {
+                if (value == null || value.trim().isEmpty) {
+                  return 'Address is required';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 32),
+
+            SizedBox(
+              height: 50,
+              child: ElevatedButton(
+                onPressed: _isSaving ? null : () => _saveProfile(user),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: primary,
+                  foregroundColor: inputFill,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: _isSaving
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(color: inputFill),
+                      )
+                    : Text(
+                        _hasImageChanged
+                            ? 'Save & Upload Image'
+                            : 'Save Changes',
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            SizedBox(
+              height: 50,
+              child: OutlinedButton(
+                onPressed: _isSaving ? null : () => Navigator.pop(context),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: primary,
+                  side: const BorderSide(color: primary),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

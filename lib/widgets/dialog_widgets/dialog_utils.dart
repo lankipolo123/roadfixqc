@@ -117,4 +117,36 @@ class DialogUtils {
       },
     );
   }
+
+  // NEW: Async confirmation dialog that returns Future<bool?>
+  static Future<bool?> showConfirmationAsync({
+    required BuildContext context,
+    required String title,
+    required String message,
+    String confirmText = 'Confirm',
+    String cancelText = 'Cancel',
+    bool barrierDismissible = true,
+  }) {
+    return showDialog<bool>(
+      context: context,
+      barrierDismissible: barrierDismissible,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          icon: const Icon(Icons.help_outline, color: Colors.orange, size: 64),
+          title: Text(title),
+          content: Text(message),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(cancelText),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(confirmText),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

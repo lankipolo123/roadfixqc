@@ -67,7 +67,10 @@ class ReportTypeScreen extends StatelessWidget {
     BuildContext context,
     ReportCategory category,
   ) async {
-    final imageSource = await ImageSourceDialog.show(context);
+    final imageSource = await ImageSourceDialog.show(
+      context,
+      allowGallery: category.type != ReportCategoryType.utilityPole,
+    );
     if (imageSource != null && context.mounted) {
       NavigationHelper.navigateToDetection(context, category, imageSource);
     }

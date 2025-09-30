@@ -13,8 +13,8 @@ class DiagonalStripes extends StatelessWidget {
     this.height = 25,
     this.stripeColor = altSecondary,
     this.backgroundColor = primary,
-    this.stripeWidth = 20,
-    this.gapWidth = 20,
+    this.stripeWidth = 25,
+    this.gapWidth = 25,
   });
 
   @override

@@ -15,7 +15,7 @@ class ModuleHeader extends StatelessWidget implements PreferredSizeWidget {
     this.showBack = true,
     this.onBack,
     this.topHeight = 50,
-    this.spacing = 0,
+    this.spacing = 2,
     this.textAlign = TextAlign.left,
   });
 
@@ -24,7 +24,7 @@ class ModuleHeader extends StatelessWidget implements PreferredSizeWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Container(height: topHeight, width: double.infinity, color: primary),
+        // Replace the solid color container with DiagonalStripes
         Container(
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),

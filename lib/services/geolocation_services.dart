@@ -24,11 +24,41 @@ class GeolocationService {
     }
 
     return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      desiredAccuracy:
+          LocationAccuracy.best, // Use best accuracy for map matching
       timeLimit: const Duration(seconds: 15),
     );
   }
 
+  // Enhanced method for reports that need street-level accuracy
+  Future<LocationData> getAccurateAddressFromCoordinates(
+    double latitude,
+    double longitude,
+    double accuracy,
+  ) async {
+    try {
+      final components = await GeocodingService.getAddressComponentsAccurate(
+        latitude,
+        longitude,
+        accuracy,
+      );
+
+      return LocationData(
+        latitude: latitude,
+        longitude: longitude,
+        formattedAddress: AddressFormatter.createDetailedAddress(components),
+        shortAddress: AddressFormatter.createShortAddress(components),
+        fullAddress: AddressFormatter.createFullAddress(components),
+        city: components.locality,
+        province: components.adminArea,
+        country: components.country,
+      );
+    } catch (e) {
+      throw Exception('Failed to get accurate address: $e');
+    }
+  }
+
+  // Regular method for general use (header location, etc.)
   Future<LocationData> getAddressFromCoordinates(
     double latitude,
     double longitude,
@@ -54,6 +84,23 @@ class GeolocationService {
     }
   }
 
+  // For reports - use enhanced accuracy
+  Future<LocationData> getCurrentLocationForReports() async {
+    try {
+      Position position = await getCurrentPosition();
+      LocationData locationData = await getAccurateAddressFromCoordinates(
+        position.latitude,
+        position.longitude,
+        position.accuracy, // Pass GPS accuracy for Kalman filter
+      );
+
+      return locationData;
+    } catch (e) {
+      throw Exception('Failed to get accurate location for report: $e');
+    }
+  }
+
+  // For general use (header, etc.) - regular method
   Future<LocationData> getCurrentLocation() async {
     try {
       // Check cache first

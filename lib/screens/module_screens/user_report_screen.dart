@@ -1,12 +1,13 @@
+// lib/screens/report_screen.dart (Simplified with Layout)
 import 'package:flutter/material.dart';
 import 'package:roadfix/constant/report_constant.dart';
+import 'package:roadfix/layouts/reports_screen_layout.dart';
 import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/services/report_service.dart';
 import 'package:roadfix/widgets/user_report_widgets/user_report_card.dart';
 import 'package:roadfix/widgets/user_report_widgets/user_report_filter_tabs.dart';
-import 'package:roadfix/screens/module_screens/report_detail_screen.dart';
+import 'package:roadfix/screens/secondary_screens/report_detail_screen.dart';
 import 'package:roadfix/utils/pagination_helper.dart';
-import 'package:roadfix/widgets/common_widgets/module_header.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/user_report_widgets/pagination_fab.dart';
 
@@ -23,206 +24,108 @@ class _ReportScreenState extends State<ReportScreen> {
   int currentPage = 1;
   final int reportsPerPage = 10;
 
-  // Get filtered reports based on selected tab - NOW SORTED BY DATE
   List<ReportModel> getFilteredReports(List<ReportModel> allReports) {
     switch (selectedFilter) {
-      case 1: // Pending
+      case 1:
         return allReports
             .where((r) => r.status == ReportStatus.pending)
             .toList();
-      case 2: // Approved
+      case 2:
         return allReports
             .where((r) => r.status == ReportStatus.approved)
             .toList();
-      case 3: // Resolved
+      case 3:
         return allReports
             .where((r) => r.status == ReportStatus.resolved)
             .toList();
-      case 4: // Rejected
+      case 4:
         return allReports
             .where((r) => r.status == ReportStatus.rejected)
             .toList();
-      default: // All
+      default:
         return allReports;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primary,
-      body: Stack(
-        children: [
-          Column(
-            children: [
-              const ModuleHeader(title: 'My Reports', showBack: false),
-
-              // Filter tabs
-              Container(
-                width: double.infinity,
-                color: inputFill,
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-                child: ReportFilterTabs(
-                  selectedIndex: selectedFilter,
-                  onChanged: (index) {
-                    setState(() {
-                      selectedFilter = index;
-                      currentPage =
-                          1; // Reset to first page when filter changes
-                    });
-                  },
-                ),
-              ),
-
-              // Reports list - NOW PROPERLY SORTED BY DATE
-              Expanded(
-                child: Container(
-                  color: inputFill,
-                  padding: const EdgeInsets.symmetric(horizontal: 8),
-                  child: StreamBuilder<List<ReportModel>>(
-                    stream: _reportService
-                        .getCurrentUserReportsStream(), // FIXED: Now sorts by date
-                    builder: (context, snapshot) => _buildReportsBody(snapshot),
-                  ),
-                ),
-              ),
-            ],
-          ),
-
-          // Pagination FAB
-          _buildPaginationFAB(),
-        ],
+    return ReportScreenLayout(
+      title: 'My Reports',
+      filterTabs: ReportFilterTabs(
+        selectedIndex: selectedFilter,
+        onChanged: (index) {
+          setState(() {
+            selectedFilter = index;
+            currentPage = 1; // Reset to first page when filter changes
+          });
+        },
       ),
-    );
-  }
+      content: StreamBuilder<List<ReportModel>>(
+        stream: _reportService.getCurrentUserReportsStream(),
+        builder: (context, snapshot) {
+          // Loading state
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return ReportScreenLayout.buildLoadingState();
+          }
 
-  Widget _buildReportsBody(AsyncSnapshot<List<ReportModel>> snapshot) {
-    // Loading state
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            CircularProgressIndicator(color: primary),
-            SizedBox(height: 16),
-            Text('Loading your reports...', style: TextStyle(color: secondary)),
-          ],
-        ),
-      );
-    }
+          // Error state
+          if (snapshot.hasError) {
+            return ReportScreenLayout.buildErrorState(
+              error: snapshot.error.toString(),
+              onRetry: () => setState(() {}),
+            );
+          }
 
-    // Error state
-    if (snapshot.hasError) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            const Icon(Icons.error_outline, color: statusDanger, size: 48),
-            const SizedBox(height: 16),
-            Text(
-              'Error loading reports:\n${snapshot.error}',
-              textAlign: TextAlign.center,
-              style: const TextStyle(color: statusDanger),
-            ),
-            const SizedBox(height: 16),
-            ElevatedButton(
-              onPressed: () => setState(() {}),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: primary,
-                foregroundColor: secondary,
-              ),
-              child: const Text('Retry'),
-            ),
-          ],
-        ),
-      );
-    }
+          // Process data
+          final allReports = snapshot.data ?? [];
+          final filteredReports = getFilteredReports(allReports);
+          final paginatedReports = paginate(
+            items: filteredReports,
+            page: currentPage,
+            itemsPerPage: reportsPerPage,
+          );
 
-    // Process data - REPORTS ARE NOW SORTED BY DATE FROM FIREBASE
-    final allReports = snapshot.data ?? [];
-    final filteredReports = getFilteredReports(allReports);
-    final paginatedReports = paginate(
-      items: filteredReports,
-      page: currentPage,
-      itemsPerPage: reportsPerPage,
-    );
+          // Empty state
+          if (filteredReports.isEmpty) {
+            return ReportScreenLayout.buildEmptyState(
+              icon: _getEmptyStateIcon(),
+              message: _getEmptyStateMessage(),
+              actionButton: (selectedFilter == 0 && allReports.isEmpty)
+                  ? ElevatedButton(
+                      onPressed: () => Navigator.pushNamed(context, '/report'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primary,
+                        foregroundColor: secondary,
+                      ),
+                      child: const Text('Submit Your First Report'),
+                    )
+                  : null,
+            );
+          }
 
-    // Empty state
-    if (filteredReports.isEmpty) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _getEmptyStateIcon(),
-              color: secondary.withValues(alpha: 0.5),
-              size: 64,
-            ),
-            const SizedBox(height: 16),
-            Text(
-              _getEmptyStateMessage(),
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: secondary.withValues(alpha: 0.7),
-                fontSize: 16,
-              ),
-            ),
-            if (selectedFilter == 0 && allReports.isEmpty) ...[
-              const SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: () => Navigator.pushNamed(context, '/report'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: primary,
-                  foregroundColor: secondary,
-                ),
-                child: const Text('Submit Your First Report'),
-              ),
-            ],
-          ],
-        ),
-      );
-    }
-
-    // Reports list - NOW SHOWING NEWEST FIRST
-    return RefreshIndicator(
-      color: primary,
-      onRefresh: () async {
-        setState(() {});
-        await Future.delayed(const Duration(milliseconds: 500));
-      },
-      child: ListView(
-        padding: const EdgeInsets.only(bottom: 120),
-        children: [
-          // Date sort indicator
-          Container(
-            padding: const EdgeInsets.all(8),
-            child: Text(
-              'Reports sorted by date (newest first)',
-              style: TextStyle(
-                color: secondary.withValues(alpha: 0.6),
-                fontSize: 12,
-                fontStyle: FontStyle.italic,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 8),
-          ...paginatedReports.map(
-            (report) => Center(
-              child: ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 330),
-                child: Padding(
-                  padding: const EdgeInsets.only(bottom: 10),
-                  child: GestureDetector(
-                    onTap: () => _showReportDetails(context, report),
-                    child: ReportCard(report: report),
+          // Success state - reports list
+          return ReportScreenLayout.buildReportList(
+            onRefresh: () => setState(() {}),
+            children: paginatedReports
+                .map(
+                  (report) => Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 330),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 10),
+                        child: GestureDetector(
+                          onTap: () => _showReportDetails(context, report),
+                          child: ReportCard(report: report),
+                        ),
+                      ),
+                    ),
                   ),
-                ),
-              ),
-            ),
-          ),
-        ],
+                )
+                .toList(),
+          );
+        },
       ),
+      floatingWidget: _buildPaginationFAB(),
     );
   }
 
@@ -249,7 +152,6 @@ class _ReportScreenState extends State<ReportScreen> {
     );
   }
 
-  // Get appropriate icon for empty state
   IconData _getEmptyStateIcon() {
     switch (selectedFilter) {
       case 1:
@@ -265,7 +167,6 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  // Get appropriate message for empty state
   String _getEmptyStateMessage() {
     switch (selectedFilter) {
       case 1:
@@ -281,7 +182,6 @@ class _ReportScreenState extends State<ReportScreen> {
     }
   }
 
-  // Navigate to report details screen
   void _showReportDetails(BuildContext context, ReportModel report) {
     Navigator.push(
       context,

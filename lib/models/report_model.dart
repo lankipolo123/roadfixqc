@@ -25,6 +25,9 @@ class ReportModel {
   final Timestamp? reviewedAt;
   final String priority; // low/medium/high/urgent
 
+  // Notification field
+  final bool isRead; // NEW: For notification read status
+
   const ReportModel({
     this.id,
     required this.description,
@@ -42,6 +45,7 @@ class ReportModel {
     this.reviewedBy = '',
     this.reviewedAt,
     this.priority = 'medium',
+    this.isRead = false, // NEW: Default to false (unread)
   });
 
   // Create from Firestore document
@@ -98,6 +102,9 @@ class ReportModel {
       reviewedBy: data['reviewedBy'] ?? '',
       reviewedAt: data['reviewedAt'],
       priority: data['priority'] ?? 'medium',
+      isRead:
+          data['isRead'] ??
+          false, // NEW: Handle existing reports without this field
     );
   }
 
@@ -119,6 +126,7 @@ class ReportModel {
       'reviewedBy': reviewedBy,
       'reviewedAt': reviewedAt,
       'priority': priority,
+      'isRead': isRead, // NEW: Include in Firestore document
     };
   }
 
@@ -140,6 +148,7 @@ class ReportModel {
     String? reviewedBy,
     Timestamp? reviewedAt,
     String? priority,
+    bool? isRead, // NEW: Include in copyWith
   }) {
     return ReportModel(
       id: id ?? this.id,
@@ -158,6 +167,7 @@ class ReportModel {
       reviewedBy: reviewedBy ?? this.reviewedBy,
       reviewedAt: reviewedAt ?? this.reviewedAt,
       priority: priority ?? this.priority,
+      isRead: isRead ?? this.isRead, // NEW: Include in copyWith
     );
   }
 
@@ -169,6 +179,9 @@ class ReportModel {
 
   bool get hasAdminReview => reviewedBy.isNotEmpty;
 
+  // NEW: Helper getter for notification status
+  bool get isUnreadNotification => !isRead && reviewedAt != null;
+
   String get primaryImageUrl => imageUrl.isNotEmpty ? imageUrl.first : '';
 
   String get formattedReportedAt {
@@ -178,7 +191,7 @@ class ReportModel {
 
   @override
   String toString() {
-    return 'ReportModel(id: $id, description: $description, status: $status, reportedAt: $reportedAt)';
+    return 'ReportModel(id: $id, description: $description, status: $status, reportedAt: $reportedAt, isRead: $isRead)';
   }
 
   @override

@@ -27,15 +27,28 @@ class ReportCard extends StatelessWidget {
             border: Border(left: BorderSide(color: statusColor, width: 4)),
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             color: inputFill,
+            // Add subtle background tint based on status
+            boxShadow: [
+              BoxShadow(
+                color: statusColor.withValues(alpha: 0.2),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
           ),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
+                // Status-colored avatar with icon
                 CircleAvatar(
                   backgroundColor: statusColor,
-                  child: const Icon(Icons.report, color: inputFill),
+                  child: Icon(
+                    ReportStatusUtils.getStatusIcon(report.status),
+                    color: Colors.white, // White icon for better contrast
+                    size: 20,
+                  ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -54,7 +67,27 @@ class ReportCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          ReportStatusUtils.buildStatusWidget(report.status),
+                          // Status badge without opacity
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
+                            decoration: BoxDecoration(
+                              color: statusColor,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Text(
+                              ReportStatusUtils.getStatusText(
+                                report.status,
+                              ).toUpperCase(),
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 11,
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 4),

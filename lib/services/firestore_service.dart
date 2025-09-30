@@ -1,4 +1,4 @@
-// lib/services/firestore_service.dart (UPDATED WITH TOTP METHODS)
+// lib/services/firestore_service.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roadfix/models/user_model.dart';
@@ -13,7 +13,6 @@ class FirestoreService {
       if (user.uid == null || user.uid!.isEmpty) {
         throw Exception('User UID is required but was null or empty');
       }
-
       await _db.collection(_usersCollection).doc(user.uid).set(user.toMap());
     } catch (e) {
       throw Exception('Failed to create user: $e');
@@ -26,10 +25,7 @@ class FirestoreService {
           .collection(_usersCollection)
           .doc(uid)
           .get();
-
-      if (doc.exists) {
-        return UserModel.fromFirestore(doc);
-      }
+      if (doc.exists) return UserModel.fromFirestore(doc);
       return null;
     } catch (e) {
       throw Exception('Failed to get user: $e');
@@ -71,7 +67,6 @@ class FirestoreService {
           .where('email', isEqualTo: email)
           .limit(1)
           .get();
-
       if (query.docs.isNotEmpty) {
         return UserModel.fromFirestore(query.docs.first);
       }
@@ -88,8 +83,7 @@ class FirestoreService {
           .where('isActive', isEqualTo: true)
           .orderBy('joinedAt', descending: true)
           .get();
-
-      return query.docs.map((doc) => UserModel.fromFirestore(doc)).toList();
+      return query.docs.map((d) => UserModel.fromFirestore(d)).toList();
     } catch (e) {
       throw Exception('Failed to get active users: $e');
     }
@@ -120,8 +114,7 @@ class FirestoreService {
         .orderBy('joinedAt', descending: true)
         .snapshots()
         .map(
-          (query) =>
-              query.docs.map((doc) => UserModel.fromFirestore(doc)).toList(),
+          (query) => query.docs.map((d) => UserModel.fromFirestore(d)).toList(),
         );
   }
 
@@ -129,7 +122,6 @@ class FirestoreService {
     try {
       final currentUser = FirebaseAuth.instance.currentUser;
       if (currentUser == null) return null;
-
       return await getUser(currentUser.uid);
     } catch (e) {
       throw Exception('Failed to get current user: $e');
@@ -138,12 +130,11 @@ class FirestoreService {
 
   Stream<UserModel?> getCurrentUserStream() {
     final currentUser = FirebaseAuth.instance.currentUser;
-    if (currentUser == null) {
-      return Stream.value(null);
-    }
+    if (currentUser == null) return Stream.value(null);
     return getUserStream(currentUser.uid);
   }
 
+  /// Update user profile and ensure lastUpdated is ALWAYS written.
   Future<void> updateUserProfile({
     required String uid,
     String? fname,
@@ -152,38 +143,26 @@ class FirestoreService {
     String? contactNumber,
     String? address,
     String? userProfile,
+    required int lastUpdated,
   }) async {
     try {
-      Map<String, dynamic> updates = {};
+      // Always include lastUpdated so clients can cache-bust reliably.
+      final Map<String, dynamic> updates = {'lastUpdated': lastUpdated};
 
-      if (fname != null) {
-        updates['fname'] = fname;
-      }
-      if (lname != null) {
-        updates['lname'] = lname;
-      }
-      if (mi != null) {
-        updates['mi'] = mi;
-      }
-      if (contactNumber != null) {
-        updates['contactNumber'] = contactNumber;
-      }
-      if (address != null) {
-        updates['address'] = address;
-      }
-      if (userProfile != null) {
-        updates['userProfile'] = userProfile;
-      }
+      if (fname != null) updates['fname'] = fname;
+      if (lname != null) updates['lname'] = lname;
+      if (mi != null) updates['mi'] = mi;
+      if (contactNumber != null) updates['contactNumber'] = contactNumber;
+      if (address != null) updates['address'] = address;
+      if (userProfile != null) updates['userProfile'] = userProfile;
 
-      if (updates.isNotEmpty) {
-        await _db.collection(_usersCollection).doc(uid).update(updates);
-      }
+      await _db.collection(_usersCollection).doc(uid).update(updates);
     } catch (e) {
       throw Exception('Failed to update user profile: $e');
     }
   }
 
-  // TOTP Methods
+  // TOTP methods (kept intact)
   Future<void> enableTotp({
     required String uid,
     required String totpSecret,
@@ -229,11 +208,12 @@ class FirestoreService {
     }
   }
 
-  // Simple update method (no transaction - for direct updates only)
+  // Counts update - kept for compatibility
   Future<void> updateUserReportCounts({
     required String uid,
     required int reportsCount,
     required int pendingCount,
+    required int approvedCount,
     required int resolvedCount,
     required int rejectedCount,
   }) async {
@@ -241,6 +221,7 @@ class FirestoreService {
       await _db.collection(_usersCollection).doc(uid).update({
         'reportsCount': reportsCount,
         'pendingCount': pendingCount,
+        'approvedCount': approvedCount,
         'resolvedCount': resolvedCount,
         'rejectedCount': rejectedCount,
       });

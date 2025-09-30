@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/constant/profile_module_constant.dart';
-import 'package:roadfix/layouts/striped_form_layout.dart';
-import 'package:roadfix/widgets/common_widgets/module_header.dart';
+import 'package:roadfix/widgets/common_widgets/diagonal_stripes.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 enum AppInfoType { aboutApp, termsConditions, privacyPolicy }
@@ -35,43 +34,68 @@ class AppInfoModuleScreen extends StatelessWidget {
     final data = contentData;
 
     return Scaffold(
-      backgroundColor: primary,
-      body: StripedFormLayout(
-        child: Column(
-          children: [
-            ModuleHeader(title: data['title']!, showBack: true),
-            Expanded(
-              child: Container(
-                color: inputFill,
+      // Remove backgroundColor property to use custom background
+      // Floating action button
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => Navigator.pop(context),
+        backgroundColor: secondary,
+        foregroundColor: primary,
+        elevation: 4,
+        icon: const Icon(Icons.arrow_back),
+        label: const Text(
+          'Back to Profile',
+          style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14),
+        ),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
+      body: Stack(
+        children: [
+          // Full-page diagonal stripes background
+          Positioned.fill(
+            child: DiagonalStripes(height: MediaQuery.of(context).size.height),
+          ),
+          // Main content
+          Column(
+            children: [
+              // Header without title (clean look)
+              Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Content card with elevated design
-                      Card(
-                        elevation: 2,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
+                      // Content card with primary background
+                      Container(
+                        width: double.infinity,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(16),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withValues(alpha: 0.1),
+                              blurRadius: 10,
+                              offset: const Offset(0, 4),
+                            ),
+                          ],
                         ),
                         child: Padding(
-                          padding: const EdgeInsets.all(20),
+                          padding: const EdgeInsets.all(24),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Title with icon
+                              // Title with icon - inline
                               Row(
                                 children: [
                                   Container(
-                                    padding: const EdgeInsets.all(8),
+                                    padding: const EdgeInsets.all(10),
                                     decoration: BoxDecoration(
-                                      color: primary.withAlpha(25),
-                                      borderRadius: BorderRadius.circular(8),
+                                      color: primary,
+                                      borderRadius: BorderRadius.circular(10),
                                     ),
                                     child: Icon(
                                       _getIconForType(),
-                                      color: primary,
-                                      size: 24,
+                                      color: Colors.white,
+                                      size: 20,
                                     ),
                                   ),
                                   const SizedBox(width: 12),
@@ -79,7 +103,7 @@ class AppInfoModuleScreen extends StatelessWidget {
                                     child: Text(
                                       data['title']!,
                                       style: const TextStyle(
-                                        fontSize: 22,
+                                        fontSize: 18,
                                         fontWeight: FontWeight.bold,
                                         color: primary,
                                       ),
@@ -87,28 +111,49 @@ class AppInfoModuleScreen extends StatelessWidget {
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 20),
+
+                              const SizedBox(height: 24),
+
+                              // Divider
+                              Container(
+                                height: 1,
+                                width: double.infinity,
+                                color: Colors.grey.shade200,
+                              ),
+
+                              const SizedBox(height: 24),
 
                               // Content with proper formatting
                               Text(
                                 data['content']!,
                                 style: const TextStyle(
-                                  fontSize: 14,
-                                  height: 1.6,
+                                  fontSize: 15,
+                                  height: 1.7,
                                   color: secondary,
+                                  letterSpacing: 0.2,
                                 ),
                               ),
 
                               // Footer for About App
                               if (infoType == AppInfoType.aboutApp) ...[
-                                const SizedBox(height: 24),
+                                const SizedBox(height: 32),
+
+                                // App Information Section
                                 Container(
-                                  padding: const EdgeInsets.all(16),
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(20),
                                   decoration: BoxDecoration(
-                                    color: primary.withAlpha(13),
-                                    borderRadius: BorderRadius.circular(8),
+                                    gradient: LinearGradient(
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                      colors: [
+                                        primary.withValues(alpha: 0.1),
+                                        primary.withValues(alpha: 0.05),
+                                      ],
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
                                     border: Border.all(
-                                      color: primary.withAlpha(51),
+                                      color: primary.withValues(alpha: 0.2),
                                       width: 1,
                                     ),
                                   ),
@@ -116,15 +161,25 @@ class AppInfoModuleScreen extends StatelessWidget {
                                     crossAxisAlignment:
                                         CrossAxisAlignment.start,
                                     children: [
-                                      const Text(
-                                        'App Information',
-                                        style: TextStyle(
-                                          fontSize: 16,
-                                          fontWeight: FontWeight.w600,
-                                          color: primary,
-                                        ),
+                                      const Row(
+                                        children: [
+                                          Icon(
+                                            Icons.info,
+                                            color: primary,
+                                            size: 20,
+                                          ),
+                                          SizedBox(width: 8),
+                                          Text(
+                                            'App Information',
+                                            style: TextStyle(
+                                              fontSize: 18,
+                                              fontWeight: FontWeight.bold,
+                                              color: primary,
+                                            ),
+                                          ),
+                                        ],
                                       ),
-                                      const SizedBox(height: 8),
+                                      const SizedBox(height: 12),
                                       _buildInfoRow(
                                         'Version',
                                         ProfileModuleConstants.appVersion,
@@ -159,39 +214,15 @@ class AppInfoModuleScreen extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 20),
-
-                      // Back button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: ElevatedButton(
-                          onPressed: () => Navigator.pop(context),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: primary,
-                            foregroundColor: inputFill,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(25),
-                            ),
-                          ),
-                          child: const Text(
-                            'Back to Profile',
-                            style: TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 20),
+                      // Extra space for floating button
+                      const SizedBox(height: 80),
                     ],
                   ),
                 ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -208,10 +239,10 @@ class AppInfoModuleScreen extends StatelessWidget {
     }
   }
 
-  // Helper method to build info rows for About App
+  // Helper method to build info rows for About App - Simple
   Widget _buildInfoRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 2),
+      padding: const EdgeInsets.symmetric(vertical: 3),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

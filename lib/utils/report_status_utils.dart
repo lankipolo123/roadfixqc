@@ -8,8 +8,10 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return statusWarning;
+      case ReportStatus.approved:
+        return statusSuccess; // GREEN for approved!
       case ReportStatus.resolved:
-        return statusSuccess;
+        return statusSuccess; // Keep green for resolved too
       case ReportStatus.rejected:
         return statusDanger;
       default:
@@ -22,6 +24,8 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return 'Pending';
+      case ReportStatus.approved:
+        return 'Approved'; // Added approved text
       case ReportStatus.resolved:
         return 'Resolved';
       case ReportStatus.rejected:
@@ -36,8 +40,10 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return Icons.hourglass_empty;
+      case ReportStatus.approved:
+        return Icons.check_circle; // Added approved icon
       case ReportStatus.resolved:
-        return Icons.check_circle;
+        return Icons.task_alt; // Different icon for resolved
       case ReportStatus.rejected:
         return Icons.cancel;
       default:
@@ -50,6 +56,8 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return 'Pending Review';
+      case ReportStatus.approved:
+        return 'Approved'; // Added approved detailed text
       case ReportStatus.resolved:
         return 'Resolved';
       case ReportStatus.rejected:

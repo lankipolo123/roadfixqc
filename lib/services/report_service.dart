@@ -1,4 +1,4 @@
-// lib/services/report_service.dart (COMPLETE FIX)
+// lib/services/report_service.dart (DYNAMIC COUNTING VERSION)
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,7 +14,7 @@ class ReportService {
 
   static const String _reportsCollection = 'reports';
 
-  // SUBMIT REPORTS
+  // SUBMIT REPORTS - SIMPLIFIED (NO COUNT UPDATES)
   Future<String?> submitReport({
     required File imageFile,
     required String description,
@@ -50,26 +50,11 @@ class ReportService {
         priority: ReportPriority.medium,
       );
 
-      // Save to Firestore and update counts
-      String? docId;
-      await _db.runTransaction((transaction) async {
-        final userRef = _db.collection('users').doc(currentUser.uid);
-        final userSnapshot = await transaction.get(userRef);
-
-        final reportRef = _db.collection(_reportsCollection).doc();
-        transaction.set(reportRef, report.toMap());
-        docId = reportRef.id;
-
-        if (userSnapshot.exists) {
-          final userData = userSnapshot.data() ?? {};
-          transaction.update(userRef, {
-            'reportsCount': (userData['reportsCount'] ?? 0) + 1,
-            'pendingCount': (userData['pendingCount'] ?? 0) + 1,
-          });
-        }
-      });
-
-      return docId;
+      // Simply add report to collection - NO COUNT UPDATES
+      final docRef = await _db
+          .collection(_reportsCollection)
+          .add(report.toMap());
+      return docRef.id;
     } catch (e) {
       throw Exception('Failed to submit report: $e');
     }
@@ -148,6 +133,52 @@ class ReportService {
     }
   }
 
+  // CALCULATE COUNTS DYNAMICALLY
+  Future<Map<String, int>> getUserReportCounts() async {
+    try {
+      final reports = await getCurrentUserReports();
+
+      return {
+        'total': reports.length,
+        'pending': reports
+            .where((r) => r.status == ReportStatus.pending)
+            .length,
+        'approved': reports
+            .where((r) => r.status == ReportStatus.approved)
+            .length,
+        'resolved': reports
+            .where((r) => r.status == ReportStatus.resolved)
+            .length,
+        'rejected': reports
+            .where((r) => r.status == ReportStatus.rejected)
+            .length,
+      };
+    } catch (e) {
+      throw Exception('Failed to calculate user report counts: $e');
+    }
+  }
+
+  // CALCULATE COUNTS DYNAMICALLY (STREAM VERSION)
+  Stream<Map<String, int>> getUserReportCountsStream() {
+    return getCurrentUserReportsStream().map((reports) {
+      return {
+        'total': reports.length,
+        'pending': reports
+            .where((r) => r.status == ReportStatus.pending)
+            .length,
+        'approved': reports
+            .where((r) => r.status == ReportStatus.approved)
+            .length,
+        'resolved': reports
+            .where((r) => r.status == ReportStatus.resolved)
+            .length,
+        'rejected': reports
+            .where((r) => r.status == ReportStatus.rejected)
+            .length,
+      };
+    });
+  }
+
   // GET APPROVED REPORTS (for Recent Reports section)
   Future<List<ReportModel>> getApprovedReports({int limit = 10}) async {
     try {
@@ -190,7 +221,7 @@ class ReportService {
     }
   }
 
-  // UPDATE REPORT STATUS (Admin function)
+  // UPDATE REPORT STATUS - SIMPLIFIED (NO COUNT UPDATES)
   Future<void> updateReportStatus({
     required String reportId,
     required String newStatus,
@@ -198,69 +229,28 @@ class ReportService {
     String? reviewedBy,
   }) async {
     try {
-      await _db.runTransaction((transaction) async {
-        final reportRef = _db.collection(_reportsCollection).doc(reportId);
-        final reportSnapshot = await transaction.get(reportRef);
+      // Simply update report status - NO COUNT UPDATES
+      final reportUpdates = <String, dynamic>{
+        'status': newStatus,
+        'reviewedAt': Timestamp.now(),
+      };
+      if (adminNotes != null) reportUpdates['adminNotes'] = adminNotes;
+      if (reviewedBy != null) reportUpdates['reviewedBy'] = reviewedBy;
 
-        if (!reportSnapshot.exists) {
-          throw Exception('Report not found');
-        }
-
-        final reportData = reportSnapshot.data()!;
-        final oldStatus = reportData['status'] as String;
-        final userId = reportData['userId'] as String;
-
-        final userRef = _db.collection('users').doc(userId);
-        final userSnapshot = await transaction.get(userRef);
-
-        // Update report
-        final reportUpdates = <String, dynamic>{
-          'status': newStatus,
-          'reviewedAt': Timestamp.now(),
-        };
-        if (adminNotes != null) reportUpdates['adminNotes'] = adminNotes;
-        if (reviewedBy != null) reportUpdates['reviewedBy'] = reviewedBy;
-
-        transaction.update(reportRef, reportUpdates);
-
-        // Update user counts if status changed
-        if (oldStatus != newStatus && userSnapshot.exists) {
-          final userData = userSnapshot.data() ?? {};
-          final counts = _calculateNewCounts(userData, oldStatus, newStatus);
-          transaction.update(userRef, counts);
-        }
-      });
+      await _db
+          .collection(_reportsCollection)
+          .doc(reportId)
+          .update(reportUpdates);
     } catch (e) {
       throw Exception('Failed to update report status: $e');
     }
   }
 
-  // DELETE REPORT
+  // DELETE REPORT - SIMPLIFIED (NO COUNT UPDATES)
   Future<void> deleteReport(String reportId) async {
     try {
-      await _db.runTransaction((transaction) async {
-        final reportRef = _db.collection(_reportsCollection).doc(reportId);
-        final reportSnapshot = await transaction.get(reportRef);
-
-        if (!reportSnapshot.exists) {
-          throw Exception('Report not found');
-        }
-
-        final reportData = reportSnapshot.data()!;
-        final status = reportData['status'] as String;
-        final userId = reportData['userId'] as String;
-
-        final userRef = _db.collection('users').doc(userId);
-        final userSnapshot = await transaction.get(userRef);
-
-        transaction.delete(reportRef);
-
-        if (userSnapshot.exists) {
-          final userData = userSnapshot.data() ?? {};
-          final counts = _calculateDeleteCounts(userData, status);
-          transaction.update(userRef, counts);
-        }
-      });
+      // Simply delete the report - NO COUNT UPDATES
+      await _db.collection(_reportsCollection).doc(reportId).delete();
     } catch (e) {
       throw Exception('Failed to delete report: $e');
     }
@@ -316,92 +306,5 @@ class ReportService {
     } catch (e) {
       throw Exception('Failed to get global report counts: $e');
     }
-  }
-
-  // PRIVATE HELPER METHODS
-  Map<String, int> _calculateNewCounts(
-    Map<String, dynamic> userData,
-    String oldStatus,
-    String newStatus,
-  ) {
-    int pendingCount = userData['pendingCount'] ?? 0;
-    int approvedCount = userData['approvedCount'] ?? 0;
-    int resolvedCount = userData['resolvedCount'] ?? 0;
-    int rejectedCount = userData['rejectedCount'] ?? 0;
-
-    // Decrement old status
-    switch (oldStatus) {
-      case 'pending':
-        pendingCount = (pendingCount > 0) ? pendingCount - 1 : 0;
-        break;
-      case 'approved':
-        approvedCount = (approvedCount > 0) ? approvedCount - 1 : 0;
-        break;
-      case 'resolved':
-        resolvedCount = (resolvedCount > 0) ? resolvedCount - 1 : 0;
-        break;
-      case 'rejected':
-        rejectedCount = (rejectedCount > 0) ? rejectedCount - 1 : 0;
-        break;
-    }
-
-    // Increment new status
-    switch (newStatus) {
-      case 'pending':
-        pendingCount++;
-        break;
-      case 'approved':
-        approvedCount++;
-        break;
-      case 'resolved':
-        resolvedCount++;
-        break;
-      case 'rejected':
-        rejectedCount++;
-        break;
-    }
-
-    return {
-      'pendingCount': pendingCount,
-      'approvedCount': approvedCount,
-      'resolvedCount': resolvedCount,
-      'rejectedCount': rejectedCount,
-    };
-  }
-
-  Map<String, int> _calculateDeleteCounts(
-    Map<String, dynamic> userData,
-    String status,
-  ) {
-    int reportsCount = userData['reportsCount'] ?? 0;
-    int pendingCount = userData['pendingCount'] ?? 0;
-    int approvedCount = userData['approvedCount'] ?? 0;
-    int resolvedCount = userData['resolvedCount'] ?? 0;
-    int rejectedCount = userData['rejectedCount'] ?? 0;
-
-    reportsCount = (reportsCount > 0) ? reportsCount - 1 : 0;
-
-    switch (status) {
-      case 'pending':
-        pendingCount = (pendingCount > 0) ? pendingCount - 1 : 0;
-        break;
-      case 'approved':
-        approvedCount = (approvedCount > 0) ? approvedCount - 1 : 0;
-        break;
-      case 'resolved':
-        resolvedCount = (resolvedCount > 0) ? resolvedCount - 1 : 0;
-        break;
-      case 'rejected':
-        rejectedCount = (rejectedCount > 0) ? rejectedCount - 1 : 0;
-        break;
-    }
-
-    return {
-      'reportsCount': reportsCount,
-      'pendingCount': pendingCount,
-      'approvedCount': approvedCount,
-      'resolvedCount': resolvedCount,
-      'rejectedCount': rejectedCount,
-    };
   }
 }

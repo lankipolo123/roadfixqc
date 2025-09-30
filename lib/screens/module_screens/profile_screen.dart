@@ -1,10 +1,10 @@
-// lib/screens/profile_screen.dart (UPDATED WITH TOTP FUNCTIONALITY)
+// lib/screens/profile_screen.dart (Complete Implementation)
 import 'package:flutter/material.dart';
 import 'package:roadfix/screens/profile_modules/app_info_modules.dart';
 import 'package:roadfix/screens/profile_modules/edit_profile_screen.dart';
 import 'package:roadfix/screens/profile_modules/change_email_screen.dart';
 import 'package:roadfix/screens/profile_modules/change_password_screen.dart';
-import 'package:roadfix/widgets/common_widgets/module_header.dart';
+import 'package:roadfix/screens/tutorial_screens/step_one_screen.dart';
 import 'package:roadfix/widgets/dialog_widgets/logout_confirmation_dialog.dart';
 import 'package:roadfix/widgets/dialog_widgets/totp_setup_dialog.dart';
 import 'package:roadfix/widgets/dialog_widgets/totp_disable_dialog.dart';
@@ -12,8 +12,8 @@ import 'package:roadfix/widgets/profile_widgets/profile_card.dart';
 import 'package:roadfix/widgets/profile_widgets/status_summary_row.dart';
 import 'package:roadfix/widgets/profile_widgets/profile_option_tile.dart';
 import 'package:roadfix/widgets/profile_widgets/section_header.dart';
+import 'package:roadfix/layouts/profile_screen_layout.dart';
 import 'package:roadfix/models/profile_option_model.dart';
-import 'package:roadfix/models/profile_summary.dart';
 import 'package:roadfix/models/user_model.dart';
 import 'package:roadfix/services/user_service.dart';
 import 'package:roadfix/services/auth_service.dart';
@@ -33,102 +33,50 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: primary,
-      body: Column(
-        children: [
-          const ModuleHeader(title: 'Profile', showBack: false),
-          Expanded(
-            child: Container(
-              color: inputFill,
-              child: StreamBuilder<UserModel?>(
-                stream: _userService.getCurrentUserStream(),
-                builder: (context, snapshot) => _buildBody(snapshot),
-              ),
-            ),
-          ),
-        ],
-      ),
+    return ProfileScreenLayout(
+      title: 'Profile',
+      contentBuilder: (context) {
+        return StreamBuilder<UserModel?>(
+          stream: _userService.getCurrentUserStream(),
+          builder: (context, snapshot) {
+            // Loading state
+            if (snapshot.connectionState == ConnectionState.waiting) {
+              return ProfileScreenLayout.buildLoadingState();
+            }
+
+            // Error state
+            if (snapshot.hasError) {
+              return ProfileScreenLayout.buildErrorState();
+            }
+
+            // No data state
+            if (!snapshot.hasData) {
+              return ProfileScreenLayout.buildNoDataState();
+            }
+
+            // Success state - build profile content
+            return ProfileScreenLayout.buildScrollableContent(
+              children: _buildProfileContent(snapshot.data!),
+            );
+          },
+        );
+      },
     );
   }
 
-  Widget _buildBody(AsyncSnapshot<UserModel?> snapshot) {
-    if (snapshot.connectionState == ConnectionState.waiting) {
-      return const Center(child: CircularProgressIndicator(color: primary));
-    }
-
-    if (snapshot.hasError) return _buildErrorState();
-    if (!snapshot.hasData) return _buildNoDataState();
-
-    final user = snapshot.data!;
-    final profileSummary = _userService.userToProfileSummary(user);
-
-    return _buildProfileContent(profileSummary, user);
-  }
-
-  Widget _buildErrorState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.error_outline, size: 64, color: statusDanger),
-          SizedBox(height: 16),
-          Text(
-            'Failed to load profile',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: altSecondary,
-            ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Please try again later',
-            style: TextStyle(fontSize: 14, color: altSecondary),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNoDataState() {
-    return const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.person_outline, size: 64, color: altSecondary),
-          SizedBox(height: 16),
-          Text(
-            'No profile data found',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-              color: altSecondary,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildProfileContent(ProfileSummary profileSummary, UserModel user) {
-    return SingleChildScrollView(
-      child: Column(
-        children: [
-          const SizedBox(height: 2),
-          ProfileCard(
-            user: profileSummary,
-            summary: StatusSummaryRow(user: profileSummary),
-          ),
-          const SizedBox(height: 12),
-          _buildSettingsSection(user),
-          _buildAppInfoSection(),
-          _buildHowToUseTile(),
-          _buildLogoutTile(),
-          const SizedBox(height: 24),
-        ],
-      ),
-    );
+  List<Widget> _buildProfileContent(UserModel user) {
+    return [
+      const SizedBox(height: 2),
+      ProfileCard(user: user),
+      const SizedBox(height: 12),
+      const StatusSummaryRow(),
+      const SizedBox(height: 12),
+      _buildSettingsSection(user),
+      _buildAppInfoSection(),
+      _buildHowToUseTile(),
+      _buildLogoutTile(),
+      const SizedBox(height: 24),
+    ];
   }
 
   Widget _buildSettingsSection(UserModel user) {
@@ -141,7 +89,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           primary,
           _handleEditProfile,
         ),
-        _buildTotpOptionTile(user),
+        _buildTotpOptionTile(user), // This now has the switch!
         _buildOptionTile(
           Icons.email_outlined,
           'Change Email',
@@ -158,6 +106,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
+  // Updated TOTP option tile with switch
   Widget _buildTotpOptionTile(UserModel user) {
     return Column(
       children: [
@@ -165,12 +114,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         ProfileOptionTile(
           option: ProfileOption(
             icon: user.totpEnabled ? Icons.verified_user : Icons.security,
-            label: user.totpEnabled ? 'Disable 2FA' : 'Enable 2FA',
+            label: 'Two-Factor Authentication',
             iconBackgroundColor: user.totpEnabled ? statusSuccess : redAccent,
-            trailing: user.totpEnabled
-                ? const Icon(Icons.check_circle, color: statusSuccess, size: 16)
-                : null,
-            onTap: () => _handleTotpToggle(user),
+            mode: ProfileOptionMode.toggle,
+            toggleValue: user.totpEnabled,
+            onToggleChanged: (value) async {
+              // Handle the toggle change
+              await _handleTotpToggle(user);
+            },
           ),
         ),
       ],
@@ -221,7 +172,10 @@ class _ProfileScreenState extends State<ProfileScreen> {
             icon: Icons.help_outline,
             label: 'How to Use',
             iconBackgroundColor: Colors.blueAccent,
-            onTap: () {}, // placeholder
+            onTap: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const TutorialStep1Screen()),
+            ),
           ),
         ),
       ],
@@ -269,7 +223,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     );
   }
 
-  // Navigation handlers
+  // Event handlers
   void _handleEditProfile() async {
     final result = await Navigator.push(
       context,
@@ -302,36 +256,33 @@ class _ProfileScreenState extends State<ProfileScreen> {
     }
   }
 
+  // Updated TOTP handler to work better with switch
   Future<void> _handleTotpToggle(UserModel user) async {
     try {
       bool? result;
 
       if (user.totpEnabled) {
-        // Show disable dialog
+        // Disable 2FA
         result = await TotpDisableDialog.show(context);
-
-        if (result == true && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Two-Factor Authentication disabled'),
-              backgroundColor: statusWarning,
-              duration: Duration(seconds: 3),
-            ),
-          );
-        }
       } else {
-        // Show setup dialog
+        // Enable 2FA
         result = await TotpSetupDialog.show(context);
+      }
 
-        if (result == true && mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('Two-Factor Authentication enabled successfully'),
-              backgroundColor: statusSuccess,
-              duration: Duration(seconds: 3),
+      if (result == true && mounted) {
+        // The UI will automatically update via the StreamBuilder
+        // when the user data changes
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              user.totpEnabled
+                  ? 'Two-Factor Authentication disabled'
+                  : 'Two-Factor Authentication enabled successfully',
             ),
-          );
-        }
+            backgroundColor: user.totpEnabled ? statusWarning : statusSuccess,
+            duration: const Duration(seconds: 3),
+          ),
+        );
       }
     } catch (e) {
       if (mounted) {

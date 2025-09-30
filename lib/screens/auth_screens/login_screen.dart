@@ -1,4 +1,4 @@
-// lib/screens/auth_screens/login_screen.dart (UPDATED WITH TOTP SUPPORT - USING YOUR AUTHRESULT)
+// lib/screens/auth_screens/login_screen.dart (UPDATED WITH CONNECTIVITY CACHE)
 import 'package:flutter/material.dart';
 import 'package:roadfix/layouts/auth_scaffold.dart';
 import 'package:roadfix/widgets/auth_widgets/login_top_content.dart';
@@ -15,6 +15,7 @@ import 'package:roadfix/screens/auth_screens/forgot_password_screen.dart';
 import 'package:roadfix/utils/focus_helper.dart';
 import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/services/connectivity_service.dart';
+import 'package:roadfix/utils/connectivity_cache.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -52,6 +53,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<void> _checkInitialConnectivity() async {
+    // Check if we should skip the initial check (already done this session)
+    if (ConnectivityCache.shouldSkipInitialCheck()) {
+      setState(() {
+        _isInitialLoading = false;
+        _hasConnection = ConnectivityCache.hasRecentConnection();
+      });
+      return;
+    }
+
     try {
       await Future.wait([
         ConnectivityService.hasInternetConnection(),
@@ -61,6 +71,9 @@ class _LoginScreenState extends State<LoginScreen> {
       });
 
       if (mounted) {
+        // Cache the result
+        ConnectivityCache.setConnectionStatus(_hasConnection);
+
         setState(() => _isInitialLoading = false);
 
         if (!_hasConnection) {
@@ -76,6 +89,7 @@ class _LoginScreenState extends State<LoginScreen> {
       }
     } catch (e) {
       if (mounted) {
+        ConnectivityCache.setConnectionStatus(false);
         setState(() {
           _hasConnection = false;
           _isInitialLoading = false;
@@ -94,7 +108,15 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Future<bool> _checkConnectivityBeforeAction() async {
+    // First check cache
+    final cachedStatus = ConnectivityCache.getCachedConnectionStatus();
+    if (cachedStatus == true) {
+      return true; // We have recent confirmed connection
+    }
+
+    // If no cache or expired, do a quick check
     final hasConnection = await ConnectivityService.hasInternetConnection();
+    ConnectivityCache.setConnectionStatus(hasConnection);
 
     if (!hasConnection && mounted) {
       SnackbarUtils.showError(
@@ -348,19 +370,20 @@ class _LoginScreenState extends State<LoginScreen> {
         topPadding: 30,
         topContent: LoginTopContent(),
         children: [
-          SizedBox(height: 100),
+          SizedBox(height: 80),
           Center(
+            // ignore: prefer_const_constructors
             child: Column(
               children: [
                 CircularProgressIndicator(
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
+                  valueColor: AlwaysStoppedAnimation<Color>(primary),
                 ),
-                SizedBox(height: 24),
+                SizedBox(height: 20),
                 Text(
                   'Checking connection...',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
-                  textAlign: TextAlign.center,
+                  style: TextStyle(color: altSecondary, fontSize: 14),
                 ),
+                SizedBox(height: 40),
               ],
             ),
           ),

@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/models/report_category_model.dart';
-import 'package:roadfix/screens/reporting_detection_screens/pothole_detection_screen.dart';
-import 'package:roadfix/screens/reporting_detection_screens/road_concern_screen.dart';
+import 'package:roadfix/screens/secondary_screens/pothole_detection_screen.dart';
+import 'package:roadfix/screens/secondary_screens/road_concern_screen.dart';
+import 'package:roadfix/screens/secondary_screens/utility_pole_camera_screen.dart';
 
 class NavigationHelper {
   static void navigateToDetection(
@@ -24,7 +25,13 @@ class NavigationHelper {
         break;
 
       case ReportCategoryType.utilityPole:
-        _showComingSoon(context, 'Utility Pole Detection');
+        // Utility pole uses custom camera screen (ignores imageSource)
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => UtilityPoleCameraScreen(category: category),
+          ),
+        );
         break;
 
       case ReportCategoryType.roadConcern:
@@ -37,21 +44,5 @@ class NavigationHelper {
         );
         break;
     }
-  }
-
-  static void _showComingSoon(BuildContext context, String feature) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(feature),
-        content: const Text('This feature is coming soon!'),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('OK'),
-          ),
-        ],
-      ),
-    );
   }
 }

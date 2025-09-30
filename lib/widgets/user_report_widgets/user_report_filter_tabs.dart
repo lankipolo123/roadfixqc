@@ -28,14 +28,14 @@ class ReportFilterTabs extends StatelessWidget {
               margin: const EdgeInsets.symmetric(horizontal: 4),
               padding: const EdgeInsets.symmetric(vertical: 10),
               decoration: BoxDecoration(
-                color: selectedIndex == index ? primary : Colors.transparent,
+                color: selectedIndex == index ? primary : inputFill,
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Center(
                 child: Text(
                   label,
                   style: TextStyle(
-                    color: selectedIndex == index ? secondary : Colors.black87,
+                    color: selectedIndex == index ? inputFill : Colors.black87,
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),

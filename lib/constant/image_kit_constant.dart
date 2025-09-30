@@ -8,8 +8,31 @@ class ImageKitConstants {
   static const String reportsFolder = '/roadfix/reports';
   static const String profilesFolder = '/roadfix/profiles';
 
-  static const int maxFileSize = 50 * 1024 * 1024; // 50MB (increased from 10MB)
+  // UPDATED: Reduced from 50MB to 25MB for capstone requirement
+  static const int maxFileSize = 25 * 1024 * 1024; // 25MB
+  static const int minFileSize = 100 * 1024; // 100KB minimum
   static const List<String> allowedFormats = ['jpg', 'jpeg', 'png', 'webp'];
+
+  // NEW: Security constants
+  static const int spamCooldownMinutes = 5; // 5 minutes between reports
+  static const int maxReportsPerDay = 10;
+  static const int maxDescriptionLength = 500;
+  static const List<String> forbiddenPatterns = [
+    '<script',
+    '</script>',
+    'javascript:',
+    'onclick=',
+    'onerror=',
+    'onload=',
+    'eval(',
+    'document.',
+    'window.',
+    'alert(',
+    'setTimeout',
+    'setInterval',
+    'Function(',
+    'constructor',
+  ];
 
   static const Map<String, dynamic> thumbnailTransform = {
     'w': 150,

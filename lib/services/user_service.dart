@@ -1,90 +1,99 @@
-// lib/services/user_service.dart (FIXED TO WORK WITH YOUR USERMODEL)
+import 'package:flutter/foundation.dart';
 import 'package:roadfix/models/user_model.dart';
-import 'package:roadfix/models/profile_summary.dart';
 import 'package:roadfix/services/firestore_service.dart';
 
 class UserService {
   final FirestoreService _firestoreService = FirestoreService();
 
-  // Get current user data (for homepage, profile, reporting)
+  // Cache for user data to avoid unnecessary calls
+  UserModel? _cachedUser;
+  DateTime? _lastCacheTime;
+  static const Duration _cacheTimeout = Duration(minutes: 5);
+
   Future<UserModel?> getCurrentUser() async {
     try {
-      return await _firestoreService.getCurrentUser();
+      // Return cached user if still valid
+      if (_cachedUser != null &&
+          _lastCacheTime != null &&
+          DateTime.now().difference(_lastCacheTime!) < _cacheTimeout) {
+        return _cachedUser;
+      }
+
+      // Fetch fresh user data
+      final user = await _firestoreService.getCurrentUser();
+
+      // Update cache
+      _cachedUser = user;
+      _lastCacheTime = DateTime.now();
+
+      return user;
     } catch (e) {
       throw Exception('Failed to get current user: $e');
     }
   }
 
-  // Stream current user data (real-time updates for all screens)
   Stream<UserModel?> getCurrentUserStream() {
+    // Stream from FirestoreService directly
     return _firestoreService.getCurrentUserStream();
   }
 
-  // Convert UserModel to ProfileSummary with REAL report counts from database
-  ProfileSummary userToProfileSummary(UserModel user) {
-    return ProfileSummary(
-      name: user.fullName,
-      email: user.email,
-      phone: user.contactNumber.isNotEmpty
-          ? user.contactNumber
-          : 'No phone number',
-      location: user.address.isNotEmpty ? user.address : 'No address provided',
-      imageUrl: user.userProfile,
-      // ✅ FIXED: Use real counts from UserModel (now includes approvedCount)
-      reportsCount: user.reportsCount,
-      pendingCount: user.pendingCount,
-      approvedCount: user.approvedCount,
-      resolvedCount: user.resolvedCount,
-    );
-  }
-
-  // Get current user's profile summary (for profile screen)
-  Future<ProfileSummary?> getCurrentUserProfileSummary() async {
+  /// Get user once without caching (for real-time updates)
+  Future<UserModel?> getCurrentUserFresh() async {
     try {
-      final user = await getCurrentUser();
-      if (user == null) return null;
-      return userToProfileSummary(user);
+      final user = await _firestoreService.getCurrentUser();
+
+      // Update cache with fresh data
+      _cachedUser = user;
+      _lastCacheTime = DateTime.now();
+
+      return user;
     } catch (e) {
-      throw Exception('Failed to get user profile: $e');
+      throw Exception('Failed to get current user: $e');
     }
   }
 
-  // Stream profile summary (for profile screen)
-  Stream<ProfileSummary?> getCurrentUserProfileSummaryStream() {
-    return getCurrentUserStream().map((user) {
-      if (user == null) return null;
-      return userToProfileSummary(user);
-    });
+  /// Clear cache when user data is updated
+  void clearCache() {
+    _cachedUser = null;
+    _lastCacheTime = null;
   }
 
-  // Update profile method to use userProfile field
+  /// Update profile; automatically sets lastUpdated if not provided.
   Future<void> updateProfile({
     String? firstName,
     String? lastName,
     String? middleInitial,
     String? contactNumber,
     String? address,
-    String? imageUrl, // Keep this parameter name for compatibility
+    String? userProfile,
+    int? lastUpdated,
   }) async {
     try {
-      final currentUser = await getCurrentUser();
+      final currentUser = await _firestoreService.getCurrentUser();
       if (currentUser?.uid == null) throw Exception('No user logged in');
 
+      final uid = currentUser!.uid!;
+      final effectiveLastUpdated =
+          lastUpdated ?? DateTime.now().millisecondsSinceEpoch;
+
       await _firestoreService.updateUserProfile(
-        uid: currentUser!.uid!,
+        uid: uid,
         fname: firstName,
         lname: lastName,
         mi: middleInitial,
         contactNumber: contactNumber,
         address: address,
-        userProfile: imageUrl, // Map imageUrl parameter to userProfile field
+        userProfile: userProfile,
+        lastUpdated: effectiveLastUpdated,
       );
+
+      // Clear cache after update to ensure fresh data on next fetch
+      clearCache();
     } catch (e) {
       throw Exception('Failed to update profile: $e');
     }
   }
 
-  // Get user's full name (for homepage greeting)
   Future<String> getCurrentUserName() async {
     try {
       final user = await getCurrentUser();
@@ -94,12 +103,10 @@ class UserService {
     }
   }
 
-  // Check if user profile is complete (for reporting requirements)
   Future<bool> isProfileComplete() async {
     try {
       final user = await getCurrentUser();
       if (user == null) return false;
-
       return user.fname.isNotEmpty &&
           user.lname.isNotEmpty &&
           user.email.isNotEmpty &&
@@ -108,5 +115,15 @@ class UserService {
     } catch (e) {
       return false;
     }
+  }
+
+  /// Get user stream but with better error handling
+  Stream<UserModel?> getCurrentUserStreamSafe() {
+    return getCurrentUserStream().handleError((error) {
+      if (kDebugMode) {
+        print('User stream error: $error');
+      }
+      return null;
+    });
   }
 }

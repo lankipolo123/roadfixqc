@@ -57,7 +57,6 @@ class CustomTextField extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Label
         Text(
           label,
           style: const TextStyle(
@@ -67,8 +66,6 @@ class CustomTextField extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 8),
-
-        // Text field
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -100,7 +97,8 @@ class CustomTextField extends StatelessWidget {
                   )
                 : null,
             filled: true,
-            fillColor: backgroundColor ?? (enabled ? inputFill : altSecondary),
+            fillColor:
+                backgroundColor ?? (enabled ? inputFill : Colors.grey[300]),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(borderRadius),
               borderSide: BorderSide(
@@ -132,7 +130,7 @@ class CustomTextField extends StatelessWidget {
               borderSide: const BorderSide(color: altSecondary, width: 1),
             ),
             contentPadding: padding,
-            counterText: '', // Hide character counter
+            counterText: '',
           ),
         ),
       ],
@@ -140,7 +138,6 @@ class CustomTextField extends StatelessWidget {
   }
 }
 
-// Specialized variants for common use cases
 class NameTextField extends CustomTextField {
   NameTextField({
     super.key,
@@ -196,7 +193,9 @@ class DescriptionTextField extends CustomTextField {
     super.label = 'Description',
     super.maxLines = 4,
     super.maxLength = 500,
-    super.hintText, // Make hintText configurable
+    super.hintText,
+    super.readOnly = false,
+    super.enabled = true,
   }) : super(
          textCapitalization: TextCapitalization.sentences,
          validator: (value) =>

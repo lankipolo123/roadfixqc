@@ -1,4 +1,4 @@
-// lib/models/user_model.dart (UPDATED WITH TOTP FIELDS)
+// lib/models/user_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class UserModel {
@@ -11,7 +11,7 @@ class UserModel {
   final String address;
   final bool isActive;
   final String role;
-  final String userProfile;
+  final String userProfile; // clean ImageKit url (no ?updatedAt)
   final Timestamp? joinedAt;
 
   // TOTP fields
@@ -19,12 +19,8 @@ class UserModel {
   final String? totpSecret;
   final Timestamp? totpEnabledAt;
 
-  // Report counts (updated when reports are submitted/status changed)
-  final int reportsCount;
-  final int pendingCount;
-  final int approvedCount;
-  final int resolvedCount;
-  final int rejectedCount;
+  // lastUpdated: millisecondsSinceEpoch — used for cache-busting
+  final int? lastUpdated;
 
   const UserModel({
     this.uid,
@@ -41,16 +37,22 @@ class UserModel {
     this.totpEnabled = false,
     this.totpSecret,
     this.totpEnabledAt,
-    this.reportsCount = 0,
-    this.pendingCount = 0,
-    this.approvedCount = 0,
-    this.resolvedCount = 0,
-    this.rejectedCount = 0,
+    this.lastUpdated,
   });
 
-  // Create from Firestore document
   factory UserModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>? ?? {};
+
+    int? parsedLastUpdated;
+    final rawLast = data['lastUpdated'];
+    if (rawLast is int) {
+      parsedLastUpdated = rawLast;
+    } else if (rawLast is Timestamp) {
+      parsedLastUpdated = rawLast.millisecondsSinceEpoch;
+    } else if (rawLast is String) {
+      // in case it's stored as string number
+      parsedLastUpdated = int.tryParse(rawLast);
+    }
 
     return UserModel(
       uid: doc.id,
@@ -67,17 +69,12 @@ class UserModel {
       totpEnabled: data['totpEnabled'] ?? false,
       totpSecret: data['totpSecret'],
       totpEnabledAt: data['totpEnabledAt'],
-      reportsCount: data['reportsCount'] ?? 0,
-      pendingCount: data['pendingCount'] ?? 0,
-      approvedCount: data['approvedCount'] ?? 0,
-      resolvedCount: data['resolvedCount'] ?? 0,
-      rejectedCount: data['rejectedCount'] ?? 0,
+      lastUpdated: parsedLastUpdated,
     );
   }
 
-  // Convert to Map for Firestore
   Map<String, dynamic> toMap() {
-    return {
+    final map = {
       'fname': fname,
       'lname': lname,
       'mi': mi,
@@ -91,15 +88,14 @@ class UserModel {
       'totpEnabled': totpEnabled,
       'totpSecret': totpSecret,
       'totpEnabledAt': totpEnabledAt,
-      'reportsCount': reportsCount,
-      'pendingCount': pendingCount,
-      'approvedCount': approvedCount,
-      'resolvedCount': resolvedCount,
-      'rejectedCount': rejectedCount,
     };
+
+    if (lastUpdated != null) {
+      map['lastUpdated'] = lastUpdated;
+    }
+    return map;
   }
 
-  // Create a copy with modified fields
   UserModel copyWith({
     String? uid,
     String? fname,
@@ -115,11 +111,7 @@ class UserModel {
     bool? totpEnabled,
     String? totpSecret,
     Timestamp? totpEnabledAt,
-    int? reportsCount,
-    int? pendingCount,
-    int? approvedCount,
-    int? resolvedCount,
-    int? rejectedCount,
+    int? lastUpdated,
   }) {
     return UserModel(
       uid: uid ?? this.uid,
@@ -136,15 +128,10 @@ class UserModel {
       totpEnabled: totpEnabled ?? this.totpEnabled,
       totpSecret: totpSecret ?? this.totpSecret,
       totpEnabledAt: totpEnabledAt ?? this.totpEnabledAt,
-      reportsCount: reportsCount ?? this.reportsCount,
-      pendingCount: pendingCount ?? this.pendingCount,
-      approvedCount: approvedCount ?? this.approvedCount,
-      resolvedCount: resolvedCount ?? this.resolvedCount,
-      rejectedCount: rejectedCount ?? this.rejectedCount,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
     );
   }
 
-  // Helper getter for full name
   String get fullName {
     final middle = mi.isNotEmpty ? ' $mi ' : ' ';
     return '$fname$middle$lname'.trim();
@@ -152,7 +139,7 @@ class UserModel {
 
   @override
   String toString() {
-    return 'UserModel(uid: $uid, fullName: $fullName, email: $email, reportsCount: $reportsCount, totpEnabled: $totpEnabled)';
+    return 'UserModel(uid: $uid, fullName: $fullName, email: $email, totpEnabled: $totpEnabled)';
   }
 
   @override

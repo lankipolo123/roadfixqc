@@ -14,9 +14,13 @@ class DetectionService {
 
   // Load the YOLO model
   Future<void> loadModel() async {
-    _yolo = YOLO(modelPath: 'yolo11n_87.tflite', task: YOLOTask.detect);
+    _yolo = YOLO(
+      modelPath: 'pothole_model_float32.tflite',
+      task: YOLOTask.detect,
+      useGpu: false,
+    );
     await _yolo.loadModel();
-    debugPrint('✅ YOLO model loaded');
+    debugPrint('✅ Pothole YOLO model loaded');
     _isModelLoaded = true;
   }
 
@@ -64,7 +68,7 @@ class DetectionService {
     for (var box in rawBoxes) {
       debugPrint('🔍 Raw box data: $box');
 
-      // Parse the box data (your existing logic)
+      // Parse the box data
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
       final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
       final double x2Norm = (box['x2_norm'] ?? 0).toDouble();
@@ -84,6 +88,12 @@ class DetectionService {
 
       if (conf < 0.3) continue;
 
+      // FILTER: Only keep Pothole detections
+      if (className != 'Pothole') {
+        debugPrint('⏭️ Skipping non-Pothole detection: $className');
+        continue;
+      }
+
       results.add(
         DetectionResult(
           centerX: xc,
@@ -100,7 +110,7 @@ class DetectionService {
       );
     }
 
-    debugPrint('📊 Total detections: ${results.length}');
+    debugPrint('📊 Total Pothole detections: ${results.length}');
     return results;
   }
 }
