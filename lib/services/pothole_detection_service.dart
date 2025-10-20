@@ -6,25 +6,37 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ultralytics_yolo/yolo.dart';
 import '../models/detection_result.dart';
 
-class DetectionService {
-  late YOLO _yolo;
+class PotholeDetectionService {
+  YOLO? _yolo; // ✅ Made nullable
   bool _isModelLoaded = false;
 
   bool get isModelLoaded => _isModelLoaded;
 
-  // Load the YOLO model
+  /// Load the YOLO model
   Future<void> loadModel() async {
+    // ✅ Dispose previous model if exists
+    dispose();
+
     _yolo = YOLO(
       modelPath: 'pothole_model_float32.tflite',
       task: YOLOTask.detect,
-      useGpu: false,
+      useGpu: true,
     );
-    await _yolo.loadModel();
-    debugPrint('✅ Pothole YOLO model loaded');
+    await _yolo!.loadModel();
+    debugPrint('✅ Pothole YOLO model loaded (pothole_model_float32.tflite)');
     _isModelLoaded = true;
   }
 
-  // Pick image from gallery
+  /// ✅ ADDED: Properly dispose the model
+  void dispose() {
+    if (_yolo != null) {
+      debugPrint('🗑️ Pothole model service disposed');
+      _yolo = null;
+      _isModelLoaded = false;
+    }
+  }
+
+  /// Pick image from gallery
   Future<File?> pickImage() async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.gallery);
@@ -32,7 +44,7 @@ class DetectionService {
     return File(image.path);
   }
 
-  // Pick image from specific source
+  /// Pick image from specific source
   Future<File?> pickImageFromSource(ImageSource source) async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: source);
@@ -40,7 +52,7 @@ class DetectionService {
     return File(image.path);
   }
 
-  // Decode image to ui.Image
+  /// Decode image to ui.Image
   Future<ui.Image> decodeImage(File file) async {
     final Uint8List bytes = await file.readAsBytes();
     final codec = await ui.instantiateImageCodec(bytes);
@@ -48,27 +60,40 @@ class DetectionService {
     return frame.image;
   }
 
-  // Run detection on image
+  /// Run detection on image
   Future<List<DetectionResult>> detectObjects(File imageFile) async {
-    if (!_isModelLoaded) {
-      throw Exception('Model not loaded');
+    debugPrint('\n========================================');
+    debugPrint('🚀 POTHOLE DETECTION START');
+    debugPrint('   Model: pothole_model_float32.tflite');
+    debugPrint('========================================');
+
+    if (!_isModelLoaded || _yolo == null) {
+      throw Exception('Pothole model not loaded');
     }
 
     final Uint8List bytes = await imageFile.readAsBytes();
-    final output = await _yolo.predict(bytes);
+    debugPrint('📸 Image size: ${bytes.length} bytes');
+
+    final output = await _yolo!.predict(bytes);
+    debugPrint('📦 Raw output keys: ${output.keys}');
 
     final rawBoxes = output['boxes'];
+    debugPrint('📊 TOTAL BOXES DETECTED: ${rawBoxes?.length ?? 0}');
+
     if (rawBoxes == null || rawBoxes.isEmpty) {
-      debugPrint('⚠️ No boxes detected');
+      debugPrint('⚠️ No potholes detected');
+      debugPrint('========================================\n');
       return [];
     }
 
     final List<DetectionResult> results = [];
+    int boxNum = 0;
 
     for (var box in rawBoxes) {
+      boxNum++;
+      debugPrint('\n--- BOX #$boxNum ---');
       debugPrint('🔍 Raw box data: $box');
 
-      // Parse the box data
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
       final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
       final double x2Norm = (box['x2_norm'] ?? 0).toDouble();
@@ -76,19 +101,19 @@ class DetectionService {
       final double conf = (box['confidence'] ?? 0).toDouble();
       final String className = box['className'] ?? 'Unknown';
 
-      // Convert to center + width/height
+      debugPrint('   Class: "$className"');
+      debugPrint('   Confidence: ${(conf * 100).toStringAsFixed(1)}%');
+
       final double xc = (x1Norm + x2Norm) / 2;
       final double yc = (y1Norm + y2Norm) / 2;
       final double w = x2Norm - x1Norm;
       final double h = y2Norm - y1Norm;
 
-      debugPrint(
-        '🔍 Parsed: xc=$xc yc=$yc w=$w h=$h conf=$conf class=$className',
-      );
+      if (conf < 0.4) {
+        debugPrint('   ❌ SKIPPED: Confidence too low');
+        continue;
+      }
 
-      if (conf < 0.3) continue;
-
-      // FILTER: Only keep Pothole detections
       if (className != 'Pothole') {
         debugPrint('⏭️ Skipping non-Pothole detection: $className');
         continue;
@@ -105,12 +130,15 @@ class DetectionService {
         ),
       );
 
-      debugPrint(
-        '✅ Detection: xc=$xc yc=$yc w=$w h=$h conf=${conf.toStringAsFixed(2)} class=$className',
-      );
+      debugPrint('✅ Pothole detected: conf=${conf.toStringAsFixed(2)}');
     }
 
-    debugPrint('📊 Total Pothole detections: ${results.length}');
+    debugPrint('\n========================================');
+    debugPrint('📊 SUMMARY:');
+    debugPrint('   Total detections: ${rawBoxes.length}');
+    debugPrint('   Pothole detections: ${results.length}');
+    debugPrint('========================================\n');
+
     return results;
   }
 }

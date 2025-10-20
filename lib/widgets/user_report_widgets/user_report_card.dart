@@ -27,7 +27,6 @@ class ReportCard extends StatelessWidget {
             border: Border(left: BorderSide(color: statusColor, width: 4)),
             borderRadius: const BorderRadius.all(Radius.circular(8)),
             color: inputFill,
-            // Add subtle background tint based on status
             boxShadow: [
               BoxShadow(
                 color: statusColor.withValues(alpha: 0.2),
@@ -46,7 +45,7 @@ class ReportCard extends StatelessWidget {
                   backgroundColor: statusColor,
                   child: Icon(
                     ReportStatusUtils.getStatusIcon(report.status),
-                    color: Colors.white, // White icon for better contrast
+                    color: Colors.white,
                     size: 20,
                   ),
                 ),
@@ -67,7 +66,7 @@ class ReportCard extends StatelessWidget {
                               ),
                             ),
                           ),
-                          // Status badge without opacity
+                          // Status badge
                           Container(
                             padding: const EdgeInsets.symmetric(
                               horizontal: 8,
@@ -135,25 +134,60 @@ class ReportCard extends StatelessWidget {
                             ),
                           ),
                           const Spacer(),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              Icon(
-                                Icons.touch_app,
-                                size: 14,
-                                color: Colors.grey[600],
+                          // Show completion badge if resolved with image
+                          if (report.hasResolvedImage)
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 6,
+                                vertical: 2,
                               ),
-                              const SizedBox(width: 4),
-                              Text(
-                                'Click to view',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey[600],
-                                  fontWeight: FontWeight.w500,
+                              decoration: BoxDecoration(
+                                color: statusSuccess.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(8),
+                                border: Border.all(
+                                  color: statusSuccess.withValues(alpha: 0.4),
                                 ),
                               ),
-                            ],
-                          ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.check_circle,
+                                    size: 12,
+                                    color: statusSuccess,
+                                  ),
+                                  SizedBox(width: 4),
+                                  Text(
+                                    'Completed',
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: statusSuccess,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            )
+                          else
+                            Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Icon(
+                                  Icons.touch_app,
+                                  size: 14,
+                                  color: Colors.grey[600],
+                                ),
+                                const SizedBox(width: 4),
+                                Text(
+                                  'Click to view',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
                         ],
                       ),
                     ],

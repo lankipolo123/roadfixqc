@@ -2,7 +2,9 @@ import 'dart:io';
 import 'package:roadfix/models/security_model.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:html_unescape/html_unescape.dart';
-// Import the models file
+
+// TESTING FEATURE FLAG - set to true to disable spam protection for testing
+const bool disableSpamProtection = true;
 
 class SecurityService {
   static final SecurityService _instance = SecurityService._internal();
@@ -52,6 +54,27 @@ class SecurityService {
     required String description,
     required String location,
   }) async {
+    // TESTING: Skip spam checks if disabled
+    if (disableSpamProtection) {
+      // Still validate file and text, but skip spam/brute force checks
+      final fileResult = await _validateFile(imageFile);
+      if (!fileResult.isValid) return fileResult;
+
+      final textResult = _validateText(description, location);
+      if (!textResult.isValid) return textResult;
+
+      return SecurityResult.success(
+        cleanDescription: _sanitizeText(description),
+        cleanLocation: _sanitizeText(location),
+        metadata: {
+          'validationTimestamp': DateTime.now().toIso8601String(),
+          'fileSize': await imageFile.length(),
+          'spamProtectionDisabled': true,
+        },
+      );
+    }
+
+    // NORMAL FLOW: Full validation
     // 0. Check for brute force lockout first
     final bruteForceResult = await _checkBruteForce();
     if (!bruteForceResult.isValid) return bruteForceResult;
@@ -92,6 +115,9 @@ class SecurityService {
 
   /// Record successful submission for spam tracking
   Future<void> recordSubmission(String location, String description) async {
+    // Skip recording if spam protection is disabled
+    if (disableSpamProtection) return;
+
     final prefs = await SharedPreferences.getInstance();
     final now = DateTime.now();
 

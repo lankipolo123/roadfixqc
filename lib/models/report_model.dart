@@ -1,37 +1,37 @@
-// lib/models/report_model.dart
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class ReportModel {
-  final String? id; // Document ID from Firestore
-
-  // User-facing fields (filled by user)
+  final String? id;
   final String description;
-  final String location; // Keep as String for address
+  final String location;
+  final double? latitude; // NEW: GPS coordinate
+  final double? longitude; // NEW: GPS coordinate
   final List<String> imageUrl;
   final String reportType;
   final List<String> tags;
-
-  // Auto-filled fields (from user profile + system)
   final String userId;
   final String email;
   final String fullName;
   final String phoneNumber;
   final Timestamp reportedAt;
-  final String status; // pending/approved/resolved/rejected
-
-  // Admin-only fields (empty initially)
+  final String status;
   final String adminNotes;
   final String reviewedBy;
   final Timestamp? reviewedAt;
-  final String priority; // low/medium/high/urgent
+  final String priority;
+  final bool isRead;
 
-  // Notification field
-  final bool isRead; // NEW: For notification read status
+  // NEW: Resolved image fields
+  final String? resolvedImageUrl;
+  final String? completionNotes;
+  final Timestamp? completionImageUploadedAt;
 
   const ReportModel({
     this.id,
     required this.description,
     required this.location,
+    this.latitude, // NEW
+    this.longitude, // NEW
     required this.imageUrl,
     required this.reportType,
     required this.tags,
@@ -40,35 +40,33 @@ class ReportModel {
     required this.fullName,
     required this.phoneNumber,
     required this.reportedAt,
-    this.status = 'pending',
+    this.status = ReportStatus.pending,
     this.adminNotes = '',
     this.reviewedBy = '',
     this.reviewedAt,
-    this.priority = 'medium',
-    this.isRead = false, // NEW: Default to false (unread)
+    this.priority = ReportPriority.medium,
+    this.isRead = false,
+    this.resolvedImageUrl,
+    this.completionNotes,
+    this.completionImageUploadedAt,
   });
 
-  // Create from Firestore document
   factory ReportModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
 
-    // Handle location field - it might be a GeoPoint or String
     String locationString = '';
     final locationData = data['location'];
     if (locationData is GeoPoint) {
-      // Convert GeoPoint to string representation
       locationString = '${locationData.latitude}°, ${locationData.longitude}°';
     } else if (locationData is String) {
       locationString = locationData;
     }
 
-    // Handle tags field - it might be a String or List
     List<String> tagsList = [];
     final tagsData = data['tags'];
     if (tagsData is List) {
       tagsList = List<String>.from(tagsData);
     } else if (tagsData is String && tagsData.isNotEmpty) {
-      // If tags is stored as comma-separated string, split it
       tagsList = tagsData
           .split(',')
           .map((tag) => tag.trim())
@@ -76,7 +74,6 @@ class ReportModel {
           .toList();
     }
 
-    // Handle imageUrl field - ensure it's always a list
     List<String> imageList = [];
     final imageData = data['imageUrl'];
     if (imageData is List) {
@@ -89,6 +86,8 @@ class ReportModel {
       id: doc.id,
       description: data['description'] ?? '',
       location: locationString,
+      latitude: data['latitude']?.toDouble(), // NEW
+      longitude: data['longitude']?.toDouble(), // NEW
       imageUrl: imageList,
       reportType: data['reportType'] ?? '',
       tags: tagsList,
@@ -97,25 +96,27 @@ class ReportModel {
       fullName: data['fullName'] ?? '',
       phoneNumber: data['phoneNumber'] ?? '',
       reportedAt: data['reportedAt'] ?? Timestamp.now(),
-      status: data['status'] ?? 'pending',
+      status: data['status'] ?? ReportStatus.pending,
       adminNotes: data['adminNotes'] ?? '',
       reviewedBy: data['reviewedBy'] ?? '',
       reviewedAt: data['reviewedAt'],
-      priority: data['priority'] ?? 'medium',
-      isRead:
-          data['isRead'] ??
-          false, // NEW: Handle existing reports without this field
+      priority: data['priority'] ?? ReportPriority.medium,
+      isRead: data['isRead'] ?? false,
+      resolvedImageUrl: data['resolvedImageUrl'],
+      completionNotes: data['completionNotes'],
+      completionImageUploadedAt: data['completionImageUploadedAt'],
     );
   }
 
-  // Convert to Map for Firestore
   Map<String, dynamic> toMap() {
     return {
       'description': description,
-      'location': location, // Store as string
+      'location': location,
+      'latitude': latitude, // NEW
+      'longitude': longitude, // NEW
       'imageUrl': imageUrl,
       'reportType': reportType,
-      'tags': tags, // Store as array
+      'tags': tags,
       'userId': userId,
       'email': email,
       'fullName': fullName,
@@ -126,15 +127,19 @@ class ReportModel {
       'reviewedBy': reviewedBy,
       'reviewedAt': reviewedAt,
       'priority': priority,
-      'isRead': isRead, // NEW: Include in Firestore document
+      'isRead': isRead,
+      'resolvedImageUrl': resolvedImageUrl,
+      'completionNotes': completionNotes,
+      'completionImageUploadedAt': completionImageUploadedAt,
     };
   }
 
-  // Create a copy with modified fields
   ReportModel copyWith({
     String? id,
     String? description,
     String? location,
+    double? latitude, // NEW
+    double? longitude, // NEW
     List<String>? imageUrl,
     String? reportType,
     List<String>? tags,
@@ -148,12 +153,17 @@ class ReportModel {
     String? reviewedBy,
     Timestamp? reviewedAt,
     String? priority,
-    bool? isRead, // NEW: Include in copyWith
+    bool? isRead,
+    String? resolvedImageUrl,
+    String? completionNotes,
+    Timestamp? completionImageUploadedAt,
   }) {
     return ReportModel(
       id: id ?? this.id,
       description: description ?? this.description,
       location: location ?? this.location,
+      latitude: latitude ?? this.latitude, // NEW
+      longitude: longitude ?? this.longitude, // NEW
       imageUrl: imageUrl ?? this.imageUrl,
       reportType: reportType ?? this.reportType,
       tags: tags ?? this.tags,
@@ -167,20 +177,25 @@ class ReportModel {
       reviewedBy: reviewedBy ?? this.reviewedBy,
       reviewedAt: reviewedAt ?? this.reviewedAt,
       priority: priority ?? this.priority,
-      isRead: isRead ?? this.isRead, // NEW: Include in copyWith
+      isRead: isRead ?? this.isRead,
+      resolvedImageUrl: resolvedImageUrl ?? this.resolvedImageUrl,
+      completionNotes: completionNotes ?? this.completionNotes,
+      completionImageUploadedAt:
+          completionImageUploadedAt ?? this.completionImageUploadedAt,
     );
   }
 
-  // Helper getters
-  bool get isPending => status == 'pending';
-  bool get isApproved => status == 'approved';
-  bool get isResolved => status == 'resolved';
-  bool get isRejected => status == 'rejected';
-
+  bool get isPending => status == ReportStatus.pending;
+  bool get isApproved => status == ReportStatus.approved;
+  bool get isResolved => status == ReportStatus.resolved;
+  bool get isRejected => status == ReportStatus.rejected;
+  bool get isUnderReview => status == ReportStatus.underReview;
+  bool get isInProgress => status == ReportStatus.inProgress;
   bool get hasAdminReview => reviewedBy.isNotEmpty;
-
-  // NEW: Helper getter for notification status
   bool get isUnreadNotification => !isRead && reviewedAt != null;
+  bool get hasResolvedImage =>
+      resolvedImageUrl != null && resolvedImageUrl!.isNotEmpty;
+  bool get hasCoordinates => latitude != null && longitude != null; // NEW
 
   String get primaryImageUrl => imageUrl.isNotEmpty ? imageUrl.first : '';
 
@@ -190,28 +205,33 @@ class ReportModel {
   }
 
   @override
-  String toString() {
-    return 'ReportModel(id: $id, description: $description, status: $status, reportedAt: $reportedAt, isRead: $isRead)';
-  }
+  String toString() =>
+      'ReportModel(id: $id, description: $description, status: $status)';
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-    return other is ReportModel && other.id == id;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is ReportModel && other.id == id);
 
   @override
   int get hashCode => id.hashCode;
 }
 
-// Enum-like constants for better type safety
 class ReportStatus {
   static const String pending = 'pending';
+  static const String underReview = 'under_review';
+  static const String inProgress = 'in_progress';
   static const String approved = 'approved';
   static const String resolved = 'resolved';
   static const String rejected = 'rejected';
 
-  static const List<String> all = [pending, approved, resolved, rejected];
+  static const List<String> all = [
+    pending,
+    underReview,
+    inProgress,
+    approved,
+    resolved,
+    rejected,
+  ];
 }
 
 class ReportPriority {

@@ -5,31 +5,32 @@ import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
-import 'package:roadfix/services/pothole_detection_service.dart';
 import 'package:roadfix/services/image_proccessor_service.dart';
+import 'package:roadfix/services/road_blocks_detection_service.dart';
 import 'package:roadfix/utils/detection_service_manager.dart';
 import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 
-class PotholeDetectionScreen extends StatefulWidget {
+class RoadblockDetectionScreen extends StatefulWidget {
   final ImageSource? initialImageSource;
   final ReportCategory? category;
 
-  const PotholeDetectionScreen({
+  const RoadblockDetectionScreen({
     super.key,
     this.initialImageSource,
     this.category,
   });
 
   @override
-  State<PotholeDetectionScreen> createState() => _PotholeDetectionScreenState();
+  State<RoadblockDetectionScreen> createState() =>
+      _RoadblockDetectionScreenState();
 }
 
-class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
+class _RoadblockDetectionScreenState extends State<RoadblockDetectionScreen> {
   final DetectionServiceManager _serviceManager = DetectionServiceManager();
-  PotholeDetectionService? _detectionService;
+  RoadblocksDetectionService? _detectionService;
   bool _isProcessing = false;
 
   File? _selectedImage;
@@ -49,7 +50,7 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
 
   // ✅ FIX: Load model THEN pick image
   Future<void> _initializeAndPickImage() async {
-    debugPrint('🔄 Initializing pothole detection...');
+    debugPrint('🔄 Initializing roadblock detection...');
 
     // Wait for model to load
     await _loadModel();
@@ -62,9 +63,9 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
   }
 
   Future<void> _loadModel() async {
-    debugPrint('📥 Loading pothole model...');
-    _detectionService = await _serviceManager.getPotholeService();
-    debugPrint('✅ Pothole model ready!');
+    debugPrint('📥 Loading roadblock model...');
+    _detectionService = await _serviceManager.getRoadblocksService();
+    debugPrint('✅ Roadblock model ready!');
     if (mounted) {
       setState(() {});
     }
@@ -100,7 +101,7 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Processing Image",
-      description: "Detecting road issues, please wait...",
+      description: "Detecting roadblocks, please wait...",
     );
 
     try {
@@ -135,7 +136,7 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
     if (_detections.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No potholes detected. Please try another image.'),
+          content: Text('No roadblocks detected. Please try another image.'),
           backgroundColor: statusDanger,
           duration: Duration(seconds: 3),
         ),
@@ -166,14 +167,17 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
     final avgConfidence = (totalConfidence / _detections.length * 100)
         .toStringAsFixed(1);
 
-    final detectionTags = detectionCounts.keys.toList();
+    final detectionTags = detectionCounts.keys.map((className) {
+      return _formatDisplayName(className);
+    }).toList();
 
     final descriptionParts = <String>[];
     descriptionParts.add('The Model has detected:');
 
     for (var entry in detectionCounts.entries) {
+      final displayName = _formatDisplayName(entry.key);
       descriptionParts.add(
-        '- ${entry.value} ${entry.key}${entry.value > 1 ? 's' : ''}',
+        '- ${entry.value} $displayName${entry.value > 1 ? 's' : ''}',
       );
     }
 
@@ -187,12 +191,27 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
         MaterialPageRoute(
           builder: (context) => SendReportScreen(
             imagePath: processedImagePath,
-            reportType: widget.category?.label,
+            reportType: widget.category?.label ?? 'Roadblock',
             detections: detectionTags,
             autoDescription: autoDescription,
           ),
         ),
       );
+    }
+  }
+
+  String _formatDisplayName(String className) {
+    switch (className) {
+      case 'Fallen_Tree':
+        return 'Fallen Tree';
+      case 'Road_Barrier':
+        return 'Road Barrier';
+      case 'Tires':
+        return 'Tires';
+      case 'Traffic_Cones':
+        return 'Traffic Cones';
+      default:
+        return className;
     }
   }
 
@@ -250,7 +269,7 @@ class _PotholeDetectionScreenState extends State<PotholeDetectionScreen> {
                 right: 20,
                 child: DetectionBottomCard(
                   detections: _detections,
-                  categoryLabel: widget.category?.label,
+                  categoryLabel: widget.category?.label ?? 'Roadblock',
                   onConfirm: _confirmReport,
                   onCancel: () => Navigator.pop(context),
                 ),

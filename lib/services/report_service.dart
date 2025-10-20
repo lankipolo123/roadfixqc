@@ -1,4 +1,3 @@
-// lib/services/report_service.dart (DYNAMIC COUNTING VERSION)
 import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -14,13 +13,16 @@ class ReportService {
 
   static const String _reportsCollection = 'reports';
 
-  // SUBMIT REPORTS - SIMPLIFIED (NO COUNT UPDATES)
+  // SUBMIT REPORTS - WITH PROGRESS TRACKING + COORDINATES
   Future<String?> submitReport({
     required File imageFile,
     required String description,
     required String location,
+    required double latitude, // NEW: Required GPS coordinate
+    required double longitude, // NEW: Required GPS coordinate
     required String reportType,
     required List<String> detections,
+    Function(double)? onProgress,
   }) async {
     try {
       final currentUser = _auth.currentUser;
@@ -29,15 +31,24 @@ class ReportService {
       final userModel = await _firestoreService.getCurrentUser();
       if (userModel == null) throw Exception('User profile not found');
 
-      // Upload image to ImageKit
+      onProgress?.call(0.0);
+
+      // Upload image with progress tracking (0-90%)
       final imageUploadResponse = await _imageKitService.uploadReportImage(
         imageFile,
+        onProgress: (uploadProgress) {
+          onProgress?.call(uploadProgress * 0.9);
+        },
       );
 
-      // Create report
+      onProgress?.call(0.9);
+
+      // Create report WITH coordinates
       final report = ReportModel(
         description: description,
         location: location,
+        latitude: latitude, // NEW: Save GPS coordinate
+        longitude: longitude, // NEW: Save GPS coordinate
         imageUrl: [imageUploadResponse.fileUrl],
         reportType: reportType,
         tags: detections.isNotEmpty ? detections : [reportType],
@@ -50,10 +61,12 @@ class ReportService {
         priority: ReportPriority.medium,
       );
 
-      // Simply add report to collection - NO COUNT UPDATES
       final docRef = await _db
           .collection(_reportsCollection)
           .add(report.toMap());
+
+      onProgress?.call(1.0);
+
       return docRef.id;
     } catch (e) {
       throw Exception('Failed to submit report: $e');
@@ -152,6 +165,12 @@ class ReportService {
         'rejected': reports
             .where((r) => r.status == ReportStatus.rejected)
             .length,
+        'underReview': reports
+            .where((r) => r.status == ReportStatus.underReview)
+            .length,
+        'inProgress': reports
+            .where((r) => r.status == ReportStatus.inProgress)
+            .length,
       };
     } catch (e) {
       throw Exception('Failed to calculate user report counts: $e');
@@ -175,11 +194,17 @@ class ReportService {
         'rejected': reports
             .where((r) => r.status == ReportStatus.rejected)
             .length,
+        'underReview': reports
+            .where((r) => r.status == ReportStatus.underReview)
+            .length,
+        'inProgress': reports
+            .where((r) => r.status == ReportStatus.inProgress)
+            .length,
       };
     });
   }
 
-  // GET APPROVED REPORTS (for Recent Reports section)
+  // GET APPROVED REPORTS
   Future<List<ReportModel>> getApprovedReports({int limit = 10}) async {
     try {
       final querySnapshot = await _db
@@ -221,7 +246,7 @@ class ReportService {
     }
   }
 
-  // UPDATE REPORT STATUS - SIMPLIFIED (NO COUNT UPDATES)
+  // UPDATE REPORT STATUS
   Future<void> updateReportStatus({
     required String reportId,
     required String newStatus,
@@ -229,7 +254,6 @@ class ReportService {
     String? reviewedBy,
   }) async {
     try {
-      // Simply update report status - NO COUNT UPDATES
       final reportUpdates = <String, dynamic>{
         'status': newStatus,
         'reviewedAt': Timestamp.now(),
@@ -246,10 +270,9 @@ class ReportService {
     }
   }
 
-  // DELETE REPORT - SIMPLIFIED (NO COUNT UPDATES)
+  // DELETE REPORT
   Future<void> deleteReport(String reportId) async {
     try {
-      // Simply delete the report - NO COUNT UPDATES
       await _db.collection(_reportsCollection).doc(reportId).delete();
     } catch (e) {
       throw Exception('Failed to delete report: $e');
@@ -301,6 +324,12 @@ class ReportService {
             .length,
         'rejected': reports
             .where((r) => r.status == ReportStatus.rejected)
+            .length,
+        'underReview': reports
+            .where((r) => r.status == ReportStatus.underReview)
+            .length,
+        'inProgress': reports
+            .where((r) => r.status == ReportStatus.inProgress)
             .length,
       };
     } catch (e) {

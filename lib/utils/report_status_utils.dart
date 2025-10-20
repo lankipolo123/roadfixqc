@@ -1,3 +1,4 @@
+// lib/utils/report_status_utils.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/widgets/themes.dart';
@@ -7,13 +8,17 @@ class ReportStatusUtils {
   static Color getStatusColor(String status) {
     switch (status) {
       case ReportStatus.pending:
-        return statusWarning;
+        return statusWarning; // Orange
       case ReportStatus.approved:
-        return statusSuccess; // GREEN for approved!
+        return statusSuccess; // Green
+      case ReportStatus.underReview:
+        return purpleAccent; // Purple for under review
+      case ReportStatus.inProgress:
+        return tealAccent; // Teal for in progress
       case ReportStatus.resolved:
-        return statusSuccess; // Keep green for resolved too
+        return statusResolved; // Green
       case ReportStatus.rejected:
-        return statusDanger;
+        return statusDanger; // Red
       default:
         return statusWarning;
     }
@@ -25,7 +30,11 @@ class ReportStatusUtils {
       case ReportStatus.pending:
         return 'Pending';
       case ReportStatus.approved:
-        return 'Approved'; // Added approved text
+        return 'Approved';
+      case ReportStatus.underReview:
+        return 'Under Review';
+      case ReportStatus.inProgress:
+        return 'In Progress';
       case ReportStatus.resolved:
         return 'Resolved';
       case ReportStatus.rejected:
@@ -41,9 +50,13 @@ class ReportStatusUtils {
       case ReportStatus.pending:
         return Icons.hourglass_empty;
       case ReportStatus.approved:
-        return Icons.check_circle; // Added approved icon
+        return Icons.check_circle;
+      case ReportStatus.underReview:
+        return Icons.visibility;
+      case ReportStatus.inProgress:
+        return Icons.autorenew;
       case ReportStatus.resolved:
-        return Icons.task_alt; // Different icon for resolved
+        return Icons.task_alt;
       case ReportStatus.rejected:
         return Icons.cancel;
       default:
@@ -57,7 +70,11 @@ class ReportStatusUtils {
       case ReportStatus.pending:
         return 'Pending Review';
       case ReportStatus.approved:
-        return 'Approved'; // Added approved detailed text
+        return 'Approved';
+      case ReportStatus.underReview:
+        return 'Under Review';
+      case ReportStatus.inProgress:
+        return 'In Progress';
       case ReportStatus.resolved:
         return 'Resolved';
       case ReportStatus.rejected:
@@ -174,5 +191,25 @@ class ReportStatusUtils {
       return 'Reviewed by $reviewedBy:\n$adminNotes';
     }
     return adminNotes;
+  }
+
+  // Get status description for user understanding
+  static String getStatusDescription(String status) {
+    switch (status) {
+      case ReportStatus.pending:
+        return 'Your report is waiting for admin review';
+      case ReportStatus.approved:
+        return 'Your report has been approved and assigned to a team';
+      case ReportStatus.underReview:
+        return 'Admin is actively reviewing your report via video call';
+      case ReportStatus.inProgress:
+        return 'Team is working on fixing the reported issue';
+      case ReportStatus.resolved:
+        return 'The issue has been fixed and verified';
+      case ReportStatus.rejected:
+        return 'Your report was reviewed and rejected';
+      default:
+        return 'Status unknown';
+    }
   }
 }

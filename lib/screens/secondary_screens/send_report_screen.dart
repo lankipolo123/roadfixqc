@@ -1,21 +1,20 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:roadfix/layouts/diagonal_background.dart';
+import 'package:roadfix/models/location_models.dart';
 import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/services/report_service.dart';
 import 'package:roadfix/widgets/common_widgets/toast_widget.dart';
 import 'package:roadfix/widgets/detection_widgets/location_textfield.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
 import 'package:roadfix/widgets/reporting_widgets/detection_tags.dart';
-import 'package:roadfix/widgets/reporting_widgets/report_action_button.dart';
 import 'package:roadfix/widgets/reporting_widgets/report_form.dart';
-import 'package:roadfix/widgets/common_widgets/custom_text_field.dart';
 import 'package:roadfix/services/user_service.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/services/security_service.dart';
 
 // Development feature flag - set to false for production
-const bool enableQuezonCityOnly = true;
+const bool enableQuezonCityOnly = false;
 
 class SendReportScreen extends StatefulWidget {
   final String imagePath;
@@ -48,6 +47,7 @@ class _SendReportScreenState extends State<SendReportScreen> {
   bool _isLoadingUserData = true;
   bool _isLoadingLocation = false;
   bool _isSubmittingReport = false;
+  LocationData? _locationData;
 
   @override
   void initState() {
@@ -100,6 +100,7 @@ class _SendReportScreenState extends State<SendReportScreen> {
 
       if (mounted) {
         setState(() {
+          _locationData = locationData;
           _locationController.text = locationData.formattedAddress;
           _isLoadingLocation = false;
         });
@@ -164,6 +165,17 @@ class _SendReportScreenState extends State<SendReportScreen> {
       }
     }
 
+    // Check if location has coordinates
+    if (_locationData == null) {
+      AppToast.showError(
+        context,
+        message: 'Please get your current location first',
+        title: 'Location Required',
+        duration: const Duration(seconds: 3),
+      );
+      return;
+    }
+
     final securityResult = await _securityService.validateReport(
       imageFile: File(widget.imagePath),
       description: _descriptionController.text.trim(),
@@ -198,6 +210,8 @@ class _SendReportScreenState extends State<SendReportScreen> {
         imageFile: File(widget.imagePath),
         description: securityResult.cleanDescription!,
         location: securityResult.cleanLocation!,
+        latitude: _locationData!.latitude,
+        longitude: _locationData!.longitude,
         reportType: widget.reportType ?? 'road_issue',
         detections: widget.detections ?? [],
       );
@@ -255,16 +269,45 @@ class _SendReportScreenState extends State<SendReportScreen> {
     }
   }
 
-  void _onReportAnother() {
+  // ✅ CHANGED: Cancel navigation
+  void _onCancel() {
     if (!_isSubmittingReport) {
-      Navigator.popUntil(context, (route) => route.settings.name == '/report');
+      Navigator.pop(context);
     }
   }
 
-  void _onDone() {
-    if (!_isSubmittingReport) {
-      Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
-    }
+  // ✅ ADDED: Show full screen image
+  void _showFullImage() {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(10),
+        child: Stack(
+          children: [
+            Center(
+              child: InteractiveViewer(
+                panEnabled: true,
+                minScale: 0.5,
+                maxScale: 4.0,
+                child: Image.file(File(widget.imagePath), fit: BoxFit.contain),
+              ),
+            ),
+            Positioned(
+              top: 10,
+              right: 10,
+              child: IconButton(
+                onPressed: () => Navigator.pop(context),
+                style: IconButton.styleFrom(
+                  backgroundColor: secondary.withValues(alpha: 0.8),
+                ),
+                icon: const Icon(Icons.close, color: inputFill, size: 30),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 
   @override
@@ -300,26 +343,53 @@ class _SendReportScreenState extends State<SendReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    // ✅ CHANGED: Made image clickable
                     Center(
-                      child: Container(
-                        width: 180,
-                        height: 180,
-                        decoration: BoxDecoration(
-                          color: secondary,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: secondary.withValues(alpha: 0.2),
-                              blurRadius: 8,
-                              offset: const Offset(0, 4),
-                            ),
-                          ],
-                        ),
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            File(widget.imagePath),
-                            fit: BoxFit.cover,
+                      child: GestureDetector(
+                        onTap: _showFullImage,
+                        child: Container(
+                          width: 180,
+                          height: 180,
+                          decoration: BoxDecoration(
+                            color: secondary,
+                            borderRadius: BorderRadius.circular(12),
+                            boxShadow: [
+                              BoxShadow(
+                                color: secondary.withValues(alpha: 0.2),
+                                blurRadius: 8,
+                                offset: const Offset(0, 4),
+                              ),
+                            ],
+                          ),
+                          child: Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(12),
+                                child: Image.file(
+                                  File(widget.imagePath),
+                                  fit: BoxFit.cover,
+                                  width: 180,
+                                  height: 180,
+                                ),
+                              ),
+                              // ✅ ADDED: Zoom icon overlay
+                              Positioned(
+                                bottom: 8,
+                                right: 8,
+                                child: Container(
+                                  padding: const EdgeInsets.all(6),
+                                  decoration: BoxDecoration(
+                                    color: secondary.withValues(alpha: 0.7),
+                                    borderRadius: BorderRadius.circular(20),
+                                  ),
+                                  child: const Icon(
+                                    Icons.zoom_in,
+                                    color: inputFill,
+                                    size: 20,
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -340,24 +410,116 @@ class _SendReportScreenState extends State<SendReportScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        DescriptionTextField(
-                          controller: _descriptionController,
-                          hintText: 'Auto-generated description',
-                          readOnly: true,
-                          enabled: false,
+                        // ✅ CHANGED: Blueish-grey disabled look
+                        Container(
+                          decoration: BoxDecoration(
+                            color: const Color(
+                              0xFFE8EFF5,
+                            ), // Blueish-grey background
+                            borderRadius: BorderRadius.circular(8),
+                            border: Border.all(
+                              color: const Color(
+                                0xFFB0C4DE,
+                              ), // Light steel blue border
+                              width: 1,
+                            ),
+                          ),
+                          child: TextField(
+                            controller: _descriptionController,
+                            readOnly: true,
+                            enabled: false,
+                            maxLines: 5,
+                            style: const TextStyle(
+                              color: Color(
+                                0xFF5B6B7D,
+                              ), // Darker blueish-grey text
+                              fontSize: 14,
+                            ),
+                            decoration: const InputDecoration(
+                              hintText: 'Auto-generated description',
+                              hintStyle: TextStyle(
+                                color: Color(
+                                  0xFF8B99A8,
+                                ), // Medium blueish-grey hint
+                              ),
+                              border: InputBorder.none,
+                              contentPadding: EdgeInsets.all(16),
+                            ),
+                          ),
                         ),
                       ],
                     ),
 
                     const SizedBox(height: 32),
 
-                    ReportActionButtons(
-                      onSubmit: _isSubmittingReport ? () {} : _submitReport,
-                      onReportAnother: _isSubmittingReport
-                          ? () {}
-                          : _onReportAnother,
-                      onDone: _isSubmittingReport ? () {} : _onDone,
-                      isLoading: _isSubmittingReport,
+                    // ✅ CHANGED: New action buttons layout
+                    Row(
+                      children: [
+                        // Submit button
+                        Expanded(
+                          flex: 2,
+                          child: ElevatedButton(
+                            onPressed: _isSubmittingReport
+                                ? null
+                                : _submitReport,
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: primary,
+                              disabledBackgroundColor: Colors.grey.shade400,
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: _isSubmittingReport
+                                ? const SizedBox(
+                                    height: 20,
+                                    width: 20,
+                                    child: CircularProgressIndicator(
+                                      color: inputFill,
+                                      strokeWidth: 2,
+                                    ),
+                                  )
+                                : const Text(
+                                    'Submit Report',
+                                    style: TextStyle(
+                                      color: inputFill,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        // Cancel button
+                        Expanded(
+                          flex: 1,
+                          child: OutlinedButton(
+                            onPressed: _isSubmittingReport ? null : _onCancel,
+                            style: OutlinedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              side: BorderSide(
+                                color: _isSubmittingReport
+                                    ? Colors.grey.shade400
+                                    : secondary,
+                                width: 2,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                            ),
+                            child: Text(
+                              'Cancel',
+                              style: TextStyle(
+                                color: _isSubmittingReport
+                                    ? Colors.grey.shade400
+                                    : secondary,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

@@ -1,4 +1,4 @@
-// lib\widgets\detection_widgets\location_textfield.dart
+// lib/widgets/detection_widgets/location_textfield.dart (FIXED - WITH GPS CALLBACK)
 import 'package:flutter/material.dart';
 import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/widgets/themes.dart';
@@ -6,6 +6,8 @@ import 'package:roadfix/widgets/themes.dart';
 class LocationTextField extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onSuffixIconTap;
+  final Function(double lat, double lng)?
+  onLocationSelected; // ✅ NEW: Pass GPS back
   final bool isLoading;
   final String? hintText;
   final String? labelText;
@@ -14,6 +16,7 @@ class LocationTextField extends StatefulWidget {
     super.key,
     required this.controller,
     this.onSuffixIconTap,
+    this.onLocationSelected, // ✅ NEW
     this.isLoading = false,
     this.hintText,
     this.labelText,
@@ -37,7 +40,17 @@ class _LocationTextFieldState extends State<LocationTextField> {
     try {
       final locationData = await _geoService.getCurrentLocation();
       if (mounted) {
+        // Set address text
         widget.controller.text = locationData.formattedAddress;
+
+        // ✅ PASS GPS COORDINATES BACK TO PARENT
+        if (widget.onLocationSelected != null) {
+          widget.onLocationSelected!(
+            locationData.latitude,
+            locationData.longitude,
+          );
+        }
+
         setState(() {
           _isLoadingLocation = false;
         });

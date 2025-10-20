@@ -1,4 +1,3 @@
-// lib/widgets/common_widgets/loading_modal.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -28,7 +27,7 @@ class LoadingModal extends StatelessWidget {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: secondary.withAlpha(40),
+                color: secondary.withValues(alpha: 0.16),
                 blurRadius: 24,
                 offset: const Offset(0, 12),
                 spreadRadius: 0,
@@ -38,7 +37,6 @@ class LoadingModal extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              // Spinning animation
               const SizedBox(
                 width: 56,
                 height: 56,
@@ -48,8 +46,6 @@ class LoadingModal extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 24),
-
-              // Title
               Text(
                 title,
                 style: const TextStyle(
@@ -61,8 +57,6 @@ class LoadingModal extends StatelessWidget {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 12),
-
-              // Description
               Text(
                 description,
                 style: const TextStyle(
@@ -80,7 +74,6 @@ class LoadingModal extends StatelessWidget {
     );
   }
 
-  // Static method to show the modal
   static void show(
     BuildContext context, {
     required String title,
@@ -90,7 +83,7 @@ class LoadingModal extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: barrierDismissible,
-      barrierColor: secondary.withAlpha(125),
+      barrierColor: secondary.withValues(alpha: 0.49),
       builder: (context) => LoadingModal(
         title: title,
         description: description,
@@ -99,7 +92,6 @@ class LoadingModal extends StatelessWidget {
     );
   }
 
-  // Static method to hide the modal
   static void hide(BuildContext context) {
     if (Navigator.canPop(context)) {
       Navigator.of(context).pop();
@@ -107,7 +99,6 @@ class LoadingModal extends StatelessWidget {
   }
 }
 
-// Compact version for simple loading states
 class CompactLoadingModal extends StatelessWidget {
   final String message;
   final bool barrierDismissible;
@@ -132,7 +123,7 @@ class CompactLoadingModal extends StatelessWidget {
             borderRadius: BorderRadius.circular(12),
             boxShadow: [
               BoxShadow(
-                color: secondary.withAlpha(25),
+                color: secondary.withValues(alpha: 0.10),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),
@@ -167,7 +158,6 @@ class CompactLoadingModal extends StatelessWidget {
     );
   }
 
-  // Static methods for compact version
   static void show(
     BuildContext context, {
     required String message,
@@ -176,7 +166,7 @@ class CompactLoadingModal extends StatelessWidget {
     showDialog(
       context: context,
       barrierDismissible: barrierDismissible,
-      barrierColor: secondary.withAlpha(100),
+      barrierColor: secondary.withValues(alpha: 0.39),
       builder: (context) => CompactLoadingModal(
         message: message,
         barrierDismissible: barrierDismissible,
@@ -188,5 +178,110 @@ class CompactLoadingModal extends StatelessWidget {
     if (Navigator.canPop(context)) {
       Navigator.of(context).pop();
     }
+  }
+}
+
+// NEW: Progress Loading Modal
+class ProgressLoadingModal extends StatelessWidget {
+  final String title;
+  final String description;
+  final double progress;
+  final bool barrierDismissible;
+
+  const ProgressLoadingModal({
+    super.key,
+    required this.title,
+    required this.description,
+    required this.progress,
+    this.barrierDismissible = false,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final percentage = (progress * 100).toInt();
+
+    return PopScope(
+      canPop: barrierDismissible,
+      child: Dialog(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(16),
+            boxShadow: [
+              BoxShadow(
+                color: secondary.withValues(alpha: 0.16),
+                blurRadius: 24,
+                offset: const Offset(0, 12),
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 80,
+                    height: 80,
+                    child: CircularProgressIndicator(
+                      value: progress,
+                      color: primary,
+                      backgroundColor: Colors.grey.shade200,
+                      strokeWidth: 6,
+                    ),
+                  ),
+                  Text(
+                    '$percentage%',
+                    style: const TextStyle(
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                      color: primary,
+                      fontFamily: 'Poppins',
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.w600,
+                  color: primary,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 12),
+              Text(
+                description,
+                style: const TextStyle(
+                  fontSize: 14,
+                  color: secondary,
+                  height: 1.5,
+                  fontFamily: 'Poppins',
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: Colors.grey.shade200,
+                  color: primary,
+                  minHeight: 8,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }

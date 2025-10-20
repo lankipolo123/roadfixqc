@@ -23,135 +23,273 @@ class ReportDetailScreen extends StatelessWidget {
             padding: const EdgeInsets.all(16),
             child: Column(
               children: [
-                // Card content
-                Card(
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  color: inputFill,
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        const Text(
-                          'Report Details',
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: secondary,
-                          ),
-                        ),
-                        const SizedBox(height: 16),
-
-                        if (report.imageUrl.isNotEmpty)
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: CachedNetworkImage(
-                              imageUrl: report.imageUrl.first,
-                              height: 180,
-                              fit: BoxFit.cover,
-                              placeholder: (_, __) => _loader(),
-                              errorWidget: (_, __, ___) => _error(),
+                Expanded(
+                  child: SingleChildScrollView(
+                    child: Card(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      color: inputFill,
+                      child: Padding(
+                        padding: const EdgeInsets.all(20),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            const Text(
+                              'Report Details',
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                                color: secondary,
+                              ),
                             ),
-                          ),
-                        if (report.imageUrl.isNotEmpty)
-                          const SizedBox(height: 20),
+                            const SizedBox(height: 16),
 
-                        // Status badge
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 12,
-                            vertical: 6,
-                          ),
-                          decoration: BoxDecoration(
-                            color: statusColor.withValues(alpha: 0.1),
-                            border: Border.all(color: statusColor),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: Text(
-                            ReportStatusUtils.getDetailedStatusText(
-                              report.status,
-                            ),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color: statusColor,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
+                            // BEFORE IMAGE (Original Report Image)
+                            if (report.imageUrl.isNotEmpty) ...[
+                              const Text(
+                                'BEFORE - REPORTED ISSUE',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: altSecondary,
+                                  letterSpacing: 0.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () => _showFullImage(
+                                  context,
+                                  report.imageUrl.first,
+                                  'Before - Reported Issue',
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: CachedNetworkImage(
+                                    imageUrl: report.imageUrl.first,
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) => _loader(),
+                                    errorWidget: (_, __, ___) => _error(),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
 
-                        _info(Icons.category, 'Type', report.reportType),
-                        _info(Icons.location_on, 'Location', report.location),
-                        _info(
-                          Icons.description,
-                          'Description',
-                          report.description,
-                        ),
-                        _info(
-                          Icons.schedule,
-                          'Submitted',
-                          DateFormat(
-                            'MMM dd, yyyy - hh:mm a',
-                          ).format(report.reportedAt.toDate()),
-                        ),
+                            // AFTER IMAGE (Resolved/Completion Image)
+                            if (report.hasResolvedImage) ...[
+                              const Text(
+                                'AFTER - RESOLVED',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: statusSuccess,
+                                  letterSpacing: 0.5,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                              const SizedBox(height: 8),
+                              GestureDetector(
+                                onTap: () => _showFullImage(
+                                  context,
+                                  report.resolvedImageUrl!,
+                                  'After - Resolved',
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: CachedNetworkImage(
+                                    imageUrl: report.resolvedImageUrl!,
+                                    height: 180,
+                                    width: double.infinity,
+                                    fit: BoxFit.cover,
+                                    placeholder: (_, __) => _loader(),
+                                    errorWidget: (_, __, ___) => _error(),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 20),
+                            ],
 
-                        if (ReportStatusUtils.hasAdminNotes(report.adminNotes))
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Divider(height: 30, color: altSecondary),
-                              const Row(
+                            // Status badge
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 6,
+                              ),
+                              decoration: BoxDecoration(
+                                color: statusColor.withValues(alpha: 0.1),
+                                border: Border.all(color: statusColor),
+                                borderRadius: BorderRadius.circular(20),
+                              ),
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
-                                    Icons.admin_panel_settings,
-                                    color: indigoAccent,
+                                    ReportStatusUtils.getStatusIcon(
+                                      report.status,
+                                    ),
+                                    color: statusColor,
                                     size: 16,
                                   ),
-                                  SizedBox(width: 8),
+                                  const SizedBox(width: 6),
                                   Text(
-                                    'Admin Notes',
+                                    ReportStatusUtils.getDetailedStatusText(
+                                      report.status,
+                                    ),
+                                    textAlign: TextAlign.center,
                                     style: TextStyle(
-                                      fontSize: 14,
+                                      color: statusColor,
                                       fontWeight: FontWeight.bold,
-                                      color: indigoAccent,
+                                      fontSize: 14,
                                     ),
                                   ),
                                 ],
                               ),
-                              const SizedBox(height: 8),
-                              Container(
-                                padding: const EdgeInsets.all(12),
-                                decoration: BoxDecoration(
-                                  color: indigoAccent.withValues(alpha: 0.05),
-                                  border: Border.all(
-                                    color: indigoAccent.withValues(alpha: 0.2),
+                            ),
+                            const SizedBox(height: 20),
+
+                            _info(Icons.category, 'Type', report.reportType),
+                            _info(
+                              Icons.location_on,
+                              'Location',
+                              report.location,
+                            ),
+                            _info(
+                              Icons.description,
+                              'Description',
+                              report.description,
+                            ),
+                            _info(
+                              Icons.schedule,
+                              'Submitted',
+                              DateFormat(
+                                'MMM dd, yyyy - hh:mm a',
+                              ).format(report.reportedAt.toDate()),
+                            ),
+
+                            // Completion Notes
+                            if (report.completionNotes != null &&
+                                report.completionNotes!.isNotEmpty)
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(
+                                    height: 30,
+                                    color: altSecondary,
                                   ),
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  ReportStatusUtils.formatAdminNotes(
-                                    report.adminNotes,
-                                    report.reviewedBy,
+                                  const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.task_alt,
+                                        color: statusSuccess,
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Completion Notes',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: statusSuccess,
+                                        ),
+                                      ),
+                                    ],
                                   ),
-                                  style: const TextStyle(
-                                    fontSize: 14,
-                                    color: secondary,
-                                    height: 1.4,
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: statusSuccess.withValues(
+                                        alpha: 0.05,
+                                      ),
+                                      border: Border.all(
+                                        color: statusSuccess.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      report.completionNotes!,
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: secondary,
+                                        height: 1.4,
+                                      ),
+                                    ),
                                   ),
-                                ),
+                                ],
                               ),
-                            ],
-                          ),
-                      ],
+
+                            // Admin Notes
+                            if (ReportStatusUtils.hasAdminNotes(
+                              report.adminNotes,
+                            ))
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Divider(
+                                    height: 30,
+                                    color: altSecondary,
+                                  ),
+                                  const Row(
+                                    children: [
+                                      Icon(
+                                        Icons.admin_panel_settings,
+                                        color: indigoAccent,
+                                        size: 16,
+                                      ),
+                                      SizedBox(width: 8),
+                                      Text(
+                                        'Admin Notes',
+                                        style: TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.bold,
+                                          color: indigoAccent,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Container(
+                                    padding: const EdgeInsets.all(12),
+                                    decoration: BoxDecoration(
+                                      color: indigoAccent.withValues(
+                                        alpha: 0.05,
+                                      ),
+                                      border: Border.all(
+                                        color: indigoAccent.withValues(
+                                          alpha: 0.2,
+                                        ),
+                                      ),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: Text(
+                                      ReportStatusUtils.formatAdminNotes(
+                                        report.adminNotes,
+                                        report.reviewedBy,
+                                      ),
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        color: secondary,
+                                        height: 1.4,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
+                      ),
                     ),
                   ),
                 ),
-
-                const Spacer(),
+                const SizedBox(height: 16),
 
                 // Back button
                 SizedBox(
@@ -178,6 +316,61 @@ class ReportDetailScreen extends StatelessWidget {
               ],
             ),
           ),
+        ),
+      ),
+    );
+  }
+
+  void _showFullImage(BuildContext context, String imageUrl, String title) {
+    showDialog(
+      context: context,
+      builder: (context) => Dialog(
+        backgroundColor: Colors.transparent,
+        insetPadding: const EdgeInsets.all(16),
+        child: Stack(
+          children: [
+            GestureDetector(
+              onTap: () => Navigator.pop(context),
+              child: Container(
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.black87,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.all(16),
+                      child: Text(
+                        title,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    InteractiveViewer(
+                      child: CachedNetworkImage(
+                        imageUrl: imageUrl,
+                        fit: BoxFit.contain,
+                        placeholder: (_, __) => _loader(),
+                        errorWidget: (_, __, ___) => _error(),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              top: 8,
+              right: 8,
+              child: IconButton(
+                icon: const Icon(Icons.close, color: Colors.white, size: 30),
+                onPressed: () => Navigator.pop(context),
+              ),
+            ),
+          ],
         ),
       ),
     );

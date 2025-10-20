@@ -24,8 +24,7 @@ class GeolocationService {
     }
 
     return await Geolocator.getCurrentPosition(
-      desiredAccuracy:
-          LocationAccuracy.best, // Use best accuracy for map matching
+      desiredAccuracy: LocationAccuracy.best,
       timeLimit: const Duration(seconds: 15),
     );
   }
@@ -91,7 +90,7 @@ class GeolocationService {
       LocationData locationData = await getAccurateAddressFromCoordinates(
         position.latitude,
         position.longitude,
-        position.accuracy, // Pass GPS accuracy for Kalman filter
+        position.accuracy,
       );
 
       return locationData;

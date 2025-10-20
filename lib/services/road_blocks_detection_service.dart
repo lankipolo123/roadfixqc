@@ -6,33 +6,31 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ultralytics_yolo/yolo.dart';
 import '../models/detection_result.dart';
 
-class UtilityPoleDetectionService {
+class RoadblocksDetectionService {
   YOLO? _yolo; // ✅ Made nullable
   bool _isModelLoaded = false;
 
   bool get isModelLoaded => _isModelLoaded;
 
-  /// Load the utility pole YOLO model
+  /// Load the roadblocks YOLO model
   Future<void> loadModel() async {
     // ✅ Dispose previous model if exists
     dispose();
 
     _yolo = YOLO(
-      modelPath: 'utilitypole_model_float32.tflite',
+      modelPath: 'roadblocks_INT8.tflite',
       task: YOLOTask.detect,
       useGpu: false,
     );
     await _yolo!.loadModel();
-    debugPrint(
-      '✅ Utility Pole YOLO model loaded (utilitypole_model_float32.tflite)',
-    );
+    debugPrint('✅ Roadblocks YOLO model loaded (roadblocks_INT8.tflite)');
     _isModelLoaded = true;
   }
 
   /// ✅ ADDED: Properly dispose the model
   void dispose() {
     if (_yolo != null) {
-      debugPrint('🗑️ Utility Pole model service disposed');
+      debugPrint('🗑️ Roadblocks model service disposed');
       _yolo = null;
       _isModelLoaded = false;
     }
@@ -65,12 +63,12 @@ class UtilityPoleDetectionService {
   /// Run detection on image
   Future<List<DetectionResult>> detectObjects(File imageFile) async {
     debugPrint('\n========================================');
-    debugPrint('🚀 UTILITY POLE DETECTION START');
-    debugPrint('   Model: utilitypole_model_float32.tflite');
+    debugPrint('🚀 ROADBLOCKS DETECTION START');
+    debugPrint('   Model: roadblocks_INT8.tflite');
     debugPrint('========================================');
 
     if (!_isModelLoaded || _yolo == null) {
-      throw Exception('Utility Pole model not loaded');
+      throw Exception('Roadblocks model not loaded');
     }
 
     final Uint8List bytes = await imageFile.readAsBytes();
@@ -83,7 +81,7 @@ class UtilityPoleDetectionService {
     debugPrint('📊 TOTAL BOXES DETECTED: ${rawBoxes?.length ?? 0}');
 
     if (rawBoxes == null || rawBoxes.isEmpty) {
-      debugPrint('⚠️ No utility poles detected');
+      debugPrint('⚠️ No roadblocks detected');
       debugPrint('========================================\n');
       return [];
     }
@@ -116,8 +114,8 @@ class UtilityPoleDetectionService {
         continue;
       }
 
-      if (className != 'Broken_Pole') {
-        debugPrint('⏭️ Skipping non-Broken_Pole detection: $className');
+      if (className == 'Tires_with_rim' || className == 'Stable_Tree') {
+        debugPrint('⏭️ Skipping filtered class: $className');
         continue;
       }
 
@@ -132,13 +130,13 @@ class UtilityPoleDetectionService {
         ),
       );
 
-      debugPrint('✅ Broken Pole detected: conf=${conf.toStringAsFixed(2)}');
+      debugPrint('✅ Roadblock detected: $className');
     }
 
     debugPrint('\n========================================');
     debugPrint('📊 SUMMARY:');
     debugPrint('   Total detections: ${rawBoxes.length}');
-    debugPrint('   Broken Pole detections: ${results.length}');
+    debugPrint('   Roadblocks detections: ${results.length}');
     debugPrint('========================================\n');
 
     return results;

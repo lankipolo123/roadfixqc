@@ -4,7 +4,9 @@ import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/screens/secondary_screens/report_detail_screen.dart';
 import 'package:roadfix/services/notification_service.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
+import 'package:roadfix/utils/pagination_helper.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/widgets/user_report_widgets/pagination_fab.dart';
 
 // Create a data class to hold both reports and viewed status
 class NotificationData {
@@ -14,10 +16,17 @@ class NotificationData {
   NotificationData(this.reports, this.viewedIds);
 }
 
-class NotificationsScreen extends StatelessWidget {
-  final NotificationService _notificationService = NotificationService();
+class NotificationsScreen extends StatefulWidget {
+  const NotificationsScreen({super.key});
 
-  NotificationsScreen({super.key});
+  @override
+  State<NotificationsScreen> createState() => _NotificationsScreenState();
+}
+
+class _NotificationsScreenState extends State<NotificationsScreen> {
+  final NotificationService _notificationService = NotificationService();
+  int currentPage = 1;
+  final int notificationsPerPage = 10;
 
   // Create a combined stream to avoid timing issues
   Stream<NotificationData> get _combinedStream {
@@ -83,10 +92,10 @@ class NotificationsScreen extends StatelessWidget {
             );
           }
 
-          final reports = data.reports;
+          final allReports = data.reports;
           final viewedIds = data.viewedIds;
 
-          if (reports.isEmpty) {
+          if (allReports.isEmpty) {
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -119,23 +128,57 @@ class NotificationsScreen extends StatelessWidget {
             );
           }
 
-          return ListView.separated(
-            padding: const EdgeInsets.all(16),
-            itemCount: reports.length,
-            separatorBuilder: (context, index) => const SizedBox(height: 12),
-            itemBuilder: (context, index) {
-              final report = reports[index];
-              final isViewed = viewedIds.contains(report.id);
-              return _buildDismissibleNotificationCard(
-                context,
-                report,
-                isViewed,
-                index,
-              );
-            },
+          // Apply pagination
+          final paginatedReports = paginate(
+            items: allReports,
+            page: currentPage,
+            itemsPerPage: notificationsPerPage,
+          );
+
+          return Stack(
+            children: [
+              ListView.separated(
+                padding: const EdgeInsets.only(
+                  left: 16,
+                  right: 16,
+                  top: 16,
+                  bottom: 100, // Space for pagination FAB
+                ),
+                itemCount: paginatedReports.length,
+                separatorBuilder: (context, index) =>
+                    const SizedBox(height: 12),
+                itemBuilder: (context, index) {
+                  final report = paginatedReports[index];
+                  final isViewed = viewedIds.contains(report.id);
+                  return _buildDismissibleNotificationCard(
+                    context,
+                    report,
+                    isViewed,
+                    index,
+                  );
+                },
+              ),
+              // Pagination FAB
+              _buildPaginationFAB(allReports.length),
+            ],
           );
         },
       ),
+    );
+  }
+
+  Widget _buildPaginationFAB(int totalNotifications) {
+    final pageCount = totalPages(
+      itemCount: totalNotifications,
+      itemsPerPage: notificationsPerPage,
+    );
+
+    if (pageCount <= 1) return const SizedBox();
+
+    return PaginationFAB(
+      pageCount: pageCount,
+      currentPage: currentPage,
+      onPageSelected: (page) => setState(() => currentPage = page),
     );
   }
 
@@ -207,7 +250,7 @@ class NotificationsScreen extends StatelessWidget {
     ReportModel report,
     bool isViewed,
   ) {
-    // Use ReportStatusUtils instead of custom _getStatusColor method
+    // Use ReportStatusUtils to get status color
     final statusColor = ReportStatusUtils.getStatusColor(report.status);
     final relativeTime = report.reviewedAt != null
         ? _notificationService.getRelativeTime(report.reviewedAt!.toDate())

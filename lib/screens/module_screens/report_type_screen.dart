@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:roadfix/constant/report_categories.dart';
 import 'package:roadfix/utils/detection_navigation_helper.dart';
 import 'package:roadfix/models/report_category_model.dart';
+import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/common_widgets/dual_color_text.dart';
 import 'package:roadfix/widgets/reporting_widgets/report_category_button.dart';
-import 'package:roadfix/widgets/dialog_widgets/image_source_dialog.dart';
 
 class ReportTypeScreen extends StatelessWidget {
   const ReportTypeScreen({super.key});
@@ -67,12 +67,46 @@ class ReportTypeScreen extends StatelessWidget {
     BuildContext context,
     ReportCategory category,
   ) async {
-    final imageSource = await ImageSourceDialog.show(
-      context,
-      allowGallery: category.type != ReportCategoryType.utilityPole,
-    );
-    if (imageSource != null && context.mounted) {
-      NavigationHelper.navigateToDetection(context, category, imageSource);
+    // ✅ Show the right dialog options based on category type
+    final imageSourceOption = await _showImageSourceDialog(context, category);
+
+    if (imageSourceOption != null && context.mounted) {
+      await NavigationHelper.navigateToDetection(
+        context,
+        category,
+        imageSourceOption,
+      );
+    }
+  }
+
+  /// ✅ Show dialog with correct options for each category
+  Future<ImageSourceOption?> _showImageSourceDialog(
+    BuildContext context,
+    ReportCategory category,
+  ) async {
+    switch (category.type) {
+      case ReportCategoryType.pothole:
+        // ✅ POTHOLE: Show all 3 options (Camera, Distance Camera, Gallery)
+        return DetectionImageSourceDialog.show(
+          context,
+          allowGallery: true,
+          allowDistanceCamera: true,
+        );
+
+      case ReportCategoryType.roadConcern: // ✅ FIXED - was roadblock
+        // ✅ ROADBLOCK: Show 2 options (Camera, Gallery)
+        return DetectionImageSourceDialog.show(
+          context,
+          allowGallery: true,
+          allowDistanceCamera: false,
+        );
+
+      case ReportCategoryType.utilityPole:
+        // ✅ UTILITY POLE: Go straight to camera (no dialog)
+        return ImageSourceOption.camera;
+
+      default:
+        return null;
     }
   }
 }

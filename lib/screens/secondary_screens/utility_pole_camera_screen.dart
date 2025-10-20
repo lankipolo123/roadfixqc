@@ -6,8 +6,9 @@ import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/camera_angle_service.dart';
-import 'package:roadfix/services/image_proccessor_service.dart';
 import 'package:roadfix/services/utility_pole_detection_service.dart';
+import 'package:roadfix/services/image_proccessor_service.dart';
+import 'package:roadfix/utils/detection_service_manager.dart';
 import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
 import 'package:roadfix/widgets/detection_widgets/camera_angle_indicator.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
@@ -25,8 +26,9 @@ class UtilityPoleCameraScreen extends StatefulWidget {
 }
 
 class _UtilityPoleCameraScreenState extends State<UtilityPoleCameraScreen> {
-  final UtilityPoleDetectionService _detectionService =
-      UtilityPoleDetectionService();
+  // ✅ CHANGED: Use manager instead of direct service
+  final DetectionServiceManager _serviceManager = DetectionServiceManager();
+  UtilityPoleDetectionService? _detectionService;
   final CameraAngleService _angleService = CameraAngleService();
 
   CameraController? _cameraController;
@@ -51,11 +53,13 @@ class _UtilityPoleCameraScreenState extends State<UtilityPoleCameraScreen> {
   void dispose() {
     _cameraController?.dispose();
     _angleService.dispose();
+    // Manager keeps the service alive for reuse
     super.dispose();
   }
 
   Future<void> _loadModel() async {
-    await _detectionService.loadModel();
+    // ✅ CRITICAL: Get service from manager (auto-disposes old models)
+    _detectionService = await _serviceManager.getUtilityPoleService();
     if (mounted) {
       setState(() {});
     }
@@ -92,6 +96,11 @@ class _UtilityPoleCameraScreenState extends State<UtilityPoleCameraScreen> {
       return;
     }
 
+    if (_detectionService == null) {
+      debugPrint('⚠️ Service not loaded yet');
+      return;
+    }
+
     final angleValidation = _angleService.validateForPoleDetection();
 
     if (!angleValidation.isValid) {
@@ -113,7 +122,7 @@ class _UtilityPoleCameraScreenState extends State<UtilityPoleCameraScreen> {
       final XFile imageFile = await _cameraController!.takePicture();
       final File file = File(imageFile.path);
 
-      final decodedImage = await _detectionService.decodeImage(file);
+      final decodedImage = await _detectionService!.decodeImage(file);
 
       if (!mounted) return;
 
@@ -130,7 +139,7 @@ class _UtilityPoleCameraScreenState extends State<UtilityPoleCameraScreen> {
         description: "Detecting utility poles, please wait...",
       );
 
-      final detections = await _detectionService.detectObjects(file);
+      final detections = await _detectionService!.detectObjects(file);
 
       if (!mounted) return;
 

@@ -39,41 +39,27 @@ class AddressFormatter {
     'Cainta': 'Cainta',
   };
 
-  static const Map<String, String> _provinceAbbreviations = {
-    'Metro Manila': 'MM',
-    'National Capital Region': 'NCR',
-    'Metropolitan Manila': 'MM',
-    'Rizal': 'Rizal',
-    'Bulacan': 'Bulacan',
-    'Cavite': 'Cavite',
-    'Laguna': 'Laguna',
-    'Batangas': 'Batangas',
-    'Pampanga': 'Pampanga',
-  };
-
   static String createShortAddress(AddressComponents components) {
-    final street = components.street;
-    final suburb = components.suburb;
-    final locality = components.locality;
-    final adminArea = components.adminArea;
-
-    // Prioritize city + province over street address for short display
-    if (locality.isNotEmpty && adminArea.isNotEmpty && adminArea != locality) {
-      String cityShort = _abbreviateCity(locality);
-      String provinceShort = _abbreviateProvince(adminArea);
-      return '$cityShort, $provinceShort';
+    // PRIORITY 1: Street name (with or without house number)
+    // This ensures "Pase Humilidad" shows instead of "Elmonte Verde Royale"
+    if (components.street.isNotEmpty) {
+      return components.street;
     }
 
+    // PRIORITY 2: Subdivision only if no street
+    if (components.subdivision.isNotEmpty) {
+      return components.subdivision;
+    }
+
+    // PRIORITY 3: Suburb/Barangay
+    if (components.suburb.isNotEmpty) {
+      return components.suburb;
+    }
+
+    // PRIORITY 4: City abbreviation as last resort
+    final locality = components.locality;
     if (locality.isNotEmpty) {
       return _abbreviateCity(locality);
-    }
-
-    if (street.isNotEmpty) {
-      return street;
-    }
-
-    if (suburb.isNotEmpty) {
-      return suburb;
     }
 
     return 'Unknown Location';
@@ -82,12 +68,12 @@ class AddressFormatter {
   static String createDetailedAddress(AddressComponents components) {
     List<String> parts = [];
 
-    // Street address with house number
+    // Street address with house number (e.g., "123 Pase Humilidad")
     if (components.street.isNotEmpty) {
       parts.add(components.street);
     }
 
-    // Subdivision/Neighborhood if available
+    // Subdivision/Neighborhood if available (e.g., "Elmonte Verde Royale")
     if (components.subdivision.isNotEmpty &&
         components.subdivision != components.locality) {
       parts.add(components.subdivision);
@@ -124,10 +110,18 @@ class AddressFormatter {
     List<String> addressParts = [];
 
     if (components.street.isNotEmpty) addressParts.add(components.street);
+
+    if (components.subdivision.isNotEmpty &&
+        components.subdivision != components.locality) {
+      addressParts.add(components.subdivision);
+    }
+
     if (components.suburb.isNotEmpty &&
-        components.suburb != components.locality) {
+        components.suburb != components.locality &&
+        components.suburb != components.subdivision) {
       addressParts.add(components.suburb);
     }
+
     if (components.locality.isNotEmpty) addressParts.add(components.locality);
     if (components.adminArea.isNotEmpty) addressParts.add(components.adminArea);
     if (components.country.isNotEmpty) addressParts.add(components.country);
@@ -137,9 +131,5 @@ class AddressFormatter {
 
   static String _abbreviateCity(String city) {
     return _cityAbbreviations[city] ?? city;
-  }
-
-  static String _abbreviateProvince(String province) {
-    return _provinceAbbreviations[province] ?? province;
   }
 }

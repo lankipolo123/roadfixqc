@@ -1,4 +1,4 @@
-// lib/screens/report_screen.dart (Simplified with Layout)
+// lib/screens/report_screen.dart (COMPLETE FILE)
 import 'package:flutter/material.dart';
 import 'package:roadfix/constant/report_constant.dart';
 import 'package:roadfix/layouts/reports_screen_layout.dart';
@@ -26,23 +26,31 @@ class _ReportScreenState extends State<ReportScreen> {
 
   List<ReportModel> getFilteredReports(List<ReportModel> allReports) {
     switch (selectedFilter) {
-      case 1:
+      case 1: // Pending
         return allReports
             .where((r) => r.status == ReportStatus.pending)
             .toList();
-      case 2:
+      case 2: // Under Review
+        return allReports
+            .where((r) => r.status == ReportStatus.underReview)
+            .toList();
+      case 3: // In Progress
+        return allReports
+            .where((r) => r.status == ReportStatus.inProgress)
+            .toList();
+      case 4: // Approved
         return allReports
             .where((r) => r.status == ReportStatus.approved)
             .toList();
-      case 3:
+      case 5: // Resolved
         return allReports
             .where((r) => r.status == ReportStatus.resolved)
             .toList();
-      case 4:
+      case 6: // Rejected
         return allReports
             .where((r) => r.status == ReportStatus.rejected)
             .toList();
-      default:
+      default: // All
         return allReports;
     }
   }
@@ -56,19 +64,17 @@ class _ReportScreenState extends State<ReportScreen> {
         onChanged: (index) {
           setState(() {
             selectedFilter = index;
-            currentPage = 1; // Reset to first page when filter changes
+            currentPage = 1;
           });
         },
       ),
       content: StreamBuilder<List<ReportModel>>(
         stream: _reportService.getCurrentUserReportsStream(),
         builder: (context, snapshot) {
-          // Loading state
           if (snapshot.connectionState == ConnectionState.waiting) {
             return ReportScreenLayout.buildLoadingState();
           }
 
-          // Error state
           if (snapshot.hasError) {
             return ReportScreenLayout.buildErrorState(
               error: snapshot.error.toString(),
@@ -76,7 +82,6 @@ class _ReportScreenState extends State<ReportScreen> {
             );
           }
 
-          // Process data
           final allReports = snapshot.data ?? [];
           final filteredReports = getFilteredReports(allReports);
           final paginatedReports = paginate(
@@ -85,7 +90,6 @@ class _ReportScreenState extends State<ReportScreen> {
             itemsPerPage: reportsPerPage,
           );
 
-          // Empty state
           if (filteredReports.isEmpty) {
             return ReportScreenLayout.buildEmptyState(
               icon: _getEmptyStateIcon(),
@@ -103,7 +107,6 @@ class _ReportScreenState extends State<ReportScreen> {
             );
           }
 
-          // Success state - reports list
           return ReportScreenLayout.buildReportList(
             onRefresh: () => setState(() {}),
             children: paginatedReports
@@ -157,10 +160,14 @@ class _ReportScreenState extends State<ReportScreen> {
       case 1:
         return Icons.hourglass_empty; // Pending
       case 2:
-        return Icons.verified_outlined; // Approved
+        return Icons.visibility_outlined; // Under Review
       case 3:
-        return Icons.check_circle_outline; // Resolved
+        return Icons.autorenew_outlined; // In Progress
       case 4:
+        return Icons.verified_outlined; // Approved
+      case 5:
+        return Icons.check_circle_outline; // Resolved
+      case 6:
         return Icons.cancel_outlined; // Rejected
       default:
         return Icons.report_outlined; // All
@@ -172,10 +179,14 @@ class _ReportScreenState extends State<ReportScreen> {
       case 1:
         return ReportConstants.emptyPendingReports;
       case 2:
-        return ReportConstants.emptyApprovedReports;
+        return ReportConstants.emptyUnderReviewReports;
       case 3:
-        return ReportConstants.emptyResolvedReports;
+        return ReportConstants.emptyInProgressReports;
       case 4:
+        return ReportConstants.emptyApprovedReports;
+      case 5:
+        return ReportConstants.emptyResolvedReports;
+      case 6:
         return ReportConstants.emptyRejectedReports;
       default:
         return ReportConstants.emptyAllReports;

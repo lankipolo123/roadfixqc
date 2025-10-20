@@ -14,8 +14,8 @@ final List<ReportCategory> reportCategories = [
     type: ReportCategoryType.utilityPole,
   ),
   ReportCategory(
-    label: 'Road Concerns',
-    description: 'General road issues',
+    label: 'Road Blocks',
+    description: 'Unused Cones and Barrier,Fallen Tree,Tires',
     imagePath: 'assets/images/road_concerns.webp',
     type: ReportCategoryType.roadConcern,
   ),

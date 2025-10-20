@@ -1,8 +1,8 @@
-// lib/services/imagekit_services.dart (FINAL FIXED - NO TIMESTAMPS)
 import 'dart:io';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:roadfix/constant/image_kit_constant.dart';
 import 'package:roadfix/services/image_kit_transformer.dart';
+import 'package:roadfix/utils/image_compression_utility.dart';
 import '../models/imagekit_models.dart';
 import '../utils/file_validator.dart';
 import 'imagekit_uploader.dart';
@@ -23,11 +23,15 @@ class ImageKitService {
     try {
       FileValidator.validateImageFile(imageFile);
 
+      // ✅ COMPRESS IMAGE
+      final compressedImage =
+          await ImageCompressionUtility.compressImageAdaptive(imageFile);
+
       final timestamp = DateTime.now().millisecondsSinceEpoch;
       final fileName = 'report_${reportId ?? timestamp}.jpg';
 
       final response = await ImageKitUploader.upload(
-        imageFile,
+        compressedImage,
         fileName: fileName,
         folder: ImageKitConstants.reportsFolder,
         tags: ['roadfix', 'report', reportId ?? 'unknown'],
@@ -50,7 +54,6 @@ class ImageKitService {
 
       final targetUserId = userId ?? _auth.currentUser?.uid ?? 'anonymous';
 
-      // ✅ FIXED: No timestamp = same filename every time = overwrite!
       final fileName = 'profile_$targetUserId.jpg';
 
       final response = await ImageKitUploader.upload(

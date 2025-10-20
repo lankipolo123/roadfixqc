@@ -1,4 +1,4 @@
-// lib/services/notification_service.dart (IMPROVED with DELETE)
+// lib/services/notification_service.dart (COMPLETE VERSION)
 import 'dart:async';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -10,18 +10,14 @@ class NotificationService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   static const String _viewedKey = 'viewed_notifications';
-  static const String _deletedKey =
-      'deleted_notifications'; // New key for deleted notifications
+  static const String _deletedKey = 'deleted_notifications';
 
-  // Stream controller for viewed notification IDs
+  // Stream controllers
   final BehaviorSubject<Set<String>> _viewedIdsController =
       BehaviorSubject<Set<String>>();
-
-  // Stream controller for deleted notification IDs
   final BehaviorSubject<Set<String>> _deletedIdsController =
       BehaviorSubject<Set<String>>();
 
-  // Initialize viewed IDs on first access
   bool _initialized = false;
 
   // Get all recently updated reports (filtered by deleted status)
@@ -44,7 +40,7 @@ class NotificationService {
             .where(
               (report) =>
                   report.reviewedAt != null && !deletedIds.contains(report.id),
-            ) // Filter out deleted notifications
+            )
             .toList();
 
         // Sort by most recent first
@@ -138,37 +134,43 @@ class NotificationService {
     }
   }
 
-  // Get unread notification count stream - IMPROVED VERSION
+  // Get unread notification count stream
   Stream<int> getUnreadNotificationCountStream() {
-    // Combine reports stream with viewed IDs stream
     return Rx.combineLatest2<List<ReportModel>, Set<String>, int>(
       getRecentlyUpdatedReportsStream(),
       getViewedNotificationIdsStream(),
       (reports, viewedIds) {
-        // Calculate unread count (already filtered by deleted in getRecentlyUpdatedReportsStream)
         final unreadCount = reports
             .where((report) => !viewedIds.contains(report.id))
             .length;
         return unreadCount;
       },
-    ).distinct(); // Only emit when the count actually changes
+    ).distinct();
   }
 
+  // Get status display text - UPDATED WITH ALL STATUSES
   String getStatusDisplayText(String status) {
-    switch (status) {
+    switch (status.toLowerCase()) {
       case 'approved':
         return 'Approved';
+      case 'under_review':
+      case 'underreview':
+      case 'in_review':
+        return 'Under Review';
+      case 'in_progress':
+      case 'inprogress':
+        return 'In Progress';
       case 'resolved':
         return 'Resolved';
       case 'rejected':
         return 'Rejected';
-      case 'in_review':
-        return 'In Review';
+      case 'pending':
       default:
         return 'Pending';
     }
   }
 
+  // Get relative time
   String getRelativeTime(DateTime dateTime) {
     final now = DateTime.now();
     final difference = now.difference(dateTime);

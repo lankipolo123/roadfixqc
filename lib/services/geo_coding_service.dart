@@ -77,8 +77,6 @@ class GeocodingService {
       final smoothedLat = _kalmanFilter.latitude;
       final smoothedLng = _kalmanFilter.longitude;
 
-      // Debug logging removed for production
-
       // Step 2: Apply map matching to snap to nearest road
       final mapMatched = await _performMapMatching(smoothedLat, smoothedLng);
 
@@ -191,7 +189,7 @@ class GeocodingService {
     return null;
   }
 
-  // Enhanced reverse geocoding with higher precision
+  // Enhanced reverse geocoding with optimal zoom for street-level detail
   static Future<AddressComponents> _reverseGeocode(
     double latitude,
     double longitude,
@@ -201,7 +199,7 @@ class GeocodingService {
       'format=json&'
       'lat=$latitude&'
       'lon=$longitude&'
-      'zoom=21&' // Maximum zoom for building level
+      'zoom=18&' // Optimal zoom for street-level detail (not 21 which is too specific)
       'addressdetails=1&'
       'extratags=1&'
       'namedetails=1&'

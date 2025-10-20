@@ -7,7 +7,7 @@ import 'package:roadfix/widgets/common_widgets/custom_text_field.dart';
 import 'package:roadfix/widgets/common_widgets/user_avatar.dart';
 import 'package:roadfix/services/user_service.dart';
 import 'package:roadfix/models/user_model.dart';
-import 'package:roadfix/widgets/dialog_widgets/image_source_dialog.dart';
+import 'package:roadfix/widgets/dialog_widgets/image_source_dialog.dart'; // ✅ ORIGINAL - no change
 import 'package:roadfix/widgets/themes.dart';
 
 class EditProfileScreen extends StatefulWidget {
@@ -65,11 +65,12 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     if (!mounted) return;
 
     try {
+      // ✅ Uses ORIGINAL ImageSourceDialog - returns ImageSource directly
       final source = await ImageSourceDialog.show(context);
       if (source == null || !mounted) return;
 
       final pickedFile = await _imagePicker.pickImage(
-        source: source,
+        source: source, // ✅ Already ImageSource type - no conversion needed!
         maxWidth: 1024,
         maxHeight: 1024,
         imageQuality: 85,
@@ -206,12 +207,7 @@ class _EditProfileScreenState extends State<EditProfileScreen> {
     }
 
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
-        30,
-        80,
-        30,
-        30,
-      ), // Added 80px top padding
+      padding: const EdgeInsets.fromLTRB(30, 80, 30, 30),
       child: Form(
         key: _formKey,
         child: Column(
