@@ -28,7 +28,7 @@ class RecentReportsSection extends StatelessWidget {
 
         // Reports - no fixed height
         StreamBuilder<List<ReportModel>>(
-          stream: ReportService().getApprovedReportsStream(limit: 5),
+          stream: ReportService().getAcceptedReportsStream(limit: 5),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return const SizedBox(
@@ -54,11 +54,11 @@ class RecentReportsSection extends StatelessWidget {
               );
             }
 
-            final approvedReports = snapshot.data ?? [];
+            final acceptedReports = snapshot.data ?? [];
             final oneWeekAgo = DateTime.now().subtract(const Duration(days: 7));
 
-            // Filter by reviewedAt (approval date) instead of reportedAt
-            final recentReports = approvedReports.where((report) {
+            // Filter by reviewedAt (acceptance date) instead of reportedAt
+            final recentReports = acceptedReports.where((report) {
               final approvalDate = report.reviewedAt != null
                   ? report.reviewedAt!.toDate()
                   : report.reportedAt.toDate();

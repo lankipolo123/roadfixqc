@@ -151,19 +151,15 @@ class NotificationService {
   // Get status display text - UPDATED WITH ALL STATUSES
   String getStatusDisplayText(String status) {
     switch (status.toLowerCase()) {
-      case 'approved':
-        return 'Approved';
-      case 'under_review':
-      case 'underreview':
-      case 'in_review':
-        return 'Under Review';
+      case 'accepted':
+        return 'Accepted';
       case 'in_progress':
       case 'inprogress':
         return 'In Progress';
       case 'resolved':
         return 'Resolved';
-      case 'rejected':
-        return 'Rejected';
+      case 'invalid':
+        return 'Invalid';
       case 'pending':
       default:
         return 'Pending';

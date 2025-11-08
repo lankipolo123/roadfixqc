@@ -18,7 +18,7 @@ class StatusSummaryRow extends StatelessWidget {
             children: [
               _statusBox('Reports', 0, statusDanger),
               _statusBox('Pending', 0, statusWarning),
-              _statusBox('Approved', 0, statusSuccess),
+              _statusBox('Accepted', 0, statusSuccess),
               _statusBox('Resolved', 0, primary),
             ],
           );
@@ -29,7 +29,7 @@ class StatusSummaryRow extends StatelessWidget {
             children: [
               _statusBox('Reports', 0, statusDanger),
               _statusBox('Pending', 0, statusWarning),
-              _statusBox('Approved', 0, statusSuccess),
+              _statusBox('Accepted', 0, statusSuccess),
               _statusBox('Resolved', 0, primary),
             ],
           );
@@ -37,13 +37,13 @@ class StatusSummaryRow extends StatelessWidget {
 
         final counts =
             snapshot.data ??
-            {'total': 0, 'pending': 0, 'approved': 0, 'resolved': 0};
+            {'total': 0, 'pending': 0, 'accepted': 0, 'resolved': 0};
 
         return Row(
           children: [
             _statusBox('Reports', counts['total']!, statusDanger),
             _statusBox('Pending', counts['pending']!, statusWarning),
-            _statusBox('Approved', counts['approved']!, statusSuccess),
+            _statusBox('Accepted', counts['accepted']!, statusSuccess),
             _statusBox('Resolved', counts['resolved']!, primary),
           ],
         );

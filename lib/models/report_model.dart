@@ -186,10 +186,9 @@ class ReportModel {
   }
 
   bool get isPending => status == ReportStatus.pending;
-  bool get isApproved => status == ReportStatus.approved;
+  bool get isAccepted => status == ReportStatus.accepted;
   bool get isResolved => status == ReportStatus.resolved;
-  bool get isRejected => status == ReportStatus.rejected;
-  bool get isUnderReview => status == ReportStatus.underReview;
+  bool get isInvalid => status == ReportStatus.invalid;
   bool get isInProgress => status == ReportStatus.inProgress;
   bool get hasAdminReview => reviewedBy.isNotEmpty;
   bool get isUnreadNotification => !isRead && reviewedAt != null;
@@ -218,19 +217,17 @@ class ReportModel {
 
 class ReportStatus {
   static const String pending = 'pending';
-  static const String underReview = 'under_review';
   static const String inProgress = 'in_progress';
-  static const String approved = 'approved';
+  static const String accepted = 'accepted';
   static const String resolved = 'resolved';
-  static const String rejected = 'rejected';
+  static const String invalid = 'invalid';
 
   static const List<String> all = [
     pending,
-    underReview,
     inProgress,
-    approved,
+    accepted,
     resolved,
-    rejected,
+    invalid,
   ];
 }
 

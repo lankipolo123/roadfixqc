@@ -156,17 +156,14 @@ class ReportService {
         'pending': reports
             .where((r) => r.status == ReportStatus.pending)
             .length,
-        'approved': reports
-            .where((r) => r.status == ReportStatus.approved)
+        'accepted': reports
+            .where((r) => r.status == ReportStatus.accepted)
             .length,
         'resolved': reports
             .where((r) => r.status == ReportStatus.resolved)
             .length,
-        'rejected': reports
-            .where((r) => r.status == ReportStatus.rejected)
-            .length,
-        'underReview': reports
-            .where((r) => r.status == ReportStatus.underReview)
+        'invalid': reports
+            .where((r) => r.status == ReportStatus.invalid)
             .length,
         'inProgress': reports
             .where((r) => r.status == ReportStatus.inProgress)
@@ -185,17 +182,14 @@ class ReportService {
         'pending': reports
             .where((r) => r.status == ReportStatus.pending)
             .length,
-        'approved': reports
-            .where((r) => r.status == ReportStatus.approved)
+        'accepted': reports
+            .where((r) => r.status == ReportStatus.accepted)
             .length,
         'resolved': reports
             .where((r) => r.status == ReportStatus.resolved)
             .length,
-        'rejected': reports
-            .where((r) => r.status == ReportStatus.rejected)
-            .length,
-        'underReview': reports
-            .where((r) => r.status == ReportStatus.underReview)
+        'invalid': reports
+            .where((r) => r.status == ReportStatus.invalid)
             .length,
         'inProgress': reports
             .where((r) => r.status == ReportStatus.inProgress)
@@ -204,12 +198,12 @@ class ReportService {
     });
   }
 
-  // GET APPROVED REPORTS
-  Future<List<ReportModel>> getApprovedReports({int limit = 10}) async {
+  // GET ACCEPTED REPORTS
+  Future<List<ReportModel>> getAcceptedReports({int limit = 10}) async {
     try {
       final querySnapshot = await _db
           .collection(_reportsCollection)
-          .where('status', isEqualTo: ReportStatus.approved)
+          .where('status', isEqualTo: ReportStatus.accepted)
           .orderBy('reportedAt', descending: true)
           .limit(limit)
           .get();
@@ -218,14 +212,14 @@ class ReportService {
           .map((doc) => ReportModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      throw Exception('Failed to get approved reports: $e');
+      throw Exception('Failed to get accepted reports: $e');
     }
   }
 
-  Stream<List<ReportModel>> getApprovedReportsStream({int limit = 10}) {
+  Stream<List<ReportModel>> getAcceptedReportsStream({int limit = 10}) {
     return _db
         .collection(_reportsCollection)
-        .where('status', isEqualTo: ReportStatus.approved)
+        .where('status', isEqualTo: ReportStatus.accepted)
         .orderBy('reportedAt', descending: true)
         .limit(limit)
         .snapshots()
@@ -316,17 +310,14 @@ class ReportService {
         'pending': reports
             .where((r) => r.status == ReportStatus.pending)
             .length,
-        'approved': reports
-            .where((r) => r.status == ReportStatus.approved)
+        'accepted': reports
+            .where((r) => r.status == ReportStatus.accepted)
             .length,
         'resolved': reports
             .where((r) => r.status == ReportStatus.resolved)
             .length,
-        'rejected': reports
-            .where((r) => r.status == ReportStatus.rejected)
-            .length,
-        'underReview': reports
-            .where((r) => r.status == ReportStatus.underReview)
+        'invalid': reports
+            .where((r) => r.status == ReportStatus.invalid)
             .length,
         'inProgress': reports
             .where((r) => r.status == ReportStatus.inProgress)

@@ -30,25 +30,21 @@ class _ReportScreenState extends State<ReportScreen> {
         return allReports
             .where((r) => r.status == ReportStatus.pending)
             .toList();
-      case 2: // Under Review
-        return allReports
-            .where((r) => r.status == ReportStatus.underReview)
-            .toList();
-      case 3: // In Progress
+      case 2: // In Progress
         return allReports
             .where((r) => r.status == ReportStatus.inProgress)
             .toList();
-      case 4: // Approved
+      case 3: // Accepted
         return allReports
-            .where((r) => r.status == ReportStatus.approved)
+            .where((r) => r.status == ReportStatus.accepted)
             .toList();
-      case 5: // Resolved
+      case 4: // Resolved
         return allReports
             .where((r) => r.status == ReportStatus.resolved)
             .toList();
-      case 6: // Rejected
+      case 5: // Invalid
         return allReports
-            .where((r) => r.status == ReportStatus.rejected)
+            .where((r) => r.status == ReportStatus.invalid)
             .toList();
       default: // All
         return allReports;
@@ -160,15 +156,13 @@ class _ReportScreenState extends State<ReportScreen> {
       case 1:
         return Icons.hourglass_empty; // Pending
       case 2:
-        return Icons.visibility_outlined; // Under Review
-      case 3:
         return Icons.autorenew_outlined; // In Progress
+      case 3:
+        return Icons.verified_outlined; // Accepted
       case 4:
-        return Icons.verified_outlined; // Approved
-      case 5:
         return Icons.check_circle_outline; // Resolved
-      case 6:
-        return Icons.cancel_outlined; // Rejected
+      case 5:
+        return Icons.cancel_outlined; // Invalid
       default:
         return Icons.report_outlined; // All
     }
@@ -179,15 +173,13 @@ class _ReportScreenState extends State<ReportScreen> {
       case 1:
         return ReportConstants.emptyPendingReports;
       case 2:
-        return ReportConstants.emptyUnderReviewReports;
-      case 3:
         return ReportConstants.emptyInProgressReports;
+      case 3:
+        return ReportConstants.emptyAcceptedReports;
       case 4:
-        return ReportConstants.emptyApprovedReports;
-      case 5:
         return ReportConstants.emptyResolvedReports;
-      case 6:
-        return ReportConstants.emptyRejectedReports;
+      case 5:
+        return ReportConstants.emptyInvalidReports;
       default:
         return ReportConstants.emptyAllReports;
     }

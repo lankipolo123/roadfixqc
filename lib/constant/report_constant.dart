@@ -8,32 +8,30 @@ class ReportConstants {
   static const String emptyUnderReviewReports =
       'No reports under review\nYour reports will appear here once being reviewed.';
   static const String emptyInProgressReports =
-      'No reports in progress\nApproved reports that are being fixed will show here.';
-  static const String emptyApprovedReports =
-      'No approved reports yet\nWait for admin to approve your submissions';
+      'No reports in progress\nAccepted reports that are being fixed will show here.';
+  static const String emptyAcceptedReports =
+      'No accepted reports yet\nWait for admin to accept your submissions';
   static const String emptyResolvedReports =
-      'No resolved reports yet\nApproved reports will be resolved after fixes';
-  static const String emptyRejectedReports =
-      'No rejected reports\nGreat job on your submissions!';
+      'No resolved reports yet\nAccepted reports will be resolved after fixes';
+  static const String emptyInvalidReports =
+      'No invalid reports\nGreat job on your submissions!';
 
   // Filter tab labels - UPDATED WITH SHORTER LABELS
   static const List<String> filterLabels = [
     'All', // 0
     'Pending', // 1
-    'Review', // 2 (was "Under Review")
-    'Progress', // 3 (was "In Progress")
-    'Approved', // 4
-    'Resolved', // 5
-    'Rejected', // 6
+    'Progress', // 2 (was "In Progress")
+    'Accepted', // 3
+    'Resolved', // 4
+    'Invalid', // 5
   ];
 
   // Status values (centralized)
   static const String statusPending = 'pending';
-  static const String statusUnderReview = 'under_review';
   static const String statusInProgress = 'in_progress';
-  static const String statusApproved = 'approved';
+  static const String statusAccepted = 'accepted';
   static const String statusResolved = 'resolved';
-  static const String statusRejected = 'rejected';
+  static const String statusInvalid = 'invalid';
 
   // UI Messages
   static const String loadingReports = 'Loading your reports...';

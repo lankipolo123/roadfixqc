@@ -213,17 +213,17 @@ class FirestoreService {
     required String uid,
     required int reportsCount,
     required int pendingCount,
-    required int approvedCount,
+    required int acceptedCount,
     required int resolvedCount,
-    required int rejectedCount,
+    required int invalidCount,
   }) async {
     try {
       await _db.collection(_usersCollection).doc(uid).update({
         'reportsCount': reportsCount,
         'pendingCount': pendingCount,
-        'approvedCount': approvedCount,
+        'acceptedCount': acceptedCount,
         'resolvedCount': resolvedCount,
-        'rejectedCount': rejectedCount,
+        'invalidCount': invalidCount,
       });
     } catch (e) {
       throw Exception('Failed to update user report counts: $e');

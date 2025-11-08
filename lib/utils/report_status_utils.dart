@@ -9,15 +9,13 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return statusWarning; // Orange
-      case ReportStatus.approved:
+      case ReportStatus.accepted:
         return statusSuccess; // Green
-      case ReportStatus.underReview:
-        return purpleAccent; // Purple for under review
       case ReportStatus.inProgress:
         return tealAccent; // Teal for in progress
       case ReportStatus.resolved:
         return statusResolved; // Green
-      case ReportStatus.rejected:
+      case ReportStatus.invalid:
         return statusDanger; // Red
       default:
         return statusWarning;
@@ -29,16 +27,14 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return 'Pending';
-      case ReportStatus.approved:
-        return 'Approved';
-      case ReportStatus.underReview:
-        return 'Under Review';
+      case ReportStatus.accepted:
+        return 'Accepted';
       case ReportStatus.inProgress:
         return 'In Progress';
       case ReportStatus.resolved:
         return 'Resolved';
-      case ReportStatus.rejected:
-        return 'Rejected';
+      case ReportStatus.invalid:
+        return 'Invalid';
       default:
         return 'Pending';
     }
@@ -49,15 +45,13 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return Icons.hourglass_empty;
-      case ReportStatus.approved:
+      case ReportStatus.accepted:
         return Icons.check_circle;
-      case ReportStatus.underReview:
-        return Icons.visibility;
       case ReportStatus.inProgress:
         return Icons.autorenew;
       case ReportStatus.resolved:
         return Icons.task_alt;
-      case ReportStatus.rejected:
+      case ReportStatus.invalid:
         return Icons.cancel;
       default:
         return Icons.hourglass_empty;
@@ -69,16 +63,14 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return 'Pending Review';
-      case ReportStatus.approved:
-        return 'Approved';
-      case ReportStatus.underReview:
-        return 'Under Review';
+      case ReportStatus.accepted:
+        return 'Accepted';
       case ReportStatus.inProgress:
         return 'In Progress';
       case ReportStatus.resolved:
         return 'Resolved';
-      case ReportStatus.rejected:
-        return 'Rejected';
+      case ReportStatus.invalid:
+        return 'Invalid';
       default:
         return 'Pending Review';
     }
@@ -198,16 +190,14 @@ class ReportStatusUtils {
     switch (status) {
       case ReportStatus.pending:
         return 'Your report is waiting for admin review';
-      case ReportStatus.approved:
-        return 'Your report has been approved and assigned to a team';
-      case ReportStatus.underReview:
-        return 'Admin is actively reviewing your report via video call';
+      case ReportStatus.accepted:
+        return 'Your report has been accepted and assigned to a team';
       case ReportStatus.inProgress:
         return 'Team is working on fixing the reported issue';
       case ReportStatus.resolved:
         return 'The issue has been fixed and verified';
-      case ReportStatus.rejected:
-        return 'Your report was reviewed and rejected';
+      case ReportStatus.invalid:
+        return 'Your report was reviewed and marked as invalid';
       default:
         return 'Status unknown';
     }
