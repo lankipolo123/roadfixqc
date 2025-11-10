@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import 'package:roadfix/constant/auth_constant.dart';
 import 'package:roadfix/models/user_model.dart';
 import 'package:roadfix/services/firestore_service.dart';
+import 'package:roadfix/services/email_service.dart';
 import 'package:roadfix/utils/auth_result.dart';
 import 'package:roadfix/utils/auth_error_handler.dart';
 
@@ -26,8 +27,9 @@ class AuthService {
       if (user == null) return AuthConstants.noUserSignedIn;
       if (user.emailVerified) return AuthConstants.emailAlreadyVerified;
 
-      await user.sendEmailVerification();
-      return null; // Success
+      // Use custom email service instead of Firebase default
+      final error = await EmailService.sendVerificationEmail(user.email!);
+      return error; // null on success, error message on failure
     } on FirebaseAuthException catch (e) {
       return AuthErrorHandler.handleFirebaseAuthException(e);
     } catch (e) {
@@ -146,8 +148,9 @@ class AuthService {
 
   Future<String?> resetPassword(String email) async {
     try {
-      await _auth.sendPasswordResetEmail(email: email);
-      return null;
+      // Use custom email service instead of Firebase default
+      final error = await EmailService.sendPasswordResetEmail(email);
+      return error; // null on success, error message on failure
     } on FirebaseAuthException catch (e) {
       return AuthErrorHandler.handleFirebaseAuthException(e);
     } catch (e) {
@@ -242,7 +245,8 @@ class AuthService {
 
   Future<void> _sendEmailVerification(User user) async {
     try {
-      await user.sendEmailVerification();
+      // Use custom email service instead of Firebase default
+      await EmailService.sendVerificationEmail(user.email!);
     } catch (e) {
       // Email verification failure is not critical
     }
