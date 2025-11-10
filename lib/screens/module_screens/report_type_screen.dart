@@ -105,14 +105,6 @@ class ReportTypeScreen extends StatelessWidget {
         // ✅ UTILITY POLE: Go straight to camera (no dialog)
         return ImageSourceOption.camera;
 
-      case ReportCategoryType.roadCrack:
-        // ✅ ROAD CRACK: Show 2 options (Camera, Gallery)
-        return DetectionImageSourceDialog.show(
-          context,
-          allowGallery: true,
-          allowDistanceCamera: false,
-        );
-
       default:
         return null;
     }
