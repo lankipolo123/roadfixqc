@@ -7,9 +7,7 @@ import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/camera_angle_service.dart';
 import 'package:roadfix/services/image_proccessor_service.dart';
-import 'package:roadfix/services/pothole_detection_service.dart';
-import 'package:roadfix/services/road_blocks_detection_service.dart';
-import 'package:roadfix/services/utility_pole_detection_service.dart';
+import 'package:roadfix/services/unified_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
 import 'package:roadfix/widgets/detection_widgets/camera_angle_indicator.dart';
 import 'package:roadfix/widgets/detection_widgets/crop_overlay_area.dart';
@@ -38,7 +36,7 @@ class ReusableCameraDetectionScreen extends StatefulWidget {
 
 class _ReusableCameraDetectionScreenState
     extends State<ReusableCameraDetectionScreen> {
-  dynamic _detectionService;
+  final UnifiedDetectionService _detectionService = UnifiedDetectionService();
   CameraAngleService? _angleService;
 
   CameraController? _cameraController;
@@ -74,7 +72,6 @@ class _ReusableCameraDetectionScreenState
   @override
   void initState() {
     super.initState();
-    _initializeServices();
     _loadModel();
     if (_requiresGyro) {
       _angleService = CameraAngleService();
@@ -87,26 +84,12 @@ class _ReusableCameraDetectionScreenState
   void dispose() {
     _cameraController?.dispose();
     _angleService?.dispose();
-    _detectionService?.dispose();
+    _detectionService.dispose();
     super.dispose();
   }
 
-  void _initializeServices() {
-    switch (widget.detectionType) {
-      case DetectionType.pothole:
-        _detectionService = PotholeDetectionService();
-        break;
-      case DetectionType.roadblock:
-        _detectionService = RoadblocksDetectionService();
-        break;
-      case DetectionType.utilityPole:
-        _detectionService = UtilityPoleDetectionService();
-        break;
-    }
-  }
-
   Future<void> _loadModel() async {
-    await _detectionService?.loadModel();
+    await _detectionService.loadModel();
     if (mounted) {
       setState(() {});
     }
@@ -182,16 +165,40 @@ class _ReusableCameraDetectionScreenState
         title: "Processing Image",
         description: "Running hybrid zoom detection...",
       );
-      final fullDetections = await _detectionService.detectObjects(file);
+      // Use the appropriate detection method based on type
+      List<DetectionResult> fullDetections;
+      List<DetectionResult> croppedDetections;
+
+      switch (widget.detectionType) {
+        case DetectionType.pothole:
+          fullDetections = await _detectionService.detectPotholes(file);
+          break;
+        case DetectionType.roadblock:
+          fullDetections = await _detectionService.detectRoadblocks(file);
+          break;
+        case DetectionType.utilityPole:
+          fullDetections = await _detectionService.detectBrokenPoles(file);
+          break;
+      }
+
       final croppedResult = await ImageCroppingUtility.cropRoadRegion(
         file,
         cropRatio: 0.4,
       );
 
       setState(() {});
-      final croppedDetections = await _detectionService.detectObjects(
-        croppedResult.croppedFile,
-      );
+
+      switch (widget.detectionType) {
+        case DetectionType.pothole:
+          croppedDetections = await _detectionService.detectPotholes(croppedResult.croppedFile);
+          break;
+        case DetectionType.roadblock:
+          croppedDetections = await _detectionService.detectRoadblocks(croppedResult.croppedFile);
+          break;
+        case DetectionType.utilityPole:
+          croppedDetections = await _detectionService.detectBrokenPoles(croppedResult.croppedFile);
+          break;
+      }
       final remappedDetections = ImageCroppingUtility.remapDetections(
         croppedDetections: croppedDetections,
         cropStartY: croppedResult.cropStartY,

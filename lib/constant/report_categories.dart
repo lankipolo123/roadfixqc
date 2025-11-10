@@ -15,8 +15,14 @@ final List<ReportCategory> reportCategories = [
   ),
   ReportCategory(
     label: 'Road Blocks',
-    description: 'Unused Cones and Barrier,Fallen Tree,Tires',
+    description: 'Fallen Cones, Fallen Barriers, Trees, Tires, Debris',
     imagePath: 'assets/images/road_concerns.webp',
     type: ReportCategoryType.roadConcern,
+  ),
+  ReportCategory(
+    label: 'Road Cracks',
+    description: 'Cracks and fissures in the road surface',
+    imagePath: 'assets/images/road_concerns.webp', // Using same image for now
+    type: ReportCategoryType.roadCrack,
   ),
 ];

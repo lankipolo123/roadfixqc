@@ -1,4 +1,4 @@
-enum ReportCategoryType { pothole, utilityPole, roadConcern, roadblock }
+enum ReportCategoryType { pothole, utilityPole, roadConcern, roadblock, roadCrack }
 
 class ReportCategory {
   final String label;

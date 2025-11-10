@@ -95,6 +95,26 @@ class NavigationHelper {
         );
         break;
 
+      // ====================================
+      // ROAD CRACK DETECTION (2 options: camera/gallery)
+      // ====================================
+      case ReportCategoryType.roadCrack:
+        debugPrint(
+          '   → Road Crack Detection Screen (${imageSourceOption == ImageSourceOption.camera ? 'Camera' : 'Gallery'})',
+        );
+        await Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => RoadblockDetectionScreen(
+              initialImageSource: imageSourceOption == ImageSourceOption.camera
+                  ? ImageSource.camera
+                  : ImageSource.gallery,
+              category: category,
+            ),
+          ),
+        );
+        break;
+
       default:
         debugPrint('   ⚠️ Unknown category type');
     }

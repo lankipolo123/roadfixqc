@@ -6,8 +6,7 @@ import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/image_proccessor_service.dart';
-import 'package:roadfix/services/pothole_detection_service.dart';
-import 'package:roadfix/services/road_blocks_detection_service.dart';
+import 'package:roadfix/services/unified_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
@@ -37,7 +36,7 @@ class ReusableGalleryDetectionScreen extends StatefulWidget {
 class _ReusableGalleryDetectionScreenState
     extends State<ReusableGalleryDetectionScreen> {
   // Services
-  dynamic _detectionService;
+  final UnifiedDetectionService _detectionService = UnifiedDetectionService();
   bool _isProcessing = false;
   bool _isZoomedView = false; // ✅ Toggle zoom view
 
@@ -58,7 +57,6 @@ class _ReusableGalleryDetectionScreenState
   @override
   void initState() {
     super.initState();
-    _initializeServices();
     _loadModel();
 
     // Auto-pick image after frame renders
@@ -69,23 +67,12 @@ class _ReusableGalleryDetectionScreenState
 
   @override
   void dispose() {
-    _detectionService?.dispose();
+    _detectionService.dispose();
     super.dispose();
   }
 
-  void _initializeServices() {
-    switch (widget.detectionType) {
-      case GalleryDetectionType.pothole:
-        _detectionService = PotholeDetectionService();
-        break;
-      case GalleryDetectionType.roadblock:
-        _detectionService = RoadblocksDetectionService();
-        break;
-    }
-  }
-
   Future<void> _loadModel() async {
-    await _detectionService?.loadModel();
+    await _detectionService.loadModel();
     if (mounted) {
       setState(() {});
     }
@@ -119,7 +106,16 @@ class _ReusableGalleryDetectionScreenState
       );
       debugPrint('========================================');
 
-      final detections = await _detectionService.detectObjects(imageFile);
+      // Use the appropriate detection method based on type
+      List<DetectionResult> detections;
+      switch (widget.detectionType) {
+        case GalleryDetectionType.pothole:
+          detections = await _detectionService.detectPotholes(imageFile);
+          break;
+        case GalleryDetectionType.roadblock:
+          detections = await _detectionService.detectRoadblocks(imageFile);
+          break;
+      }
 
       debugPrint('\n📊 DETECTION RESULTS:');
       debugPrint('   Total detections: ${detections.length}');
