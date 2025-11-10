@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 enum ImageSourceOption {
-  camera, // Normal camera
+  camera, // Camera
   gallery, // Gallery picker
-  distanceCamera, // Distance detection camera (pothole only)
 }
 
-/// ✅ Detection dialog using YOUR beautiful bottom sheet design!
+/// Simple dialog to choose between camera or gallery
 class DetectionImageSourceDialog {
   static Future<ImageSourceOption?> show(
     BuildContext context, {
     bool allowGallery = true,
-    bool allowDistanceCamera = false,
   }) async {
     return showModalBottomSheet<ImageSourceOption>(
       context: context,
@@ -64,23 +62,6 @@ class DetectionImageSourceDialog {
                   ),
 
                   const SizedBox(height: 16),
-
-                  // Distance Camera option (POTHOLE ONLY)
-                  if (allowDistanceCamera) ...[
-                    _buildImageSourceOption(
-                      context: context,
-                      icon: Icons.zoom_out_map,
-                      title: 'Distance Camera',
-                      subtitle: 'Detect far potholes (hybrid zoom)',
-                      onTap: () => Navigator.pop(
-                        context,
-                        ImageSourceOption.distanceCamera,
-                      ),
-                      isEnabled: true,
-                      color: Colors.orange,
-                    ),
-                    const SizedBox(height: 16),
-                  ],
 
                   // Gallery option
                   _buildImageSourceOption(

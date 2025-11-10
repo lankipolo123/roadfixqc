@@ -17,8 +17,7 @@ class NavigationHelper {
 
     // Convert ImageSourceOption to ImageSource
     ImageSource? source;
-    if (imageSourceOption == ImageSourceOption.camera ||
-        imageSourceOption == ImageSourceOption.distanceCamera) {
+    if (imageSourceOption == ImageSourceOption.camera) {
       source = ImageSource.camera;
     } else if (imageSourceOption == ImageSourceOption.gallery) {
       source = ImageSource.gallery;

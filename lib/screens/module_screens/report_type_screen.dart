@@ -79,30 +79,22 @@ class ReportTypeScreen extends StatelessWidget {
     }
   }
 
-  /// ✅ Show dialog with correct options for each category
+  /// Show simple camera/gallery dialog for each category
   Future<ImageSourceOption?> _showImageSourceDialog(
     BuildContext context,
     ReportCategory category,
   ) async {
     switch (category.type) {
       case ReportCategoryType.pothole:
-        // ✅ POTHOLE: Show all 3 options (Camera, Distance Camera, Gallery)
+      case ReportCategoryType.roadConcern:
+        // Show camera/gallery options
         return DetectionImageSourceDialog.show(
           context,
           allowGallery: true,
-          allowDistanceCamera: true,
-        );
-
-      case ReportCategoryType.roadConcern: // ✅ FIXED - was roadblock
-        // ✅ ROADBLOCK: Show 2 options (Camera, Gallery)
-        return DetectionImageSourceDialog.show(
-          context,
-          allowGallery: true,
-          allowDistanceCamera: false,
         );
 
       case ReportCategoryType.utilityPole:
-        // ✅ UTILITY POLE: Go straight to camera (no dialog)
+        // Go straight to camera (no dialog)
         return ImageSourceOption.camera;
 
       default:
