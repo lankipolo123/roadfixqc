@@ -6,180 +6,97 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ultralytics_yolo/yolo.dart';
 import '../models/detection_result.dart';
 
-/// 🚀 HYBRID DETECTION SERVICE
-/// Runs 2 models: Specialized Pothole Model + Unified Model (filtered)
-/// Model 1: Pothole Detection (98%+ accuracy for potholes/cracks)
-/// Model 2: Unified Model (all other categories, blocks pothole/cracks)
+/// 🚀 UNIFIED DETECTION SERVICE
+/// Single model for all hazard detection
 class HybridDetectionService {
-  YOLO? _potholeModel;
-  YOLO? _unifiedModel;
+  YOLO? _model;
+  bool _isModelLoaded = false;
 
-  bool _isPotholeModelLoaded = false;
-  bool _isUnifiedModelLoaded = false;
+  bool get allModelsLoaded => _isModelLoaded;
 
-  bool get allModelsLoaded => _isPotholeModelLoaded && _isUnifiedModelLoaded;
-
-  /// Classes from specialized pothole model
-  static const List<String> potholeModelClasses = [
-    'Pothole',
-    'Road-Cracks',
+  /// Classes to block (non-hazards)
+  static const List<String> blockedClasses = [
+    'Sewage-Manhole', // Not a road hazard
+    'Stable', // Not a hazard
+    'Tires_with_rim', // Use "Tires" instead
+    'Traffic_Cones', // Block
+    'Road_Barrier', // Block
   ];
 
-  /// Classes from unified model (will be filtered to exclude pothole/cracks)
-  static const List<String> unifiedModelClasses = [
+  /// Detectable hazard classes
+  static const List<String> hazardClasses = [
+    'Pothole',
+    'Road-Cracks',
     'Compromised-Pole',
     'Fallen-Barrier',
     'Fallen-Cone',
-    'Road_Barrier',
-    'Traffic_Cones',
     'Tires',
-    'Stable',
-    'Sewage-Manhole',
-    'Tires_with_rim',
   ];
 
-  /// Classes to block from POTHOLE model (not hazards, present in both models)
-  static const List<String> blockedFromPothole = [
-    'Sewage-Manhole', // Not a road hazard
-    'Stable', // Not a hazard
-    'Tires_with_rim', // Use "Tires" instead
-    'Traffic_Cones', // Block
-    'Road_Barrier', // Block
-  ];
-
-  /// Classes to block from UNIFIED model
-  static const List<String> blockedFromUnified = [
-    'Pothole', // Handled by specialized pothole model (98%+ accuracy)
-    'Road-Cracks', // Handled by specialized pothole model
-    'Sewage-Manhole', // Not a road hazard
-    'Stable', // Not a hazard
-    'Tires_with_rim', // Use "Tires" instead
-    'Traffic_Cones', // Block
-    'Road_Barrier', // Block
-  ];
-
-  /// Load both models
+  /// Load model
   Future<void> loadAllModels() async {
     debugPrint('\n🔄 ========================================');
-    debugPrint('📦 LOADING HYBRID DETECTION (2 MODELS)');
+    debugPrint('📦 LOADING UNIFIED MODEL');
     debugPrint('========================================');
 
     try {
-      // Model 1: Specialized Pothole Detection (FP32 for quality)
-      debugPrint('\n1️⃣ Loading Specialized Pothole Model (FP32)...');
-      _potholeModel = YOLO(
-        modelPath: 'pothole_model_float32.tflite',
+      debugPrint('\n🎯 Loading RoadFix Unified Model (FP32)...');
+      _model = YOLO(
+        modelPath: 'roadfix-model_float32.tflite',
         task: YOLOTask.detect,
         useGpu: true,
       );
-      await _potholeModel!.loadModel();
-      _isPotholeModelLoaded = true;
-      debugPrint('   ✅ Pothole model loaded (pothole_model_float32.tflite)');
-      debugPrint('   📋 Handles: Pothole, Road-Cracks (98%+ accuracy, best quality)');
+      await _model!.loadModel();
+      _isModelLoaded = true;
+      debugPrint('   ✅ Model loaded (roadfix-model_float32.tflite)');
+      debugPrint('   📋 Detects: ${hazardClasses.join(", ")}');
+      debugPrint('   🚫 Blocks: ${blockedClasses.join(", ")}');
 
-      // Model 2: Unified Model (FP32 for quality, filtered)
-      debugPrint('\n2️⃣ Loading Unified Model (FP32, filtered)...');
-      _unifiedModel = YOLO(
-        modelPath: 'unifiedmodle_float32.tflite',
-        task: YOLOTask.detect,
-        useGpu: true,
-      );
-      await _unifiedModel!.loadModel();
-      _isUnifiedModelLoaded = true;
-      debugPrint('   ✅ Unified model loaded (unifiedmodle_float32.tflite)');
-      debugPrint('   📋 Handles: All other categories (FP32, best quality)');
-      debugPrint('   🚫 Blocks: Pothole, Road-Cracks (handled by specialized model)');
-
-      debugPrint('\n✅ HYBRID DETECTION READY!');
-      debugPrint('   Strategy: Specialized pothole model + Unified (filtered)');
+      debugPrint('\n✅ UNIFIED DETECTION READY!');
       debugPrint('========================================\n');
     } catch (e) {
-      debugPrint('❌ Error loading models: $e');
+      debugPrint('❌ Error loading model: $e');
       rethrow;
     }
   }
 
-  /// Dispose all models
-  void dispose() {
-    debugPrint('🗑️ Disposing hybrid detection models...');
-    _potholeModel = null;
-    _unifiedModel = null;
-    _isPotholeModelLoaded = false;
-    _isUnifiedModelLoaded = false;
-  }
-
-  /// Pick image from source
-  Future<File?> pickImageFromSource(ImageSource source) async {
-    final picker = ImagePicker();
-    final XFile? image = await picker.pickImage(source: source);
-    if (image == null) return null;
-    return File(image.path);
-  }
-
-  /// Decode image to ui.Image
-  Future<ui.Image> decodeImage(File file) async {
-    final Uint8List bytes = await file.readAsBytes();
-    final codec = await ui.instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    return frame.image;
-  }
-
-  /// 🎯 MAIN DETECTION METHOD - Runs 2 models (pothole + unified filtered)
+  /// Main detection method
   Future<List<DetectionResult>> detectAllHazards(
     File imageFile, {
     double confidenceThreshold = 0.3,
   }) async {
     if (!allModelsLoaded) {
-      throw Exception('Not all models are loaded');
+      throw Exception('Model not loaded');
     }
 
     debugPrint('\n🚀 ========================================');
-    debugPrint('🔥 HYBRID DETECTION START - 2 MODELS');
+    debugPrint('🔥 UNIFIED DETECTION START');
     debugPrint('========================================');
 
     final Uint8List imageBytes = await imageFile.readAsBytes();
     debugPrint('📸 Image size: ${imageBytes.length} bytes');
 
-    final List<DetectionResult> allDetections = [];
     final stopwatch = Stopwatch()..start();
 
-    // 🟢 MODEL 1: Specialized Pothole Detection
-    debugPrint('\n1️⃣ Running Specialized POTHOLE MODEL...');
-    final potholeResults = await _runModel(
-      _potholeModel!,
+    // Run model
+    debugPrint('\n🎯 Running Unified Model...');
+    final detections = await _runModel(
+      _model!,
       imageBytes,
-      'Pothole Model',
-      confidenceThreshold: 0.4, // Higher threshold for potholes
-      blockClasses: blockedFromPothole, // 🚫 Block Sewage-Manhole, Stable, Tires_with_rim, Traffic_Cones, Road_Barrier
+      confidenceThreshold: confidenceThreshold,
     );
-    allDetections.addAll(potholeResults);
-    debugPrint('   ✅ Pothole model found ${potholeResults.length} detections');
-
-    // 🔵 MODEL 2: Unified Model (FILTERED - blocks pothole/cracks + non-hazards)
-    debugPrint('\n2️⃣ Running UNIFIED MODEL (filtered)...');
-    final unifiedResults = await _runModel(
-      _unifiedModel!,
-      imageBytes,
-      'Unified Model',
-      confidenceThreshold: 0.3,
-      blockClasses: blockedFromUnified, // 🚫 Block Pothole, Road-Cracks, Sewage-Manhole, Stable, Tires_with_rim, Traffic_Cones, Road_Barrier
-    );
-    allDetections.addAll(unifiedResults);
-    debugPrint('   ✅ Unified model found ${unifiedResults.length} detections');
 
     stopwatch.stop();
 
-    // 📊 Summary
+    // Summary
     debugPrint('\n📊 ========================================');
-    debugPrint('✅ HYBRID DETECTION COMPLETE');
+    debugPrint('✅ DETECTION COMPLETE');
     debugPrint('   Total inference time: ${stopwatch.elapsedMilliseconds}ms');
-    debugPrint('   Pothole Model: ${potholeResults.length}');
-    debugPrint('   Unified Model (filtered): ${unifiedResults.length}');
-    debugPrint('   TOTAL DETECTIONS: ${allDetections.length}');
+    debugPrint('   Total detections: ${detections.length}');
 
     // Group by type
     final Map<String, int> counts = {};
-    for (var d in allDetections) {
+    for (var d in detections) {
       counts[d.className] = (counts[d.className] ?? 0) + 1;
     }
 
@@ -191,22 +108,20 @@ class HybridDetectionService {
     }
     debugPrint('========================================\n');
 
-    return allDetections;
+    return detections;
   }
 
-  /// Helper: Run a single model and parse results
+  /// Helper: Run model and parse results
   Future<List<DetectionResult>> _runModel(
     YOLO model,
-    Uint8List imageBytes,
-    String modelName, {
+    Uint8List imageBytes, {
     required double confidenceThreshold,
-    required List<String> blockClasses,
   }) async {
     final output = await model.predict(imageBytes);
     final rawBoxes = output['boxes'];
 
     if (rawBoxes == null || rawBoxes.isEmpty) {
-      debugPrint('   ⚠️ No detections from $modelName');
+      debugPrint('   ⚠️ No detections');
       return [];
     }
 
@@ -224,8 +139,8 @@ class HybridDetectionService {
       // Skip low confidence
       if (conf < confidenceThreshold) continue;
 
-      // 🚫 BLOCK classes (duplicates, non-hazards, etc.)
-      if (blockClasses.contains(className)) {
+      // 🚫 BLOCK non-hazard classes
+      if (blockedClasses.contains(className)) {
         blockedCount++;
         debugPrint('   🚫 BLOCKED: $className');
         continue;
@@ -256,5 +171,30 @@ class HybridDetectionService {
     }
 
     return results;
+  }
+
+  /// Pick image
+  Future<File?> pickImageFromSource(ImageSource source) async {
+    final picker = ImagePicker();
+    final XFile? pickedFile = await picker.pickImage(source: source);
+
+    if (pickedFile == null) {
+      return null;
+    }
+
+    return File(pickedFile.path);
+  }
+
+  /// Decode image
+  Future<ui.Image> decodeImage(File imageFile) async {
+    final bytes = await imageFile.readAsBytes();
+    final codec = await ui.instantiateImageCodec(bytes);
+    final frame = await codec.getNextFrame();
+    return frame.image;
+  }
+
+  /// Dispose
+  void dispose() {
+    debugPrint('🗑️ Disposing detection service');
   }
 }

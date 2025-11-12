@@ -4,16 +4,16 @@ import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/hybrid_detection_screen.dart';
 import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
 
-/// 🚀 HYBRID NAVIGATION: Specialized pothole + unified (filtered) for best accuracy!
+/// 🚀 UNIFIED NAVIGATION: Single model for all hazard detection!
 class NavigationHelper {
-  /// Navigate to hybrid detection screen - runs 2 models (pothole + unified filtered)
+  /// Navigate to unified detection screen - runs single RoadFix model
   static Future<void> navigateToDetection(
     BuildContext context,
     ReportCategory category,
     ImageSourceOption imageSourceOption,
   ) async {
-    debugPrint('🧭 Hybrid Navigation: ${category.type} with $imageSourceOption');
-    debugPrint('   → Using Hybrid Detection (Pothole 98%+ + Unified filtered)');
+    debugPrint('🧭 Unified Navigation: ${category.type} with $imageSourceOption');
+    debugPrint('   → Using Unified Detection (Single RoadFix Model)');
 
     // Convert ImageSourceOption to ImageSource
     ImageSource? source;

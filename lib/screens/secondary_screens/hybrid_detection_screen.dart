@@ -12,9 +12,8 @@ import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 
-/// 🚀 HYBRID DETECTION SCREEN
-/// Runs 2 models: Specialized Pothole (98%+) + Unified (filtered)
-/// Best balance of accuracy and speed!
+/// 🚀 UNIFIED DETECTION SCREEN
+/// Single model detecting all road hazards
 class HybridDetectionScreen extends StatefulWidget {
   final ImageSource? initialImageSource;
   final ReportCategory? category;
@@ -51,7 +50,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Future<void> _initializeAndPickImage() async {
-    debugPrint('🔄 Initializing hybrid detection (2 models)...');
+    debugPrint('🔄 Initializing unified detection...');
     await _loadModels();
 
     if (widget.initialImageSource != null && mounted) {
@@ -63,14 +62,14 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   Future<void> _loadModels() async {
     LoadingModal.show(
       context,
-      title: "Loading AI Models",
-      description: "Loading hybrid detection:\n1. Pothole Model (98%+)\n2. Unified Model (filtered)",
+      title: "Loading AI Model",
+      description: "Loading RoadFix unified model\nDetecting all road hazards...",
     );
 
     try {
-      debugPrint('📥 Loading hybrid models...');
+      debugPrint('📥 Loading unified model...');
       await _detectionService.loadAllModels();
-      debugPrint('✅ All models ready!');
+      debugPrint('✅ Model ready!');
     } catch (e) {
       debugPrint('❌ Failed to load models: $e');
       if (mounted) {
@@ -118,16 +117,15 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description:
-          "Running hybrid detection:\n1. Pothole Model (potholes/cracks)\n2. Unified Model (all other hazards)",
+      description: "Running unified detection\nDetecting all road hazards...",
     );
 
     try {
       debugPrint('\n========================================');
-      debugPrint('🚀 HYBRID DETECTION - 2 MODELS');
+      debugPrint('🚀 UNIFIED DETECTION');
       debugPrint('========================================');
 
-      // 🎯 Run hybrid detection (2 models)
+      // 🎯 Run unified detection
       final detections = await _detectionService.detectAllHazards(
         imageFile,
         confidenceThreshold: 0.3,
@@ -313,7 +311,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
           const Icon(Icons.image_outlined, size: 80, color: altSecondary),
           const SizedBox(height: 16),
           const Text(
-            'Hybrid Detection Ready',
+            'RoadFix Detection Ready',
             style: TextStyle(
                 color: inputFill, fontSize: 18, fontWeight: FontWeight.bold),
           ),
@@ -321,7 +319,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Best of both worlds:\n✓ Pothole Model (98%+ accuracy)\n✓ Unified Model (all other hazards)\n✓ Faster than 3 models',
+              'Unified AI Model:\n✓ Detects all road hazards\n✓ Fast and accurate\n✓ One model for everything',
               style: TextStyle(color: altSecondary, fontSize: 14),
               textAlign: TextAlign.center,
             ),
