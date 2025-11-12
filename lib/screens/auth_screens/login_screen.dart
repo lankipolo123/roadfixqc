@@ -4,8 +4,6 @@ import 'package:roadfix/layouts/auth_scaffold.dart';
 import 'package:roadfix/widgets/auth_widgets/login_top_content.dart';
 import 'package:roadfix/widgets/auth_widgets/custom_textfield.dart';
 import 'package:roadfix/widgets/common_widgets/big_button.dart';
-import 'package:roadfix/widgets/auth_widgets/social_divider.dart';
-import 'package:roadfix/widgets/auth_widgets/google_signin_button.dart';
 import 'package:roadfix/widgets/auth_widgets/auth_redirect_button.dart';
 import 'package:roadfix/widgets/dialog_widgets/totp_verfication_dialog.dart';
 import 'package:roadfix/screens/module_screens/navigation_screen.dart';
@@ -257,44 +255,6 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  Future<void> _handleGoogleSignIn() async {
-    if (!await _checkConnectivityBeforeAction()) return;
-
-    setState(() => _isLoading = true);
-
-    try {
-      final result = await _authService.signInWithGoogle();
-
-      debugPrint('🔍 Google sign-in result: $result');
-
-      if (!mounted) return;
-
-      if (result['success'] != true) {
-        SnackbarUtils.showError(
-          context,
-          result['message'] ?? 'Google Sign-In failed',
-        );
-      } else {
-        // Check if Google user needs TOTP and has it enabled
-        if (result['requires2FA'] == true) {
-          debugPrint('🔍 Google user requires TOTP');
-          await _handleTotpVerification();
-        } else {
-          _navigateToMainApp();
-        }
-      }
-    } catch (e) {
-      debugPrint('🔍 Google sign-in error: $e');
-      if (mounted) {
-        SnackbarUtils.showError(context, 'Google Sign-In failed');
-      }
-    } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
-    }
-  }
-
   void _handleSignUpNavigation() {
     if (!_isLoading && mounted) {
       Navigator.push(
@@ -348,10 +308,6 @@ class _LoginScreenState extends State<LoginScreen> {
           text: _isLoading ? "Signing In..." : "Log In",
           onPressed: _isLoading ? null : _handleLogin,
         ),
-        const SizedBox(height: 16),
-        const SocialDivider(),
-        const SizedBox(height: 12),
-        GoogleSignInButton(onPressed: _isLoading ? null : _handleGoogleSignIn),
         const SizedBox(height: 24),
         AuthRedirectTextButton(
           prompt: "Don't have an account?",
