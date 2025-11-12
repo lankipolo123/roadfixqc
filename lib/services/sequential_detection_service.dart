@@ -25,34 +25,35 @@ class SequentialDetectionService {
       _isUtilityPoleModelLoaded &&
       _isRoadblockModelLoaded;
 
+  /// REAL CLASSES from unified model training (user-provided):
   /// Model 1: Pothole Detection
   static const List<String> potholeClasses = [
     'Pothole',
+    'Road-Cracks',
     'Sewage-Manhole',
-    'Surface-Damage',
   ];
 
   /// Model 2: Utility Pole Detection
   static const List<String> utilityPoleClasses = [
-    'Broken_Pole',
-    'Standing_Pole',
+    'Compromised-Pole',
+    'Stable', // Stable pole/tree
   ];
 
-  /// Model 3: Roadblock Detection (you may need to adjust based on your training)
+  /// Model 3: Roadblock Detection
   static const List<String> roadblockClasses = [
-    'Roadblock',
-    'Barricade',
-    'Fallen_Cone',
-    'Fallen_Barrier',
-    'Traffic_Cone',
-    'Debris',
-    'Fallen_Tree',
+    'Fallen-Barrier',
+    'Fallen-Cone',
+    'Road_Barrier',
+    'Traffic_Cones',
+    'Tires',
+    'Tires_with_rim',
   ];
 
-  /// Classes to filter out
+  /// Classes to filter out (not hazards for reporting)
   static const List<String> filteredClasses = [
-    'Standing_Pole', // We only care about broken poles
-    'Sewage-Manhole', // Not a hazard for reporting
+    'Stable', // Not a hazard - stable pole/tree
+    'Sewage-Manhole', // Not a road hazard
+    'Tires_with_rim', // From unified model - filtered
   ];
 
   /// Load all 3 models

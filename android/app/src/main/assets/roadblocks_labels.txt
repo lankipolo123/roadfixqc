@@ -1,7 +1,0 @@
-Roadblock
-Barricade
-Fallen_Cone
-Fallen_Barrier
-Traffic_Cone
-Debris
-Fallen_Tree

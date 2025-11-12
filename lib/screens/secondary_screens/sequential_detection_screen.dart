@@ -254,32 +254,30 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
 
   String _formatDisplayName(String className) {
     switch (className) {
-      case 'Fallen_Tree':
-        return 'Fallen Tree';
-      case 'Road_Barrier':
-        return 'Road Barrier';
-      case 'Fallen_Cone':
-        return 'Fallen Cone';
-      case 'Fallen_Barrier':
-        return 'Fallen Barrier';
-      case 'Road_Crack':
-      case 'Surface-Damage':
-        return 'Road Crack/Surface Damage';
-      case 'Broken_Pole':
       case 'Compromised-Pole':
         return 'Broken Utility Pole';
+      case 'Fallen-Barrier':
+        return 'Fallen Barrier';
+      case 'Fallen-Cone':
+        return 'Fallen Cone';
       case 'Pothole':
         return 'Pothole';
-      case 'Traffic_Cone':
+      case 'Road-Cracks':
+        return 'Road Crack';
+      case 'Road_Barrier':
+        return 'Road Barrier';
+      case 'Sewage-Manhole':
+        return 'Sewage Manhole';
+      case 'Stable':
+        return 'Stable Object';
+      case 'Tires':
+        return 'Tire';
+      case 'Tires_with_rim':
+        return 'Tire with Rim';
       case 'Traffic_Cones':
         return 'Traffic Cone';
-      case 'Roadblock':
-      case 'Barricade':
-        return 'Roadblock';
-      case 'Debris':
-        return 'Debris';
       default:
-        return className.replaceAll('_', ' ');
+        return className.replaceAll('_', ' ').replaceAll('-', ' ');
     }
   }
 
