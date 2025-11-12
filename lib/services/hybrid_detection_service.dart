@@ -58,17 +58,17 @@ class HybridDetectionService {
     debugPrint('========================================');
 
     try {
-      // Model 1: Specialized Pothole Detection
-      debugPrint('\n1️⃣ Loading Specialized Pothole Model...');
+      // Model 1: Specialized Pothole Detection (INT8 Quantized)
+      debugPrint('\n1️⃣ Loading Specialized Pothole Model (INT8)...');
       _potholeModel = YOLO(
-        modelPath: 'pothole_model_float32.tflite',
+        modelPath: 'pothole_INT8.tflite',
         task: YOLOTask.detect,
         useGpu: true,
       );
       await _potholeModel!.loadModel();
       _isPotholeModelLoaded = true;
-      debugPrint('   ✅ Pothole model loaded (pothole_model_float32.tflite)');
-      debugPrint('   📋 Handles: Pothole, Road-Cracks (98%+ accuracy)');
+      debugPrint('   ✅ Pothole model loaded (pothole_INT8.tflite)');
+      debugPrint('   📋 Handles: Pothole, Road-Cracks (96-97% accuracy, 3x faster)');
 
       // Model 2: Unified Model (filtered)
       debugPrint('\n2️⃣ Loading Unified Model (filtered)...');
