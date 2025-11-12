@@ -212,7 +212,6 @@ class HybridDetectionService {
 
     final List<DetectionResult> results = [];
     int blockedCount = 0;
-    int filteredCount = 0;
 
     for (var box in rawBoxes) {
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
@@ -225,17 +224,10 @@ class HybridDetectionService {
       // Skip low confidence
       if (conf < confidenceThreshold) continue;
 
-      // 🚫 BLOCK classes (e.g., pothole/cracks from unified model)
+      // 🚫 BLOCK classes (duplicates, non-hazards, etc.)
       if (blockClasses.contains(className)) {
         blockedCount++;
-        debugPrint('   🚫 BLOCKED: $className (handled by specialized model)');
-        continue;
-      }
-
-      // Skip filtered classes (non-hazards)
-      if (filteredClasses.contains(className)) {
-        filteredCount++;
-        debugPrint('   ⏭️ FILTERED: $className (not a hazard)');
+        debugPrint('   🚫 BLOCKED: $className');
         continue;
       }
 
@@ -260,10 +252,7 @@ class HybridDetectionService {
     }
 
     if (blockedCount > 0) {
-      debugPrint('   📊 Blocked $blockedCount detections (duplicate categories)');
-    }
-    if (filteredCount > 0) {
-      debugPrint('   📊 Filtered $filteredCount non-hazards');
+      debugPrint('   📊 Blocked $blockedCount detections');
     }
 
     return results;
