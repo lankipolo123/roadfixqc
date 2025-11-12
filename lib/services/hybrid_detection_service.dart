@@ -73,13 +73,13 @@ class HybridDetectionService {
       // Model 2: Unified Model (FP32 for quality, filtered)
       debugPrint('\n2️⃣ Loading Unified Model (FP32, filtered)...');
       _unifiedModel = YOLO(
-        modelPath: 'lanki_capstone_FP32.tflite',
+        modelPath: 'unifiedmodle_float32.tflite',
         task: YOLOTask.detect,
         useGpu: true,
       );
       await _unifiedModel!.loadModel();
       _isUnifiedModelLoaded = true;
-      debugPrint('   ✅ Unified model loaded (lanki_capstone_FP32.tflite)');
+      debugPrint('   ✅ Unified model loaded (unifiedmodle_float32.tflite)');
       debugPrint('   📋 Handles: All other categories (FP32, best quality)');
       debugPrint('   🚫 Blocks: Pothole, Road-Cracks (handled by specialized model)');
 
