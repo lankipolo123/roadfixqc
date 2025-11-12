@@ -38,17 +38,24 @@ class HybridDetectionService {
     'Tires_with_rim',
   ];
 
-  /// Classes to completely filter out (not hazards)
-  static const List<String> filteredClasses = [
-    'Stable', // Not a hazard
+  /// Classes to block from POTHOLE model (not hazards, present in both models)
+  static const List<String> blockedFromPothole = [
     'Sewage-Manhole', // Not a road hazard
-    'Tires_with_rim', // Filtered
+    'Stable', // Not a hazard
+    'Tires_with_rim', // Use "Tires" instead
+    'Traffic_Cones', // Block
+    'Road_Barrier', // Block
   ];
 
-  /// IMPORTANT: Block these from unified model (handled by pothole model)
+  /// Classes to block from UNIFIED model
   static const List<String> blockedFromUnified = [
-    'Pothole',
-    'Road-Cracks',
+    'Pothole', // Handled by specialized pothole model (98%+ accuracy)
+    'Road-Cracks', // Handled by specialized pothole model
+    'Sewage-Manhole', // Not a road hazard
+    'Stable', // Not a hazard
+    'Tires_with_rim', // Use "Tires" instead
+    'Traffic_Cones', // Block
+    'Road_Barrier', // Block
   ];
 
   /// Load both models
@@ -143,19 +150,19 @@ class HybridDetectionService {
       imageBytes,
       'Pothole Model',
       confidenceThreshold: 0.4, // Higher threshold for potholes
-      blockClasses: [], // No blocking for pothole model
+      blockClasses: blockedFromPothole, // 🚫 Block Sewage-Manhole, Stable, Tires_with_rim, Traffic_Cones, Road_Barrier
     );
     allDetections.addAll(potholeResults);
     debugPrint('   ✅ Pothole model found ${potholeResults.length} detections');
 
-    // 🔵 MODEL 2: Unified Model (FILTERED - blocks pothole/cracks)
+    // 🔵 MODEL 2: Unified Model (FILTERED - blocks pothole/cracks + non-hazards)
     debugPrint('\n2️⃣ Running UNIFIED MODEL (filtered)...');
     final unifiedResults = await _runModel(
       _unifiedModel!,
       imageBytes,
       'Unified Model',
       confidenceThreshold: 0.3,
-      blockClasses: blockedFromUnified, // 🚫 Block Pothole & Road-Cracks
+      blockClasses: blockedFromUnified, // 🚫 Block Pothole, Road-Cracks, Sewage-Manhole, Stable, Tires_with_rim, Traffic_Cones, Road_Barrier
     );
     allDetections.addAll(unifiedResults);
     debugPrint('   ✅ Unified model found ${unifiedResults.length} detections');
