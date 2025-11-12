@@ -70,17 +70,17 @@ class HybridDetectionService {
       debugPrint('   ✅ Pothole model loaded (pothole_INT8.tflite)');
       debugPrint('   📋 Handles: Pothole, Road-Cracks (96-97% accuracy, 3x faster)');
 
-      // Model 2: Unified Model (filtered)
-      debugPrint('\n2️⃣ Loading Unified Model (filtered)...');
+      // Model 2: Unified Model (INT8 Quantized, filtered)
+      debugPrint('\n2️⃣ Loading Unified Model (INT8, filtered)...');
       _unifiedModel = YOLO(
-        modelPath: 'lanki_capstone_FP32.tflite',
+        modelPath: 'lanki_capstone_INT8.tflite',
         task: YOLOTask.detect,
         useGpu: true,
       );
       await _unifiedModel!.loadModel();
       _isUnifiedModelLoaded = true;
-      debugPrint('   ✅ Unified model loaded (lanki_capstone_FP32.tflite)');
-      debugPrint('   📋 Handles: All other categories');
+      debugPrint('   ✅ Unified model loaded (lanki_capstone_INT8.tflite)');
+      debugPrint('   📋 Handles: All other categories (INT8, 3x faster)');
       debugPrint('   🚫 Blocks: Pothole, Road-Cracks (handled by specialized model)');
 
       debugPrint('\n✅ HYBRID DETECTION READY!');
