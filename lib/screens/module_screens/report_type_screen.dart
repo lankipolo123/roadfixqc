@@ -113,20 +113,32 @@ class ReportTypeScreen extends StatelessWidget {
   }
 
   Future<void> _handleDetectionTap(BuildContext context) async {
-    // Show camera/gallery dialog
-    final imageSourceOption = await DetectionImageSourceDialog.show(
-      context,
-      allowGallery: true,
-    );
-
-    if (imageSourceOption != null && context.mounted) {
-      // Use first category as default (doesn't matter since unified detection)
-      final category = reportCategories.first;
-      await NavigationHelper.navigateToDetection(
+    try {
+      // Show camera/gallery dialog
+      final imageSourceOption = await DetectionImageSourceDialog.show(
         context,
-        category,
-        imageSourceOption,
+        allowGallery: true,
       );
+
+      if (imageSourceOption != null && context.mounted) {
+        // Use first category as default (doesn't matter since unified detection)
+        final category = reportCategories.first;
+        await NavigationHelper.navigateToDetection(
+          context,
+          category,
+          imageSourceOption,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Detection failed: $e'),
+            backgroundColor: statusDanger,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+      }
     }
   }
 }
