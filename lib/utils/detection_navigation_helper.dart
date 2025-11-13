@@ -4,16 +4,16 @@ import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/hybrid_detection_screen.dart';
 import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
 
-/// 🚀 UNIFIED NAVIGATION: Single model for all hazard detection!
+/// 🚀 SEQUENTIAL NAVIGATION: 2 models running sequentially!
 class NavigationHelper {
-  /// Navigate to unified detection screen - runs single RoadFix model
+  /// Navigate to sequential detection screen - runs 2 models (Pothole → Unified)
   static Future<void> navigateToDetection(
     BuildContext context,
     ReportCategory category,
     ImageSourceOption imageSourceOption,
   ) async {
-    debugPrint('🧭 Unified Navigation: ${category.type} with $imageSourceOption');
-    debugPrint('   → Using Unified Detection (Single RoadFix Model)');
+    debugPrint('🧭 Sequential Navigation: ${category.type} with $imageSourceOption');
+    debugPrint('   → Using Sequential Detection (2 Models)');
 
     // Convert ImageSourceOption to ImageSource
     ImageSource? source;
