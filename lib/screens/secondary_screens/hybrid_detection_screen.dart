@@ -308,10 +308,10 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.image_outlined, size: 80, color: altSecondary),
-          const SizedBox(height: 16),
+          const CircularProgressIndicator(color: primary),
+          const SizedBox(height: 24),
           const Text(
-            'RoadFix Detection Ready',
+            'Preparing Detection...',
             style: TextStyle(
                 color: inputFill, fontSize: 18, fontWeight: FontWeight.bold),
           ),
@@ -319,31 +319,9 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Unified AI Model:\n✓ Detects all road hazards\n✓ Fast and accurate\n✓ One model for everything',
+              'Please wait while we prepare the camera/gallery',
               style: TextStyle(color: altSecondary, fontSize: 14),
               textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: () => _pickImageFromSource(ImageSource.gallery),
-            icon: const Icon(Icons.photo_library),
-            label: const Text('Pick from Gallery'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: inputFill,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: () => _pickImageFromSource(ImageSource.camera),
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Take Photo'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: inputFill,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
             ),
           ),
         ],
