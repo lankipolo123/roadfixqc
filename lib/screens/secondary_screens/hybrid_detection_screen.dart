@@ -50,7 +50,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Future<void> _initializeAndPickImage() async {
-    debugPrint('🔄 Initializing unified detection...');
+    debugPrint('🔄 Initializing sequential detection (2 models)...');
     await _loadModels();
 
     if (widget.initialImageSource != null && mounted) {
@@ -62,14 +62,14 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   Future<void> _loadModels() async {
     LoadingModal.show(
       context,
-      title: "Loading AI Model",
-      description: "Loading RoadFix unified model\nDetecting all road hazards...",
+      title: "Loading AI Models",
+      description: "Loading sequential detection:\n1. Pothole Model\n2. Unified Model",
     );
 
     try {
-      debugPrint('📥 Loading unified model...');
+      debugPrint('📥 Loading sequential models...');
       await _detectionService.loadAllModels();
-      debugPrint('✅ Model ready!');
+      debugPrint('✅ All models ready!');
     } catch (e) {
       debugPrint('❌ Failed to load models: $e');
       if (mounted) {
@@ -117,15 +117,15 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description: "Running unified detection\nDetecting all road hazards...",
+      description: "Running sequential detection:\n1. Pothole Model\n2. Unified Model",
     );
 
     try {
       debugPrint('\n========================================');
-      debugPrint('🚀 UNIFIED DETECTION');
+      debugPrint('🚀 SEQUENTIAL DETECTION (2 MODELS)');
       debugPrint('========================================');
 
-      // 🎯 Run unified detection
+      // 🎯 Run sequential detection
       final detections = await _detectionService.detectAllHazards(
         imageFile,
         confidenceThreshold: 0.3,
@@ -216,7 +216,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     }).toList();
 
     final descriptionParts = <String>[];
-    descriptionParts.add('🤖 AI Detection Results:');
+    descriptionParts.add('🤖 Sequential AI Detection (2 Models):');
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
@@ -228,7 +228,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
 
     descriptionParts.add('');
     descriptionParts.add('📊 Average confidence: $avgConfidence%');
-    descriptionParts.add('🎯 Detected by RoadFix Unified Model');
+    descriptionParts.add('🎯 Pothole Model → Unified Model (Sequential)');
 
     final autoDescription = descriptionParts.join('\n');
 

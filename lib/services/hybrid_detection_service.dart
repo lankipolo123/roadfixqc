@@ -6,122 +6,163 @@ import 'package:image_picker/image_picker.dart';
 import 'package:ultralytics_yolo/yolo.dart';
 import '../models/detection_result.dart';
 
-/// 🚀 UNIFIED DETECTION SERVICE
-/// Single model for all hazard detection
+/// 🚀 SEQUENTIAL DETECTION SERVICE
+/// Runs 2 models sequentially: Pothole Model → Unified Model
 class HybridDetectionService {
-  YOLO? _model;
-  bool _isModelLoaded = false;
+  YOLO? _potholeModel;
+  YOLO? _unifiedModel;
 
-  bool get allModelsLoaded => _isModelLoaded;
+  bool _isPotholeModelLoaded = false;
+  bool _isUnifiedModelLoaded = false;
 
-  /// Classes to block (non-hazards)
-  static const List<String> blockedClasses = [
-    'Sewage-Manhole', // Not a road hazard
-    'Stable', // Not a hazard
-    'Tires_with_rim', // Use "Tires" instead
-    'Traffic_Cones', // Block
-    'Road_Barrier', // Block
-  ];
+  bool get allModelsLoaded => _isPotholeModelLoaded && _isUnifiedModelLoaded;
 
-  /// Detectable hazard classes
-  static const List<String> hazardClasses = [
-    'Pothole',
-    'Road-Cracks',
+  /// Classes to block from POTHOLE model
+  static const List<String> blockedFromPothole = [
+    'Sewage-Manhole',
+    'Stable',
+    'Tires_with_rim',
+    'Traffic_Cones',
+    'Road_Barrier',
     'Compromised-Pole',
     'Fallen-Barrier',
     'Fallen-Cone',
     'Tires',
   ];
 
-  /// Load model
+  /// Classes to block from UNIFIED model
+  static const List<String> blockedFromUnified = [
+    'Pothole', // Handled by pothole model
+    'Road-Cracks', // Handled by pothole model
+    'Sewage-Manhole',
+    'Stable',
+    'Tires_with_rim',
+    'Traffic_Cones',
+    'Road_Barrier',
+  ];
+
+  /// Load both models
   Future<void> loadAllModels() async {
     debugPrint('\n🔄 ========================================');
-    debugPrint('📦 LOADING UNIFIED MODEL');
+    debugPrint('📦 LOADING SEQUENTIAL DETECTION (2 MODELS)');
     debugPrint('========================================');
 
     try {
-      debugPrint('\n🎯 Loading RoadFix Unified Model (FP32)...');
-      _model = YOLO(
+      // Model 1: Pothole Detection
+      debugPrint('\n1️⃣ Loading Pothole Model...');
+      _potholeModel = YOLO(
+        modelPath: 'pothole_model_float32.tflite',
+        task: YOLOTask.detect,
+        useGpu: true,
+      );
+      await _potholeModel!.loadModel();
+      _isPotholeModelLoaded = true;
+      debugPrint('   ✅ Pothole model loaded');
+
+      // Model 2: Unified Model
+      debugPrint('\n2️⃣ Loading Unified Model...');
+      _unifiedModel = YOLO(
         modelPath: 'roadfix-model_float32.tflite',
         task: YOLOTask.detect,
         useGpu: true,
       );
-      await _model!.loadModel();
-      _isModelLoaded = true;
-      debugPrint('   ✅ Model loaded (roadfix-model_float32.tflite)');
-      debugPrint('   📋 Detects: ${hazardClasses.join(", ")}');
-      debugPrint('   🚫 Blocks: ${blockedClasses.join(", ")}');
+      await _unifiedModel!.loadModel();
+      _isUnifiedModelLoaded = true;
+      debugPrint('   ✅ Unified model loaded');
 
-      debugPrint('\n✅ UNIFIED DETECTION READY!');
+      debugPrint('\n✅ SEQUENTIAL DETECTION READY!');
+      debugPrint('   Model 1: Potholes & Road-Cracks');
+      debugPrint('   Model 2: All other hazards');
       debugPrint('========================================\n');
     } catch (e) {
-      debugPrint('❌ Error loading model: $e');
+      debugPrint('❌ Error loading models: $e');
       rethrow;
     }
   }
 
-  /// Main detection method
+  /// Main detection method - runs models SEQUENTIALLY
   Future<List<DetectionResult>> detectAllHazards(
     File imageFile, {
     double confidenceThreshold = 0.3,
   }) async {
     if (!allModelsLoaded) {
-      throw Exception('Model not loaded');
+      throw Exception('Not all models are loaded');
     }
 
     debugPrint('\n🚀 ========================================');
-    debugPrint('🔥 UNIFIED DETECTION START');
+    debugPrint('🔥 SEQUENTIAL DETECTION START (2 MODELS)');
     debugPrint('========================================');
 
     final Uint8List imageBytes = await imageFile.readAsBytes();
     debugPrint('📸 Image size: ${imageBytes.length} bytes');
 
+    final List<DetectionResult> allDetections = [];
     final stopwatch = Stopwatch()..start();
 
-    // Run model
-    debugPrint('\n🎯 Running Unified Model...');
-    final detections = await _runModel(
-      _model!,
+    // 🟢 MODEL 1: Pothole Detection (runs FIRST)
+    debugPrint('\n1️⃣ Running POTHOLE MODEL...');
+    final potholeResults = await _runModel(
+      _potholeModel!,
       imageBytes,
-      confidenceThreshold: confidenceThreshold,
+      'Pothole Model',
+      confidenceThreshold: 0.4,
+      blockClasses: blockedFromPothole,
     );
+    allDetections.addAll(potholeResults);
+    debugPrint('   ✅ Found ${potholeResults.length} potholes/cracks');
+
+    // 🔵 MODEL 2: Unified Model (runs SECOND, after pothole model)
+    debugPrint('\n2️⃣ Running UNIFIED MODEL...');
+    final unifiedResults = await _runModel(
+      _unifiedModel!,
+      imageBytes,
+      'Unified Model',
+      confidenceThreshold: 0.3,
+      blockClasses: blockedFromUnified,
+    );
+    allDetections.addAll(unifiedResults);
+    debugPrint('   ✅ Found ${unifiedResults.length} other hazards');
 
     stopwatch.stop();
 
     // Summary
     debugPrint('\n📊 ========================================');
-    debugPrint('✅ DETECTION COMPLETE');
-    debugPrint('   Total inference time: ${stopwatch.elapsedMilliseconds}ms');
-    debugPrint('   Total detections: ${detections.length}');
+    debugPrint('✅ SEQUENTIAL DETECTION COMPLETE');
+    debugPrint('   Total time: ${stopwatch.elapsedMilliseconds}ms');
+    debugPrint('   Model 1 (Pothole): ${potholeResults.length}');
+    debugPrint('   Model 2 (Unified): ${unifiedResults.length}');
+    debugPrint('   TOTAL: ${allDetections.length}');
 
     // Group by type
     final Map<String, int> counts = {};
-    for (var d in detections) {
+    for (var d in allDetections) {
       counts[d.className] = (counts[d.className] ?? 0) + 1;
     }
 
     if (counts.isNotEmpty) {
-      debugPrint('\n   Detected by class:');
+      debugPrint('\n   Breakdown:');
       for (var entry in counts.entries) {
         debugPrint('      • ${entry.key}: ${entry.value}');
       }
     }
     debugPrint('========================================\n');
 
-    return detections;
+    return allDetections;
   }
 
-  /// Helper: Run model and parse results
+  /// Helper: Run a single model
   Future<List<DetectionResult>> _runModel(
     YOLO model,
-    Uint8List imageBytes, {
+    Uint8List imageBytes,
+    String modelName, {
     required double confidenceThreshold,
+    required List<String> blockClasses,
   }) async {
     final output = await model.predict(imageBytes);
     final rawBoxes = output['boxes'];
 
     if (rawBoxes == null || rawBoxes.isEmpty) {
-      debugPrint('   ⚠️ No detections');
+      debugPrint('   ⚠️ No detections from $modelName');
       return [];
     }
 
@@ -139,10 +180,9 @@ class HybridDetectionService {
       // Skip low confidence
       if (conf < confidenceThreshold) continue;
 
-      // 🚫 BLOCK non-hazard classes
-      if (blockedClasses.contains(className)) {
+      // Block classes
+      if (blockClasses.contains(className)) {
         blockedCount++;
-        debugPrint('   🚫 BLOCKED: $className');
         continue;
       }
 
@@ -167,7 +207,7 @@ class HybridDetectionService {
     }
 
     if (blockedCount > 0) {
-      debugPrint('   📊 Blocked $blockedCount detections');
+      debugPrint('   🚫 Blocked $blockedCount detections');
     }
 
     return results;
