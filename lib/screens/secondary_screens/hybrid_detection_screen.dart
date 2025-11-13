@@ -216,7 +216,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     }).toList();
 
     final descriptionParts = <String>[];
-    descriptionParts.add('🤖 Hybrid AI Detection (2 Models):');
+    descriptionParts.add('🤖 AI Detection Results:');
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
@@ -228,7 +228,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
 
     descriptionParts.add('');
     descriptionParts.add('📊 Average confidence: $avgConfidence%');
-    descriptionParts.add('🎯 Pothole model (98%+) + Unified model (filtered)');
+    descriptionParts.add('🎯 Detected by RoadFix Unified Model');
 
     final autoDescription = descriptionParts.join('\n');
 
