@@ -63,13 +63,13 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Loading AI Models",
-      description: "Loading sequential detection:\n1. Pothole Model\n2. Unified Model",
+      description: "Loading 3 models:\n1. Pothole\n2. Roadblocks\n3. Utility Pole",
     );
 
     try {
-      debugPrint('📥 Loading sequential models...');
+      debugPrint('📥 Loading 3 sequential models...');
       await _detectionService.loadAllModels();
-      debugPrint('✅ All models ready!');
+      debugPrint('✅ All 3 models ready!');
     } catch (e) {
       debugPrint('❌ Failed to load models: $e');
       if (mounted) {
@@ -117,12 +117,12 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description: "Running sequential detection:\n1. Pothole Model\n2. Unified Model",
+      description: "Running 3 models:\n1. Pothole\n2. Roadblocks\n3. Utility Pole",
     );
 
     try {
       debugPrint('\n========================================');
-      debugPrint('🚀 SEQUENTIAL DETECTION (2 MODELS)');
+      debugPrint('🚀 SEQUENTIAL DETECTION (3 MODELS)');
       debugPrint('========================================');
 
       // 🎯 Run sequential detection
@@ -216,7 +216,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     }).toList();
 
     final descriptionParts = <String>[];
-    descriptionParts.add('🤖 Sequential AI Detection (2 Models):');
+    descriptionParts.add('🤖 Sequential AI Detection (3 Models):');
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
@@ -228,7 +228,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
 
     descriptionParts.add('');
     descriptionParts.add('📊 Average confidence: $avgConfidence%');
-    descriptionParts.add('🎯 Pothole Model → Unified Model (Sequential)');
+    descriptionParts.add('🎯 Pothole → Roadblocks → Utility Pole (Sequential)');
 
     final autoDescription = descriptionParts.join('\n');
 

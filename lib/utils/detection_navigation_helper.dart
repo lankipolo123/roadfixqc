@@ -4,16 +4,16 @@ import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/hybrid_detection_screen.dart';
 import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
 
-/// 🚀 SEQUENTIAL NAVIGATION: 2 models running sequentially!
+/// 🚀 SEQUENTIAL NAVIGATION: 3 models running sequentially!
 class NavigationHelper {
-  /// Navigate to sequential detection screen - runs 2 models (Pothole → Unified)
+  /// Navigate to sequential detection screen - runs 3 models (Pothole → Roadblocks → Utility Pole)
   static Future<void> navigateToDetection(
     BuildContext context,
     ReportCategory category,
     ImageSourceOption imageSourceOption,
   ) async {
     debugPrint('🧭 Sequential Navigation: ${category.type} with $imageSourceOption');
-    debugPrint('   → Using Sequential Detection (2 Models)');
+    debugPrint('   → Using Sequential Detection (3 Models)');
 
     // Convert ImageSourceOption to ImageSource
     ImageSource? source;

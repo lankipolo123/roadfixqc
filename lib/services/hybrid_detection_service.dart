@@ -7,17 +7,22 @@ import 'package:ultralytics_yolo/yolo.dart';
 import '../models/detection_result.dart';
 
 /// 🚀 SEQUENTIAL DETECTION SERVICE
-/// Runs 2 models sequentially: Pothole Model → Unified Model
+/// Runs 3 models sequentially: Pothole → Roadblocks → Utility Pole
 class HybridDetectionService {
   YOLO? _potholeModel;
-  YOLO? _unifiedModel;
+  YOLO? _roadblocksModel;
+  YOLO? _utilityPoleModel;
 
   bool _isPotholeModelLoaded = false;
-  bool _isUnifiedModelLoaded = false;
+  bool _isRoadblocksModelLoaded = false;
+  bool _isUtilityPoleModelLoaded = false;
 
-  bool get allModelsLoaded => _isPotholeModelLoaded && _isUnifiedModelLoaded;
+  bool get allModelsLoaded =>
+      _isPotholeModelLoaded &&
+      _isRoadblocksModelLoaded &&
+      _isUtilityPoleModelLoaded;
 
-  /// Classes to block from POTHOLE model
+  /// Classes to block from each model
   static const List<String> blockedFromPothole = [
     'Sewage-Manhole',
     'Stable',
@@ -30,21 +35,34 @@ class HybridDetectionService {
     'Tires',
   ];
 
-  /// Classes to block from UNIFIED model
-  static const List<String> blockedFromUnified = [
-    'Pothole', // Handled by pothole model
-    'Road-Cracks', // Handled by pothole model
+  static const List<String> blockedFromRoadblocks = [
+    'Pothole',
+    'Road-Cracks',
     'Sewage-Manhole',
     'Stable',
     'Tires_with_rim',
     'Traffic_Cones',
     'Road_Barrier',
+    'Compromised-Pole',
   ];
 
-  /// Load both models
+  static const List<String> blockedFromUtilityPole = [
+    'Pothole',
+    'Road-Cracks',
+    'Sewage-Manhole',
+    'Stable',
+    'Tires_with_rim',
+    'Traffic_Cones',
+    'Road_Barrier',
+    'Fallen-Barrier',
+    'Fallen-Cone',
+    'Tires',
+  ];
+
+  /// Load all 3 models
   Future<void> loadAllModels() async {
     debugPrint('\n🔄 ========================================');
-    debugPrint('📦 LOADING SEQUENTIAL DETECTION (2 MODELS)');
+    debugPrint('📦 LOADING SEQUENTIAL DETECTION (3 MODELS)');
     debugPrint('========================================');
 
     try {
@@ -59,20 +77,32 @@ class HybridDetectionService {
       _isPotholeModelLoaded = true;
       debugPrint('   ✅ Pothole model loaded');
 
-      // Model 2: Unified Model
-      debugPrint('\n2️⃣ Loading Unified Model...');
-      _unifiedModel = YOLO(
-        modelPath: 'roadfix-model_float32.tflite',
+      // Model 2: Roadblocks Detection
+      debugPrint('\n2️⃣ Loading Roadblocks Model...');
+      _roadblocksModel = YOLO(
+        modelPath: 'roadblocks_FP32.tflite',
         task: YOLOTask.detect,
         useGpu: true,
       );
-      await _unifiedModel!.loadModel();
-      _isUnifiedModelLoaded = true;
-      debugPrint('   ✅ Unified model loaded');
+      await _roadblocksModel!.loadModel();
+      _isRoadblocksModelLoaded = true;
+      debugPrint('   ✅ Roadblocks model loaded');
+
+      // Model 3: Utility Pole Detection
+      debugPrint('\n3️⃣ Loading Utility Pole Model...');
+      _utilityPoleModel = YOLO(
+        modelPath: 'BEST_UtilityPole_98.1percent_FP32.tflite',
+        task: YOLOTask.detect,
+        useGpu: true,
+      );
+      await _utilityPoleModel!.loadModel();
+      _isUtilityPoleModelLoaded = true;
+      debugPrint('   ✅ Utility Pole model loaded');
 
       debugPrint('\n✅ SEQUENTIAL DETECTION READY!');
       debugPrint('   Model 1: Potholes & Road-Cracks');
-      debugPrint('   Model 2: All other hazards');
+      debugPrint('   Model 2: Roadblocks (Barriers, Cones, Tires)');
+      debugPrint('   Model 3: Utility Poles');
       debugPrint('========================================\n');
     } catch (e) {
       debugPrint('❌ Error loading models: $e');
@@ -80,7 +110,7 @@ class HybridDetectionService {
     }
   }
 
-  /// Main detection method - runs models SEQUENTIALLY
+  /// Main detection method - runs 3 models SEQUENTIALLY
   Future<List<DetectionResult>> detectAllHazards(
     File imageFile, {
     double confidenceThreshold = 0.3,
@@ -90,7 +120,7 @@ class HybridDetectionService {
     }
 
     debugPrint('\n🚀 ========================================');
-    debugPrint('🔥 SEQUENTIAL DETECTION START (2 MODELS)');
+    debugPrint('🔥 SEQUENTIAL DETECTION START (3 MODELS)');
     debugPrint('========================================');
 
     final Uint8List imageBytes = await imageFile.readAsBytes();
@@ -111,17 +141,29 @@ class HybridDetectionService {
     allDetections.addAll(potholeResults);
     debugPrint('   ✅ Found ${potholeResults.length} potholes/cracks');
 
-    // 🔵 MODEL 2: Unified Model (runs SECOND, after pothole model)
-    debugPrint('\n2️⃣ Running UNIFIED MODEL...');
-    final unifiedResults = await _runModel(
-      _unifiedModel!,
+    // 🔵 MODEL 2: Roadblocks Detection (runs SECOND)
+    debugPrint('\n2️⃣ Running ROADBLOCKS MODEL...');
+    final roadblocksResults = await _runModel(
+      _roadblocksModel!,
       imageBytes,
-      'Unified Model',
+      'Roadblocks Model',
       confidenceThreshold: 0.3,
-      blockClasses: blockedFromUnified,
+      blockClasses: blockedFromRoadblocks,
     );
-    allDetections.addAll(unifiedResults);
-    debugPrint('   ✅ Found ${unifiedResults.length} other hazards');
+    allDetections.addAll(roadblocksResults);
+    debugPrint('   ✅ Found ${roadblocksResults.length} roadblocks');
+
+    // 🟡 MODEL 3: Utility Pole Detection (runs THIRD)
+    debugPrint('\n3️⃣ Running UTILITY POLE MODEL...');
+    final poleResults = await _runModel(
+      _utilityPoleModel!,
+      imageBytes,
+      'Utility Pole Model',
+      confidenceThreshold: 0.3,
+      blockClasses: blockedFromUtilityPole,
+    );
+    allDetections.addAll(poleResults);
+    debugPrint('   ✅ Found ${poleResults.length} utility poles');
 
     stopwatch.stop();
 
@@ -130,7 +172,8 @@ class HybridDetectionService {
     debugPrint('✅ SEQUENTIAL DETECTION COMPLETE');
     debugPrint('   Total time: ${stopwatch.elapsedMilliseconds}ms');
     debugPrint('   Model 1 (Pothole): ${potholeResults.length}');
-    debugPrint('   Model 2 (Unified): ${unifiedResults.length}');
+    debugPrint('   Model 2 (Roadblocks): ${roadblocksResults.length}');
+    debugPrint('   Model 3 (Utility Pole): ${poleResults.length}');
     debugPrint('   TOTAL: ${allDetections.length}');
 
     // Group by type
