@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 class EmailService {
   // Vercel API endpoint
-  static const String _baseUrl = 'https://roadfix-web.vercel.app/api';
+  static const String _baseUrl = 'https://roadfix-dashboard.vercel.app/api';
 
   /// Send verification email via Vercel API
   /// Returns null on success, error message on failure
