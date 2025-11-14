@@ -1,200 +1,447 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ultralytics_yolo/yolo.dart';
-import '../models/detection_result.dart';
+import 'package:roadfix/models/detection_result.dart';
+import 'package:roadfix/models/report_category_model.dart';
+import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
+import 'package:roadfix/services/image_proccessor_service.dart';
+import 'package:roadfix/services/sequential_detection_service.dart'; // ✅ CHANGED
+import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
+import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
+import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
+import 'package:roadfix/widgets/themes.dart';
 
-/// 🚀 UNIFIED DETECTION SERVICE
-/// Single model for all hazard detection
-class HybridDetectionService {
-  YOLO? _model;
-  bool _isModelLoaded = false;
+/// 🚀 SEQUENTIAL DETECTION SCREEN
+/// Uses 3 specialized models for maximum accuracy
+class HybridDetectionScreen extends StatefulWidget {
+  final ImageSource? initialImageSource;
+  final ReportCategory? category;
 
-  bool get allModelsLoaded => _isModelLoaded;
+  const HybridDetectionScreen({
+    super.key,
+    this.initialImageSource,
+    this.category,
+  });
 
-  /// Classes to block (non-hazards)
-  static const List<String> blockedClasses = [
-    'Sewage-Manhole', // Not a road hazard
-    'Stable', // Not a hazard
-    'Tires_with_rim', // Use "Tires" instead
-    'Traffic_Cones', // Block
-    'Road_Barrier', // Block
-  ];
+  @override
+  State<HybridDetectionScreen> createState() => _HybridDetectionScreenState();
+}
 
-  /// Detectable hazard classes
-  static const List<String> hazardClasses = [
-    'Pothole',
-    'Road-Cracks',
-    'Compromised-Pole',
-    'Fallen-Barrier',
-    'Fallen-Cone',
-    'Tires',
-  ];
+class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
+  final SequentialDetectionService _detectionService =
+      SequentialDetectionService(); // ✅ CHANGED
+  bool _isProcessing = false;
+  bool _isZoomedView = false;
 
-  /// Load model
-  Future<void> loadAllModels() async {
-    debugPrint('\n🔄 ========================================');
-    debugPrint('📦 LOADING UNIFIED MODEL');
-    debugPrint('========================================');
+  File? _selectedImage;
+  ui.Image? _decodedImage;
+  List<DetectionResult> _detections = [];
 
-    try {
-      debugPrint('\n🎯 Loading RoadFix Unified Model (FP32)...');
-      _model = YOLO(
-        modelPath: 'roadfix-model_float32.tflite',
-        task: YOLOTask.detect,
-        useGpu: true,
-      );
-      await _model!.loadModel();
-      _isModelLoaded = true;
-      debugPrint('   ✅ Model loaded (roadfix-model_float32.tflite)');
-      debugPrint('   📋 Detects: ${hazardClasses.join(", ")}');
-      debugPrint('   🚫 Blocks: ${blockedClasses.join(", ")}');
+  @override
+  void initState() {
+    super.initState();
+    // ✅ FIXED: Schedule after frame is built
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAndPickImage();
+    });
+  }
 
-      debugPrint('\n✅ UNIFIED DETECTION READY!');
-      debugPrint('========================================\n');
-    } catch (e) {
-      debugPrint('❌ Error loading model: $e');
-      rethrow;
+  @override
+  void dispose() {
+    _detectionService.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeAndPickImage() async {
+    if (!mounted) return;
+
+    debugPrint('🔄 Initializing sequential detection (3 models)...');
+    await _loadModels();
+
+    if (widget.initialImageSource != null && mounted) {
+      debugPrint('📸 Auto-picking image from ${widget.initialImageSource}');
+      await _pickImageFromSource(widget.initialImageSource!);
     }
   }
 
-  /// Main detection method
-  Future<List<DetectionResult>> detectAllHazards(
-    File imageFile, {
-    double confidenceThreshold = 0.3,
-  }) async {
-    if (!allModelsLoaded) {
-      throw Exception('Model not loaded');
-    }
+  Future<void> _loadModels() async {
+    if (!mounted) return;
 
-    debugPrint('\n🚀 ========================================');
-    debugPrint('🔥 UNIFIED DETECTION START');
-    debugPrint('========================================');
-
-    final Uint8List imageBytes = await imageFile.readAsBytes();
-    debugPrint('📸 Image size: ${imageBytes.length} bytes');
-
-    final stopwatch = Stopwatch()..start();
-
-    // Run model
-    debugPrint('\n🎯 Running Unified Model...');
-    final detections = await _runModel(
-      _model!,
-      imageBytes,
-      confidenceThreshold: confidenceThreshold,
+    LoadingModal.show(
+      context,
+      title: "Loading AI Models",
+      description:
+          "Loading 3 specialized models:\n• Pothole Detection\n• Utility Pole Detection\n• Roadblock Detection",
     );
 
-    stopwatch.stop();
-
-    // Summary
-    debugPrint('\n📊 ========================================');
-    debugPrint('✅ DETECTION COMPLETE');
-    debugPrint('   Total inference time: ${stopwatch.elapsedMilliseconds}ms');
-    debugPrint('   Total detections: ${detections.length}');
-
-    // Group by type
-    final Map<String, int> counts = {};
-    for (var d in detections) {
-      counts[d.className] = (counts[d.className] ?? 0) + 1;
-    }
-
-    if (counts.isNotEmpty) {
-      debugPrint('\n   Detected by class:');
-      for (var entry in counts.entries) {
-        debugPrint('      • ${entry.key}: ${entry.value}');
+    try {
+      debugPrint('📥 Loading all 3 models...');
+      await _detectionService.loadAllModels();
+      debugPrint('✅ All models ready!');
+    } catch (e) {
+      debugPrint('❌ Failed to load models: $e');
+      if (mounted) {
+        LoadingModal.hide(context);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load models: $e'),
+            backgroundColor: statusDanger,
+            duration: const Duration(seconds: 4),
+          ),
+        );
+        Navigator.pop(context);
       }
+      return;
     }
-    debugPrint('========================================\n');
 
-    return detections;
+    if (mounted) {
+      LoadingModal.hide(context);
+      setState(() {});
+    }
   }
 
-  /// Helper: Run model and parse results
-  Future<List<DetectionResult>> _runModel(
-    YOLO model,
-    Uint8List imageBytes, {
-    required double confidenceThreshold,
-  }) async {
-    final output = await model.predict(imageBytes);
-    final rawBoxes = output['boxes'];
+  Future<void> _pickImageFromSource(ImageSource source) async {
+    if (!mounted) return;
 
-    if (rawBoxes == null || rawBoxes.isEmpty) {
-      debugPrint('   ⚠️ No detections');
-      return [];
+    debugPrint('🎯 Calling ImagePicker with source: $source');
+    final imageFile = await _detectionService.pickImageFromSource(source);
+
+    if (imageFile == null) {
+      debugPrint('❌ User cancelled image selection');
+      if (mounted) Navigator.pop(context);
+      return;
     }
 
-    final List<DetectionResult> results = [];
-    int blockedCount = 0;
+    debugPrint('✅ Image selected: ${imageFile.path}');
 
-    for (var box in rawBoxes) {
-      final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
-      final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
-      final double x2Norm = (box['x2_norm'] ?? 0).toDouble();
-      final double y2Norm = (box['y2_norm'] ?? 0).toDouble();
-      final double conf = (box['confidence'] ?? 0).toDouble();
-      final String className = box['className'] ?? 'Unknown';
+    final decodedImage = await _detectionService.decodeImage(imageFile);
+    if (!mounted) return;
 
-      // Skip low confidence
-      if (conf < confidenceThreshold) continue;
+    setState(() {
+      _selectedImage = imageFile;
+      _decodedImage = decodedImage;
+      _isProcessing = true;
+      _detections.clear();
+      _isZoomedView = false;
+    });
 
-      // 🚫 BLOCK non-hazard classes
-      if (blockedClasses.contains(className)) {
-        blockedCount++;
-        debugPrint('   🚫 BLOCKED: $className');
-        continue;
-      }
+    LoadingModal.show(
+      context,
+      title: "Analyzing Image",
+      description:
+          "Running 3 detection models:\n• Pothole Model\n• Utility Pole Model\n• Roadblock Model",
+    );
 
-      // Calculate center and size
-      final double xc = (x1Norm + x2Norm) / 2;
-      final double yc = (y1Norm + y2Norm) / 2;
-      final double w = x2Norm - x1Norm;
-      final double h = y2Norm - y1Norm;
+    try {
+      debugPrint('\n========================================');
+      debugPrint('🚀 SEQUENTIAL DETECTION');
+      debugPrint('========================================');
 
-      results.add(
-        DetectionResult(
-          centerX: xc,
-          centerY: yc,
-          width: w,
-          height: h,
-          confidence: conf,
-          className: className,
-        ),
+      // 🎯 Run sequential detection (3 models)
+      final detections = await _detectionService.detectAllHazards(
+        imageFile,
+        confidenceThreshold: 0.3,
       );
 
-      debugPrint('   ✅ $className: ${(conf * 100).toStringAsFixed(1)}%');
-    }
+      debugPrint('\n📊 FINAL RESULTS:');
+      debugPrint('   Total hazards detected: ${detections.length}');
 
-    if (blockedCount > 0) {
-      debugPrint('   📊 Blocked $blockedCount detections');
-    }
+      // Group by type
+      final Map<String, int> counts = {};
+      for (var d in detections) {
+        counts[d.className] = (counts[d.className] ?? 0) + 1;
+      }
 
-    return results;
+      if (detections.isEmpty) {
+        debugPrint('   ⚠️ No hazards detected!');
+      } else {
+        debugPrint('\n   Breakdown:');
+        for (var entry in counts.entries) {
+          debugPrint('      - ${entry.key}: ${entry.value}');
+        }
+      }
+      debugPrint('========================================\n');
+
+      if (!mounted) return;
+      setState(() {
+        _detections = detections;
+        _isProcessing = false;
+      });
+
+      LoadingModal.hide(context);
+    } catch (e) {
+      debugPrint('❌ Detection failed: $e');
+      if (!mounted) return;
+
+      setState(() => _isProcessing = false);
+      LoadingModal.hide(context);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text("Detection error: $e"),
+          backgroundColor: statusDanger,
+        ),
+      );
+    }
   }
 
-  /// Pick image
-  Future<File?> pickImageFromSource(ImageSource source) async {
-    final picker = ImagePicker();
-    final XFile? pickedFile = await picker.pickImage(source: source);
+  Future<void> _confirmReport() async {
+    if (!mounted) return;
 
-    if (pickedFile == null) {
-      return null;
+    if (_detections.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No hazards detected. Please try another image.'),
+          backgroundColor: statusDanger,
+          duration: Duration(seconds: 3),
+        ),
+      );
+      return;
     }
 
-    return File(pickedFile.path);
+    CompactLoadingModal.show(context, message: "Preparing report...");
+
+    final processedImagePath = await ImageProcessorService.createProcessedImage(
+      _selectedImage!,
+      _decodedImage!,
+      _detections,
+    );
+
+    if (!mounted) return;
+    CompactLoadingModal.hide(context);
+
+    // Build detection summary
+    final Map<String, int> detectionCounts = {};
+    double totalConfidence = 0;
+
+    for (var detection in _detections) {
+      detectionCounts[detection.className] =
+          (detectionCounts[detection.className] ?? 0) + 1;
+      totalConfidence += detection.confidence;
+    }
+
+    final avgConfidence = (totalConfidence / _detections.length * 100)
+        .toStringAsFixed(1);
+
+    final detectionTags = detectionCounts.keys.map((className) {
+      return _formatDisplayName(className);
+    }).toList();
+
+    final descriptionParts = <String>[];
+    descriptionParts.add('🤖 AI Detection Results (3 Models):');
+    descriptionParts.add('');
+
+    for (var entry in detectionCounts.entries) {
+      final displayName = _formatDisplayName(entry.key);
+      descriptionParts.add(
+        '• ${entry.value}x $displayName${entry.value > 1 ? 's' : ''}',
+      );
+    }
+
+    descriptionParts.add('');
+    descriptionParts.add('📊 Average confidence: $avgConfidence%');
+    descriptionParts.add('🎯 Sequential Detection System');
+
+    final autoDescription = descriptionParts.join('\n');
+
+    if (processedImagePath != null) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => SendReportScreen(
+            imagePath: processedImagePath,
+            reportType: widget.category?.label ?? 'Road Hazard',
+            detections: detectionTags,
+            autoDescription: autoDescription,
+          ),
+        ),
+      );
+    }
   }
 
-  /// Decode image
-  Future<ui.Image> decodeImage(File imageFile) async {
-    final bytes = await imageFile.readAsBytes();
-    final codec = await ui.instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    return frame.image;
+  String _formatDisplayName(String className) {
+    switch (className) {
+      case 'Compromised-Pole':
+        return 'Broken Utility Pole';
+      case 'Fallen-Barrier':
+        return 'Fallen Barrier';
+      case 'Fallen-Cone':
+        return 'Fallen Cone';
+      case 'Pothole':
+        return 'Pothole';
+      case 'Road-Cracks':
+      case 'Road_Crack':
+        return 'Road Crack';
+      case 'Road_Barrier':
+        return 'Road Barrier';
+      case 'Sewage-Manhole':
+        return 'Sewage Manhole';
+      case 'Stable':
+        return 'Stable Object';
+      case 'Tires':
+        return 'Tire';
+      case 'Tires_with_rim':
+        return 'Tire with Rim';
+      case 'Traffic_Cones':
+        return 'Traffic Cone';
+      default:
+        return className.replaceAll('_', ' ').replaceAll('-', ' ');
+    }
   }
 
-  /// Dispose
-  void dispose() {
-    debugPrint('🗑️ Disposing detection service');
+  void _retakePhoto() {
+    setState(() {
+      _selectedImage = null;
+      _decodedImage = null;
+      _detections.clear();
+      _isZoomedView = false;
+    });
+  }
+
+  void _toggleZoomView() {
+    setState(() {
+      _isZoomedView = !_isZoomedView;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: secondary,
+      body: SafeArea(
+        child: _selectedImage == null
+            ? _buildEmptyState()
+            : _buildDetectionView(),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(color: primary),
+          const SizedBox(height: 24),
+          const Text(
+            'Preparing Detection...',
+            style: TextStyle(
+              color: inputFill,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 8),
+          const Padding(
+            padding: EdgeInsets.symmetric(horizontal: 40),
+            child: Text(
+              'Loading 3 specialized AI models',
+              style: TextStyle(color: altSecondary, fontSize: 14),
+              textAlign: TextAlign.center,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDetectionView() {
+    final displayScale = _isZoomedView ? 2.0 : 1.0;
+
+    return Stack(
+      children: [
+        if (_selectedImage != null && _decodedImage != null)
+          Center(
+            child: GestureDetector(
+              onTap: _toggleZoomView,
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                curve: Curves.easeInOut,
+                child: AspectRatio(
+                  aspectRatio: _decodedImage!.width / _decodedImage!.height,
+                  child: Stack(
+                    children: [
+                      Transform.scale(
+                        scale: displayScale,
+                        child: Image.file(_selectedImage!, fit: BoxFit.contain),
+                      ),
+                      if (!_isProcessing)
+                        Positioned.fill(
+                          child: Transform.scale(
+                            scale: displayScale,
+                            child: CustomPaint(
+                              painter: BoundingBoxPainter(
+                                detections: _detections,
+                              ),
+                            ),
+                          ),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+          ),
+        if (_selectedImage != null)
+          Positioned(
+            top: 80,
+            left: 0,
+            right: 0,
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  color: secondary.withValues(alpha: 0.8),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      _isZoomedView ? Icons.zoom_in : Icons.zoom_out,
+                      color: primary,
+                      size: 20,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      _isZoomedView
+                          ? 'Zoomed 2x - Tap to see full'
+                          : 'Full view - Tap to zoom',
+                      style: const TextStyle(color: inputFill, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        if (!_isProcessing && _selectedImage != null)
+          Positioned(
+            bottom: 30,
+            left: 20,
+            right: 20,
+            child: DetectionBottomCard(
+              detections: _detections,
+              categoryLabel: 'Sequential (3 Models)',
+              onConfirm: _confirmReport,
+              onCancel: _retakePhoto,
+            ),
+          ),
+        Positioned(
+          top: 20,
+          left: 20,
+          child: IconButton(
+            onPressed: () => Navigator.pop(context),
+            style: IconButton.styleFrom(
+              backgroundColor: secondary.withValues(alpha: 0.7),
+            ),
+            icon: const Icon(Icons.arrow_back, color: inputFill),
+          ),
+        ),
+      ],
+    );
   }
 }

@@ -29,10 +29,7 @@ class UnifiedDetectionService {
   ];
 
   /// Classes to filter out (ignore these detections)
-  static const List<String> filteredClasses = [
-    'Tires_with_rim',
-    'Stable_Tree',
-  ];
+  static const List<String> filteredClasses = ['Tires_with_rim', 'Stable_Tree'];
 
   /// Load the unified YOLO model
   Future<void> loadModel() async {
@@ -40,12 +37,13 @@ class UnifiedDetectionService {
     dispose();
 
     _yolo = YOLO(
-      modelPath: 'lanki_capstone_FP32.tflite', // Unified model (train new one with all categories)
+      modelPath:
+          'lanki_capstone_FP32', // Unified model (train new one with all categories)
       task: YOLOTask.detect,
       useGpu: true, // Enable GPU for better performance
     );
     await _yolo!.loadModel();
-    debugPrint('✅ Unified RoadFix YOLO model loaded (lanki_capstone_FP32.tflite)');
+    debugPrint('✅ Unified RoadFix YOLO model loaded (lanki_capstone_FP32)');
     _isModelLoaded = true;
   }
 
@@ -185,11 +183,19 @@ class UnifiedDetectionService {
 
   /// Detect specific category (convenience methods)
   Future<List<DetectionResult>> detectPotholes(File imageFile) async {
-    return detectObjects(imageFile, filterCategory: 'Pothole', confidenceThreshold: 0.4);
+    return detectObjects(
+      imageFile,
+      filterCategory: 'Pothole',
+      confidenceThreshold: 0.4,
+    );
   }
 
   Future<List<DetectionResult>> detectBrokenPoles(File imageFile) async {
-    return detectObjects(imageFile, filterCategory: 'Broken_Pole', confidenceThreshold: 0.3);
+    return detectObjects(
+      imageFile,
+      filterCategory: 'Broken_Pole',
+      confidenceThreshold: 0.3,
+    );
   }
 
   Future<List<DetectionResult>> detectRoadblocks(File imageFile) async {
@@ -198,14 +204,26 @@ class UnifiedDetectionService {
   }
 
   Future<List<DetectionResult>> detectFallenCones(File imageFile) async {
-    return detectObjects(imageFile, filterCategory: 'Fallen_Cone', confidenceThreshold: 0.3);
+    return detectObjects(
+      imageFile,
+      filterCategory: 'Fallen_Cone',
+      confidenceThreshold: 0.3,
+    );
   }
 
   Future<List<DetectionResult>> detectFallenBarriers(File imageFile) async {
-    return detectObjects(imageFile, filterCategory: 'Fallen_Barrier', confidenceThreshold: 0.3);
+    return detectObjects(
+      imageFile,
+      filterCategory: 'Fallen_Barrier',
+      confidenceThreshold: 0.3,
+    );
   }
 
   Future<List<DetectionResult>> detectRoadCracks(File imageFile) async {
-    return detectObjects(imageFile, filterCategory: 'Road_Crack', confidenceThreshold: 0.4);
+    return detectObjects(
+      imageFile,
+      filterCategory: 'Road_Crack',
+      confidenceThreshold: 0.4,
+    );
   }
 }

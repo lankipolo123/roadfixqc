@@ -54,26 +54,23 @@ class ReportTypeScreen extends StatelessWidget {
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: primary.withValues(alpha: 0.1),
-                          border: Border.all(
-                            color: primary,
-                            width: 4,
-                          ),
+                          border: Border.all(color: primary, width: 4),
                         ),
-                        child: Center(
+                        child: const Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               // Question mark
-                              const Icon(
+                              Icon(
                                 Icons.question_mark_rounded,
                                 size: 100,
                                 color: primary,
                               ),
 
-                              const SizedBox(height: 16),
+                              SizedBox(height: 16),
 
                               // Text inside circle
-                              const Text(
+                              Text(
                                 'Detect Road Issues',
                                 style: TextStyle(
                                   fontSize: 20,
@@ -94,10 +91,7 @@ class ReportTypeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 40),
                         child: Text(
                           'Tap to detect potholes, cracks, poles, and roadblocks',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: altSecondary,
-                          ),
+                          style: TextStyle(fontSize: 14, color: altSecondary),
                           textAlign: TextAlign.center,
                         ),
                       ),
