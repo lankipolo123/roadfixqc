@@ -22,30 +22,14 @@ class SequentialDetectionService {
       _isUtilityPoleModelLoaded &&
       _isRoadblockModelLoaded;
 
-  /// ✅ UPDATED: Classes to filter out completely
-  static const List<String> filteredClasses = [
-    'Stable', // Not a hazard
-    'Sewage-Manhole', // Not a road hazard
-    'Tires_with_rim', // ✅ FILTER OUT
-    'Tires', // ✅ FILTER OUT
-    'Road_Barrier', // ✅ FILTER OUT (not fallen)
-    'Traffic_Cones', // ✅ FILTER OUT (not fallen)
-    'Road-Cracks', // ✅ FILTER OUT
-    'Road_Crack', // ✅ FILTER OUT
-  ];
-
-  /// ✅ REPORTABLE CLASSES (only these will be reported)
-  static const List<String> reportableClasses = [
-    'Pothole',
-    'Compromised-Pole',
-    'Fallen-Barrier',
-    'Fallen-Cone',
-  ];
+  /// ⚠️ ALL FILTERS TEMPORARILY DISABLED FOR TESTING
+  /// This will show ALL detections from all 3 models
 
   /// Load all 3 models
   Future<void> loadAllModels() async {
     debugPrint('\n🔄 ========================================');
     debugPrint('📦 LOADING 3 SEQUENTIAL MODELS');
+    debugPrint('⚠️ ALL FILTERS DISABLED - TESTING MODE');
     debugPrint('========================================');
 
     // MODEL 1: POTHOLE
@@ -125,8 +109,7 @@ class SequentialDetectionService {
 
     debugPrint('\n✅ ========================================');
     debugPrint('🎉 ALL 3 MODELS LOADED SUCCESSFULLY!');
-    debugPrint('📋 Reportable classes: ${reportableClasses.join(", ")}');
-    debugPrint('🚫 Filtered classes: ${filteredClasses.join(", ")}');
+    debugPrint('⚠️ TESTING MODE: All detections will be shown');
     debugPrint('========================================\n');
   }
 
@@ -169,12 +152,20 @@ class SequentialDetectionService {
     File imageFile, {
     double confidenceThreshold = 0.3,
   }) async {
+    // Check model status
+    debugPrint('\n🔍 PRE-DETECTION MODEL CHECK:');
+    debugPrint('   Pothole loaded: $_isPotholeModelLoaded');
+    debugPrint('   Utility Pole loaded: $_isUtilityPoleModelLoaded');
+    debugPrint('   Roadblock loaded: $_isRoadblockModelLoaded');
+    debugPrint('   All models loaded: $allModelsLoaded');
+
     if (!allModelsLoaded) {
       throw Exception('Not all models are loaded');
     }
 
     debugPrint('\n🚀 ========================================');
     debugPrint('🔥 SEQUENTIAL DETECTION - 3 MODELS');
+    debugPrint('⚠️ ALL FILTERS DISABLED - TESTING MODE');
     debugPrint('========================================');
 
     final Uint8List imageBytes = await imageFile.readAsBytes();
@@ -190,10 +181,13 @@ class SequentialDetectionService {
         _potholeModel!,
         imageBytes,
         'Pothole',
-        confidenceThreshold: 0.4,
+        confidenceThreshold: 0.15, // Lowered for testing
       );
       allDetections.addAll(potholeResults);
       debugPrint('   ✅ Pothole model: ${potholeResults.length} detections');
+      if (potholeResults.isEmpty) {
+        debugPrint('   ⚠️ NO POTHOLE DETECTIONS');
+      }
     } catch (e) {
       debugPrint('   ❌ Pothole model failed: $e');
     }
@@ -205,10 +199,13 @@ class SequentialDetectionService {
         _utilityPoleModel!,
         imageBytes,
         'Utility Pole',
-        confidenceThreshold: 0.3,
+        confidenceThreshold: 0.15, // Lowered for testing
       );
       allDetections.addAll(poleResults);
       debugPrint('   ✅ Utility Pole model: ${poleResults.length} detections');
+      if (poleResults.isEmpty) {
+        debugPrint('   ⚠️ NO UTILITY POLE DETECTIONS');
+      }
     } catch (e) {
       debugPrint('   ❌ Utility Pole model failed: $e');
     }
@@ -220,10 +217,13 @@ class SequentialDetectionService {
         _roadblockModel!,
         imageBytes,
         'Roadblock',
-        confidenceThreshold: 0.3,
+        confidenceThreshold: 0.15, // Lowered for testing
       );
       allDetections.addAll(roadblockResults);
       debugPrint('   ✅ Roadblock model: ${roadblockResults.length} detections');
+      if (roadblockResults.isEmpty) {
+        debugPrint('   ⚠️ NO ROADBLOCK DETECTIONS');
+      }
     } catch (e) {
       debugPrint('   ❌ Roadblock model failed: $e');
     }
@@ -266,7 +266,7 @@ class SequentialDetectionService {
         debugPrint('      • ${entry.key}: ${entry.value}');
       }
     } else {
-      debugPrint('   ⚠️ No hazards detected across all 3 models');
+      debugPrint('   ⚠️ No detections across all 3 models');
     }
     debugPrint('========================================\n');
 
@@ -274,6 +274,7 @@ class SequentialDetectionService {
   }
 
   /// Helper: Run a single model and parse results
+  /// ⚠️ NO FILTERING - ALL DETECTIONS RETURNED
   Future<List<DetectionResult>> _runModel(
     YOLO model,
     Uint8List imageBytes,
@@ -286,16 +287,14 @@ class SequentialDetectionService {
     final rawBoxes = output['boxes'];
 
     if (rawBoxes == null || rawBoxes.isEmpty) {
-      debugPrint('   ⚠️ No detections');
+      debugPrint('   ⚠️ No raw detections from model');
       return [];
     }
 
     debugPrint('   📦 Raw detections: ${rawBoxes.length}');
 
     final List<DetectionResult> results = [];
-    int filteredCount = 0;
     int lowConfCount = 0;
-    int notReportableCount = 0;
 
     for (var box in rawBoxes) {
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
@@ -305,23 +304,17 @@ class SequentialDetectionService {
       final double conf = (box['confidence'] ?? 0).toDouble();
       final String className = box['className'] ?? 'Unknown';
 
-      // Skip low confidence
+      // 🔍 DEBUG: Show every detection
+      debugPrint(
+        '      🔍 DETECTED: "$className" at ${(conf * 100).toStringAsFixed(1)}%',
+      );
+
+      // Only skip if confidence is too low
       if (conf < confidenceThreshold) {
         lowConfCount++;
-        continue;
-      }
-
-      // ✅ STRICT FILTERING: Skip filtered classes
-      if (filteredClasses.contains(className)) {
-        filteredCount++;
-        debugPrint('      🚫 FILTERED: $className');
-        continue;
-      }
-
-      // ✅ ONLY ALLOW REPORTABLE CLASSES
-      if (!reportableClasses.contains(className)) {
-        notReportableCount++;
-        debugPrint('      ⏭️ NOT REPORTABLE: $className');
+        debugPrint(
+          '         ↳ ❌ Low confidence (threshold: ${(confidenceThreshold * 100).toStringAsFixed(1)}%)',
+        );
         continue;
       }
 
@@ -342,11 +335,11 @@ class SequentialDetectionService {
         ),
       );
 
-      debugPrint('      ✅ $className: ${(conf * 100).toStringAsFixed(1)}%');
+      debugPrint('         ↳ ✅ KEPT!');
     }
 
     debugPrint(
-      '   📊 Results: ${results.length} kept, $lowConfCount low confidence, $filteredCount filtered, $notReportableCount not reportable',
+      '   📊 Results: ${results.length} kept, $lowConfCount below threshold',
     );
 
     return results;

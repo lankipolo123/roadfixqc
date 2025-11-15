@@ -30,21 +30,21 @@ class _ReportScreenState extends State<ReportScreen> {
         return allReports
             .where((r) => r.status == ReportStatus.pending)
             .toList();
-      case 2: // In Progress
-        return allReports
-            .where((r) => r.status == ReportStatus.inProgress)
-            .toList();
-      case 3: // Accepted
+      case 2: // Accepted
         return allReports
             .where((r) => r.status == ReportStatus.accepted)
             .toList();
-      case 4: // Resolved
-        return allReports
-            .where((r) => r.status == ReportStatus.resolved)
-            .toList();
-      case 5: // Invalid
+      case 3: // invalid
         return allReports
             .where((r) => r.status == ReportStatus.invalid)
+            .toList();
+      case 4: // inprogress
+        return allReports
+            .where((r) => r.status == ReportStatus.inProgress)
+            .toList();
+      case 5: // resolved
+        return allReports
+            .where((r) => r.status == ReportStatus.resolved)
             .toList();
       default: // All
         return allReports;

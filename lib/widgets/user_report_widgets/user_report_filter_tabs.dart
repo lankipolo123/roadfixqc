@@ -85,11 +85,11 @@ class ReportFilterTabs extends StatelessWidget {
       case 1:
         return statusWarning;
       case 2:
-        return purpleAccent;
-      case 3:
-        return tealAccent;
-      case 4:
         return statusSuccess;
+      case 3:
+        return statusDanger;
+      case 4:
+        return purpleAccent;
       case 5:
         return statusResolved;
       case 6:

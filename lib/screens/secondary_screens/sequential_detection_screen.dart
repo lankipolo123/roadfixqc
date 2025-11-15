@@ -132,11 +132,11 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
       // 🎯 Run all 3 models sequentially
       final detections = await _detectionService.detectAllHazards(
         imageFile,
-        confidenceThreshold: 0.3,
+        confidenceThreshold: 0.15, // Lowered for testing
       );
 
       debugPrint('\n📊 FINAL RESULTS:');
-      debugPrint('   Total hazards detected: ${detections.length}');
+      debugPrint('   Total detections: ${detections.length}');
 
       // Group by type
       final Map<String, int> counts = {};
@@ -145,7 +145,7 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
       }
 
       if (detections.isEmpty) {
-        debugPrint('   ⚠️ No hazards detected!');
+        debugPrint('   ⚠️ No detections!');
       } else {
         debugPrint('\n   Breakdown:');
         for (var entry in counts.entries) {
@@ -183,7 +183,7 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
     if (_detections.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('No hazards detected. Please try another image.'),
+          content: Text('No detections found. Please try another image.'),
           backgroundColor: statusDanger,
           duration: Duration(seconds: 3),
         ),
@@ -212,8 +212,8 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
       totalConfidence += detection.confidence;
     }
 
-    final avgConfidence =
-        (totalConfidence / _detections.length * 100).toStringAsFixed(1);
+    final avgConfidence = (totalConfidence / _detections.length * 100)
+        .toStringAsFixed(1);
 
     final detectionTags = detectionCounts.keys.map((className) {
       return _formatDisplayName(className);
@@ -232,8 +232,9 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
 
     descriptionParts.add('');
     descriptionParts.add('📊 Average confidence: $avgConfidence%');
-    descriptionParts
-        .add('🎯 3 specialized models (maximum accuracy on each category)');
+    descriptionParts.add(
+      '🎯 3 specialized models (maximum accuracy on each category)',
+    );
 
     final autoDescription = descriptionParts.join('\n');
 
@@ -263,13 +264,14 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
       case 'Pothole':
         return 'Pothole';
       case 'Road-Cracks':
+      case 'Road_Crack':
         return 'Road Crack';
       case 'Road_Barrier':
         return 'Road Barrier';
       case 'Sewage-Manhole':
         return 'Sewage Manhole';
       case 'Stable':
-        return 'Stable Object';
+        return 'Stable Pole';
       case 'Tires':
         return 'Tire';
       case 'Tires_with_rim':
@@ -318,13 +320,16 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
           const Text(
             'Sequential Detection Ready',
             style: TextStyle(
-                color: inputFill, fontSize: 18, fontWeight: FontWeight.bold),
+              color: inputFill,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
           const SizedBox(height: 8),
           const Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              '3 specialized AI models loaded:\n✓ Pothole Detection (98%+)\n✓ Utility Pole Detection (98.1%)\n✓ Roadblock Detection (95%+)',
+              '⚠️ TESTING MODE: All filters disabled\n3 specialized AI models loaded:\n✓ Pothole Detection (98%+)\n✓ Utility Pole Detection (98.1%)\n✓ Roadblock Detection (95%+)',
               style: TextStyle(color: altSecondary, fontSize: 14),
               textAlign: TextAlign.center,
             ),
@@ -435,7 +440,7 @@ class _SequentialDetectionScreenState extends State<SequentialDetectionScreen> {
             right: 20,
             child: DetectionBottomCard(
               detections: _detections,
-              categoryLabel: '3 Models (Sequential)',
+              categoryLabel: '3 Models (Testing Mode)',
               onConfirm: _confirmReport,
               onCancel: _retakePhoto,
             ),

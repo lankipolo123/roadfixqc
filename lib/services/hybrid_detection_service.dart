@@ -318,13 +318,13 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: primary),
-          const SizedBox(height: 24),
-          const Text(
+          CircularProgressIndicator(color: primary),
+          SizedBox(height: 24),
+          Text(
             'Preparing Detection...',
             style: TextStyle(
               color: inputFill,
@@ -332,8 +332,8 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
               fontWeight: FontWeight.bold,
             ),
           ),
-          const SizedBox(height: 8),
-          const Padding(
+          SizedBox(height: 8),
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
               'Loading 3 specialized AI models',

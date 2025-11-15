@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/constant/report_categories.dart';
 import 'package:roadfix/utils/detection_navigation_helper.dart';
-import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/common_widgets/dual_color_text.dart';
-import 'package:roadfix/widgets/reporting_widgets/report_category_button.dart';
 
 class ReportTypeScreen extends StatelessWidget {
   const ReportTypeScreen({super.key});
