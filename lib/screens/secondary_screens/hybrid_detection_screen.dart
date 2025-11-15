@@ -6,14 +6,14 @@ import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/image_proccessor_service.dart';
-import 'package:roadfix/services/hybrid_detection_service.dart';
+import 'package:roadfix/services/sequential_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 
-/// 🚀 UNIFIED DETECTION SCREEN
-/// Single model detecting all road hazards
+/// 🚀 SEQUENTIAL DETECTION SCREEN
+/// Uses 3 specialized models
 class HybridDetectionScreen extends StatefulWidget {
   final ImageSource? initialImageSource;
   final ReportCategory? category;
@@ -29,9 +29,9 @@ class HybridDetectionScreen extends StatefulWidget {
 }
 
 class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
-  final HybridDetectionService _detectionService = HybridDetectionService();
+  final SequentialDetectionService _detectionService =
+      SequentialDetectionService();
   bool _isProcessing = false;
-  bool _isZoomedView = false;
 
   File? _selectedImage;
   ui.Image? _decodedImage;
@@ -40,7 +40,9 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   @override
   void initState() {
     super.initState();
-    _initializeAndPickImage();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _initializeAndPickImage();
+    });
   }
 
   @override
@@ -50,7 +52,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Future<void> _initializeAndPickImage() async {
-    debugPrint('🔄 Initializing sequential detection (2 models)...');
+    debugPrint('🔄 Initializing unified detection...');
     await _loadModels();
 
     if (widget.initialImageSource != null && mounted) {
@@ -60,16 +62,19 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Future<void> _loadModels() async {
+    if (!mounted) return;
+
     LoadingModal.show(
       context,
-      title: "Loading AI Models",
-      description: "Loading 3 models:\n1. Pothole\n2. Roadblocks\n3. Utility Pole",
+      title: "Loading AI Model",
+      description:
+          "Loading RoadFix unified model\nDetecting all road hazards...",
     );
 
     try {
-      debugPrint('📥 Loading 3 sequential models...');
+      debugPrint('📥 Loading unified model...');
       await _detectionService.loadAllModels();
-      debugPrint('✅ All 3 models ready!');
+      debugPrint('✅ Model ready!');
     } catch (e) {
       debugPrint('❌ Failed to load models: $e');
       if (mounted) {
@@ -92,6 +97,8 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Future<void> _pickImageFromSource(ImageSource source) async {
+    if (!mounted) return;
+
     debugPrint('🎯 Calling ImagePicker with source: $source');
     final imageFile = await _detectionService.pickImageFromSource(source);
 
@@ -111,21 +118,20 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
       _decodedImage = decodedImage;
       _isProcessing = true;
       _detections.clear();
-      _isZoomedView = false;
     });
 
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description: "Running 3 models:\n1. Pothole\n2. Roadblocks\n3. Utility Pole",
+      description: "Running unified detection\nDetecting all road hazards...",
     );
 
     try {
       debugPrint('\n========================================');
-      debugPrint('🚀 SEQUENTIAL DETECTION (3 MODELS)');
+      debugPrint('🚀 UNIFIED DETECTION');
       debugPrint('========================================');
 
-      // 🎯 Run sequential detection
+      // 🎯 Run unified detection
       final detections = await _detectionService.detectAllHazards(
         imageFile,
         confidenceThreshold: 0.3,
@@ -134,7 +140,6 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
       debugPrint('\n📊 FINAL RESULTS:');
       debugPrint('   Total hazards detected: ${detections.length}');
 
-      // Group by type
       final Map<String, int> counts = {};
       for (var d in detections) {
         counts[d.className] = (counts[d.className] ?? 0) + 1;
@@ -198,7 +203,6 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     if (!mounted) return;
     CompactLoadingModal.hide(context);
 
-    // Build detection summary
     final Map<String, int> detectionCounts = {};
     double totalConfidence = 0;
 
@@ -208,15 +212,15 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
       totalConfidence += detection.confidence;
     }
 
-    final avgConfidence =
-        (totalConfidence / _detections.length * 100).toStringAsFixed(1);
+    final avgConfidence = (totalConfidence / _detections.length * 100)
+        .toStringAsFixed(1);
 
     final detectionTags = detectionCounts.keys.map((className) {
       return _formatDisplayName(className);
     }).toList();
 
     final descriptionParts = <String>[];
-    descriptionParts.add('🤖 Sequential AI Detection (3 Models):');
+    descriptionParts.add('🤖 AI Detection Results:');
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
@@ -228,7 +232,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
 
     descriptionParts.add('');
     descriptionParts.add('📊 Average confidence: $avgConfidence%');
-    descriptionParts.add('🎯 Pothole → Roadblocks → Utility Pole (Sequential)');
+    descriptionParts.add('🎯 Detected by RoadFix Unified Model');
 
     final autoDescription = descriptionParts.join('\n');
 
@@ -258,6 +262,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
       case 'Pothole':
         return 'Pothole';
       case 'Road-Cracks':
+      case 'Road_Crack':
         return 'Road Crack';
       case 'Road_Barrier':
         return 'Road Barrier';
@@ -281,13 +286,6 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
       _selectedImage = null;
       _decodedImage = null;
       _detections.clear();
-      _isZoomedView = false;
-    });
-  }
-
-  void _toggleZoomView() {
-    setState(() {
-      _isZoomedView = !_isZoomedView;
     });
   }
 
@@ -304,22 +302,25 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Widget _buildEmptyState() {
-    return Center(
+    return const Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const CircularProgressIndicator(color: primary),
-          const SizedBox(height: 24),
-          const Text(
+          CircularProgressIndicator(color: primary),
+          SizedBox(height: 24),
+          Text(
             'Preparing Detection...',
             style: TextStyle(
-                color: inputFill, fontSize: 18, fontWeight: FontWeight.bold),
+              color: inputFill,
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-          const SizedBox(height: 8),
-          const Padding(
+          SizedBox(height: 8),
+          Padding(
             padding: EdgeInsets.symmetric(horizontal: 40),
             child: Text(
-              'Please wait while we prepare the camera/gallery',
+              'Loading 3 specialized AI models',
               style: TextStyle(color: altSecondary, fontSize: 14),
               textAlign: TextAlign.center,
             ),
@@ -330,74 +331,22 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   }
 
   Widget _buildDetectionView() {
-    final displayScale = _isZoomedView ? 2.0 : 1.0;
-
     return Stack(
       children: [
         if (_selectedImage != null && _decodedImage != null)
           Center(
-            child: GestureDetector(
-              onTap: _toggleZoomView,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: AspectRatio(
-                  aspectRatio: _decodedImage!.width / _decodedImage!.height,
-                  child: Stack(
-                    children: [
-                      Transform.scale(
-                        scale: displayScale,
-                        child: Image.file(_selectedImage!, fit: BoxFit.contain),
+            child: AspectRatio(
+              aspectRatio: _decodedImage!.width / _decodedImage!.height,
+              child: Stack(
+                children: [
+                  Image.file(_selectedImage!, fit: BoxFit.contain),
+                  if (!_isProcessing)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: BoundingBoxPainter(detections: _detections),
                       ),
-                      if (!_isProcessing)
-                        Positioned.fill(
-                          child: Transform.scale(
-                            scale: displayScale,
-                            child: CustomPaint(
-                              painter: BoundingBoxPainter(
-                                detections: _detections,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-        if (_selectedImage != null)
-          Positioned(
-            top: 80,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: secondary.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _isZoomedView ? Icons.zoom_in : Icons.zoom_out,
-                      color: primary,
-                      size: 20,
                     ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _isZoomedView
-                          ? 'Zoomed 2x - Tap to see full'
-                          : 'Full view - Tap to zoom',
-                      style: const TextStyle(color: inputFill, fontSize: 12),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
@@ -408,7 +357,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
             right: 20,
             child: DetectionBottomCard(
               detections: _detections,
-              categoryLabel: 'Hybrid (2 Models)',
+              categoryLabel: 'Sequential (3 Models)',
               onConfirm: _confirmReport,
               onCancel: _retakePhoto,
             ),
