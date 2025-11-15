@@ -20,10 +20,10 @@ class ReportConstants {
   static const List<String> filterLabels = [
     'All', // 0
     'Pending', // 1
-    'Accepted', // 2
-    'Invalid', // 3
-    'Progress', // 4 (In Progress)
-    'Resolved', // 5
+    'Progress', // 2 (In Progress)
+    'Accepted', // 3
+    'Resolved', // 4
+    'Invalid', // 5
   ];
 
   // Status values (centralized)
