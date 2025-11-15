@@ -16,14 +16,14 @@ class ReportConstants {
   static const String emptyInvalidReports =
       'No invalid reports\nGreat job on your submissions!';
 
-  // Filter tab labels - UPDATED WITH SHORTER LABELS
+  // Filter tab labels - SYNCED WITH user_report_screen.dart filtering
   static const List<String> filterLabels = [
     'All', // 0
     'Pending', // 1
-    'Progress', // 2 (was "In Progress")
-    'Accepted', // 3
-    'Resolved', // 4
-    'Invalid', // 5
+    'Accepted', // 2
+    'Invalid', // 3
+    'Progress', // 4 (In Progress)
+    'Resolved', // 5
   ];
 
   // Status values (centralized)

@@ -80,20 +80,18 @@ class ReportFilterTabs extends StatelessWidget {
 
   Color _getFilterColor(int index) {
     switch (index) {
-      case 0:
+      case 0: // All
         return primary;
-      case 1:
+      case 1: // Pending
         return statusWarning;
-      case 2:
-        return purpleAccent;
-      case 3:
-        return tealAccent;
-      case 4:
+      case 2: // Accepted
         return statusSuccess;
-      case 5:
-        return statusResolved;
-      case 6:
+      case 3: // Invalid
         return statusDanger;
+      case 4: // In Progress
+        return tealAccent;
+      case 5: // Resolved
+        return statusResolved;
       default:
         return secondary;
     }
