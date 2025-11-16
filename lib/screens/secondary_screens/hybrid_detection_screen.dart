@@ -62,21 +62,21 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
   Future<void> _loadModels() async {
     LoadingModal.show(
       context,
-      title: "Loading AI Models",
-      description: "Loading 3 models:\n1. Pothole\n2. Roadblocks\n3. Utility Pole",
+      title: "Initializing Detection",
+      description: "Preparing sequential detection service\nModels load on-demand during detection",
     );
 
     try {
-      debugPrint('📥 Loading 3 sequential models...');
+      debugPrint('📥 Initializing sequential detection service...');
       await _detectionService.loadAllModels();
-      debugPrint('✅ All 3 models ready!');
+      debugPrint('✅ Service ready!');
     } catch (e) {
-      debugPrint('❌ Failed to load models: $e');
+      debugPrint('❌ Failed to initialize service: $e');
       if (mounted) {
         LoadingModal.hide(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load models: $e'),
+            content: Text('Failed to initialize service: $e'),
             backgroundColor: statusDanger,
           ),
         );
@@ -117,7 +117,7 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description: "Running 3 models:\n1. Pothole\n2. Roadblocks\n3. Utility Pole",
+      description: "Sequential detection (3 models):\n1. Pothole → 2. Roadblocks → 3. Utility Pole\nEach model loads on-demand",
     );
 
     try {
