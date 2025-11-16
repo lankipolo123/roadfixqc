@@ -30,10 +30,8 @@ class HybridDetectionService {
     'Pothole',
     'Road-Cracks',
     'Sewage-Manhole',
+    'Stable_Tree',
     'Stable',
-    'Tires_with_rim',
-    'Traffic_Cones',
-    'Road_Barrier',
     'Compromised-Pole',
   ];
 
