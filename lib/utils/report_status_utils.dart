@@ -12,7 +12,7 @@ class ReportStatusUtils {
       case ReportStatus.accepted:
         return statusSuccess; // Green
       case ReportStatus.inProgress:
-        return tealAccent; // Teal for in progress
+        return purpleAccent; // Purple for in progress
       case ReportStatus.resolved:
         return statusResolved; // Green
       case ReportStatus.invalid:

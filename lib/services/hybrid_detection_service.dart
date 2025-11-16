@@ -14,19 +14,10 @@ import 'package:roadfix/widgets/themes.dart';
 
 /// 🚀 SEQUENTIAL DETECTION SERVICE
 /// Runs 3 models sequentially: Pothole → Roadblocks → Utility Pole
+/// Uses LOAD → RUN → DISPOSE pattern for each model to ensure proper native loading
 class HybridDetectionService {
-  YOLO? _potholeModel;
-  YOLO? _roadblocksModel;
-  YOLO? _utilityPoleModel;
-
-  bool _isPotholeModelLoaded = false;
-  bool _isRoadblocksModelLoaded = false;
-  bool _isUtilityPoleModelLoaded = false;
-
-  bool get allModelsLoaded =>
-      _isPotholeModelLoaded &&
-      _isRoadblocksModelLoaded &&
-      _isUtilityPoleModelLoaded;
+  // Models are loaded on-demand during detection, not pre-loaded
+  // This is because ultralytics_yolo only supports one model at a time at native level
 
   /// Classes to block from each model
   static const List<String> blockedFromPothole = [
@@ -45,10 +36,8 @@ class HybridDetectionService {
     'Pothole',
     'Road-Cracks',
     'Sewage-Manhole',
+    'Stable_Tree',
     'Stable',
-    'Tires_with_rim',
-    'Traffic_Cones',
-    'Road_Barrier',
     'Compromised-Pole',
   ];
 
@@ -65,68 +54,25 @@ class HybridDetectionService {
     'Tires',
   ];
 
-  /// Load all 3 models
+  /// Initialize service (no pre-loading needed)
+  /// Models are loaded on-demand during detection
   Future<void> loadAllModels() async {
     debugPrint('\n🔄 ========================================');
-    debugPrint('📦 LOADING SEQUENTIAL DETECTION (3 MODELS)');
-    debugPrint('========================================');
-
-    try {
-      // Model 1: Pothole Detection
-      debugPrint('\n1️⃣ Loading Pothole Model...');
-      _potholeModel = YOLO(
-        modelPath: 'pothole_model_float32.tflite',
-        task: YOLOTask.detect,
-        useGpu: true,
-      );
-      await _potholeModel!.loadModel();
-      _isPotholeModelLoaded = true;
-      debugPrint('   ✅ Pothole model loaded');
-
-      // Model 2: Roadblocks Detection
-      debugPrint('\n2️⃣ Loading Roadblocks Model...');
-      _roadblocksModel = YOLO(
-        modelPath: 'roadblocks_FP32.tflite',
-        task: YOLOTask.detect,
-        useGpu: true,
-      );
-      await _roadblocksModel!.loadModel();
-      _isRoadblocksModelLoaded = true;
-      debugPrint('   ✅ Roadblocks model loaded');
-
-      // Model 3: Utility Pole Detection
-      debugPrint('\n3️⃣ Loading Utility Pole Model...');
-      _utilityPoleModel = YOLO(
-        modelPath: 'BEST_UtilityPole_98.1percent_FP32.tflite',
-        task: YOLOTask.detect,
-        useGpu: true,
-      );
-      await _utilityPoleModel!.loadModel();
-      _isUtilityPoleModelLoaded = true;
-      debugPrint('   ✅ Utility Pole model loaded');
-
-      debugPrint('\n✅ SEQUENTIAL DETECTION READY!');
-      debugPrint('   Model 1: Potholes & Road-Cracks');
-      debugPrint('   Model 2: Roadblocks (Barriers, Cones, Tires)');
-      debugPrint('   Model 3: Utility Poles');
-      debugPrint('========================================\n');
-    } catch (e) {
-      debugPrint('❌ Error loading models: $e');
-      rethrow;
-    }
+    debugPrint('📦 SEQUENTIAL DETECTION SERVICE READY');
+    debugPrint('   Models will load on-demand during detection');
+    debugPrint('   Pattern: LOAD → RUN → DISPOSE (repeat for each model)');
+    debugPrint('========================================\n');
   }
 
   /// Main detection method - runs 3 models SEQUENTIALLY
+  /// Uses LOAD → RUN → DISPOSE pattern for each model
   Future<List<DetectionResult>> detectAllHazards(
     File imageFile, {
     double confidenceThreshold = 0.3,
   }) async {
-    if (!allModelsLoaded) {
-      throw Exception('Not all models are loaded');
-    }
-
     debugPrint('\n🚀 ========================================');
     debugPrint('🔥 SEQUENTIAL DETECTION START (3 MODELS)');
+    debugPrint('   Pattern: LOAD → RUN → DISPOSE (repeat 3x)');
     debugPrint('========================================');
 
     final Uint8List imageBytes = await imageFile.readAsBytes();
@@ -135,10 +81,19 @@ class HybridDetectionService {
     final List<DetectionResult> allDetections = [];
     final stopwatch = Stopwatch()..start();
 
-    // 🟢 MODEL 1: Pothole Detection (runs FIRST)
-    debugPrint('\n1️⃣ Running POTHOLE MODEL...');
+    // 🟢 MODEL 1: Pothole Detection (LOAD → RUN → DISPOSE)
+    debugPrint('\n1️⃣ POTHOLE MODEL: Loading...');
+    YOLO? potholeModel = YOLO(
+      modelPath: 'pothole_model_float32.tflite',
+      task: YOLOTask.detect,
+      useGpu: true,
+    );
+    await potholeModel.loadModel();
+    debugPrint('   ✅ Loaded pothole_model_float32.tflite');
+
+    debugPrint('   🔄 Running inference...');
     final potholeResults = await _runModel(
-      _potholeModel!,
+      potholeModel,
       imageBytes,
       'Pothole Model',
       confidenceThreshold: 0.4,
@@ -146,11 +101,23 @@ class HybridDetectionService {
     );
     allDetections.addAll(potholeResults);
     debugPrint('   ✅ Found ${potholeResults.length} potholes/cracks');
+    debugPrint('   🗑️ Disposing model...');
+    await potholeModel.dispose(); // Properly dispose native resources
+    potholeModel = null;
 
-    // 🔵 MODEL 2: Roadblocks Detection (runs SECOND)
-    debugPrint('\n2️⃣ Running ROADBLOCKS MODEL...');
+    // 🔵 MODEL 2: Roadblocks Detection (LOAD → RUN → DISPOSE)
+    debugPrint('\n2️⃣ ROADBLOCKS MODEL: Loading...');
+    YOLO? roadblocksModel = YOLO(
+      modelPath: 'roadblocks_FP32.tflite',
+      task: YOLOTask.detect,
+      useGpu: true,
+    );
+    await roadblocksModel.loadModel();
+    debugPrint('   ✅ Loaded roadblocks_FP32.tflite');
+
+    debugPrint('   🔄 Running inference...');
     final roadblocksResults = await _runModel(
-      _roadblocksModel!,
+      roadblocksModel,
       imageBytes,
       'Roadblocks Model',
       confidenceThreshold: 0.3,
@@ -158,11 +125,23 @@ class HybridDetectionService {
     );
     allDetections.addAll(roadblocksResults);
     debugPrint('   ✅ Found ${roadblocksResults.length} roadblocks');
+    debugPrint('   🗑️ Disposing model...');
+    await roadblocksModel.dispose(); // Properly dispose native resources
+    roadblocksModel = null;
 
-    // 🟡 MODEL 3: Utility Pole Detection (runs THIRD)
-    debugPrint('\n3️⃣ Running UTILITY POLE MODEL...');
+    // 🟡 MODEL 3: Utility Pole Detection (LOAD → RUN → DISPOSE)
+    debugPrint('\n3️⃣ UTILITY POLE MODEL: Loading...');
+    YOLO? utilityPoleModel = YOLO(
+      modelPath: 'BEST_UtilityPole_98.1percent_FP32.tflite',
+      task: YOLOTask.detect,
+      useGpu: true,
+    );
+    await utilityPoleModel.loadModel();
+    debugPrint('   ✅ Loaded BEST_UtilityPole_98.1percent_FP32.tflite');
+
+    debugPrint('   🔄 Running inference...');
     final poleResults = await _runModel(
-      _utilityPoleModel!,
+      utilityPoleModel,
       imageBytes,
       'Utility Pole Model',
       confidenceThreshold: 0.3,
@@ -170,6 +149,9 @@ class HybridDetectionService {
     );
     allDetections.addAll(poleResults);
     debugPrint('   ✅ Found ${poleResults.length} utility poles');
+    debugPrint('   🗑️ Disposing model...');
+    await utilityPoleModel.dispose(); // Properly dispose native resources
+    utilityPoleModel = null;
 
     stopwatch.stop();
 

@@ -6,7 +6,7 @@ import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/image_proccessor_service.dart';
-import 'package:roadfix/services/sequential_detection_service.dart';
+import 'package:roadfix/services/hybrid_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
@@ -29,8 +29,7 @@ class HybridDetectionScreen extends StatefulWidget {
 }
 
 class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
-  final SequentialDetectionService _detectionService =
-      SequentialDetectionService();
+  final HybridDetectionService _detectionService = HybridDetectionService();
   bool _isProcessing = false;
 
   File? _selectedImage;
@@ -66,22 +65,21 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
 
     LoadingModal.show(
       context,
-      title: "Loading AI Model",
-      description:
-          "Loading RoadFix unified model\nDetecting all road hazards...",
+      title: "Initializing Detection",
+      description: "Preparing sequential detection service\nModels load on-demand during detection",
     );
 
     try {
-      debugPrint('📥 Loading unified model...');
+      debugPrint('📥 Initializing sequential detection service...');
       await _detectionService.loadAllModels();
-      debugPrint('✅ Model ready!');
+      debugPrint('✅ Service ready!');
     } catch (e) {
-      debugPrint('❌ Failed to load models: $e');
+      debugPrint('❌ Failed to initialize service: $e');
       if (mounted) {
         LoadingModal.hide(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Failed to load models: $e'),
+            content: Text('Failed to initialize service: $e'),
             backgroundColor: statusDanger,
           ),
         );
@@ -123,15 +121,15 @@ class _HybridDetectionScreenState extends State<HybridDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description: "Running unified detection\nDetecting all road hazards...",
+      description: "Sequential detection (3 models):\n1. Pothole → 2. Roadblocks → 3. Utility Pole\nEach model loads on-demand",
     );
 
     try {
       debugPrint('\n========================================');
-      debugPrint('🚀 UNIFIED DETECTION');
+      debugPrint('🚀 SEQUENTIAL DETECTION (3 MODELS)');
       debugPrint('========================================');
 
-      // 🎯 Run unified detection
+      // 🎯 Run sequential detection
       final detections = await _detectionService.detectAllHazards(
         imageFile,
         confidenceThreshold: 0.3,
