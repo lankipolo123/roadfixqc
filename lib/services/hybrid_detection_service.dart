@@ -98,7 +98,8 @@ class HybridDetectionService {
     allDetections.addAll(potholeResults);
     debugPrint('   ✅ Found ${potholeResults.length} potholes/cracks');
     debugPrint('   🗑️ Disposing model...');
-    potholeModel = null; // Dispose to free native memory
+    await potholeModel.dispose(); // Properly dispose native resources
+    potholeModel = null;
 
     // 🔵 MODEL 2: Roadblocks Detection (LOAD → RUN → DISPOSE)
     debugPrint('\n2️⃣ ROADBLOCKS MODEL: Loading...');
@@ -121,7 +122,8 @@ class HybridDetectionService {
     allDetections.addAll(roadblocksResults);
     debugPrint('   ✅ Found ${roadblocksResults.length} roadblocks');
     debugPrint('   🗑️ Disposing model...');
-    roadblocksModel = null; // Dispose to free native memory
+    await roadblocksModel.dispose(); // Properly dispose native resources
+    roadblocksModel = null;
 
     // 🟡 MODEL 3: Utility Pole Detection (LOAD → RUN → DISPOSE)
     debugPrint('\n3️⃣ UTILITY POLE MODEL: Loading...');
@@ -144,7 +146,8 @@ class HybridDetectionService {
     allDetections.addAll(poleResults);
     debugPrint('   ✅ Found ${poleResults.length} utility poles');
     debugPrint('   🗑️ Disposing model...');
-    utilityPoleModel = null; // Dispose to free native memory
+    await utilityPoleModel.dispose(); // Properly dispose native resources
+    utilityPoleModel = null;
 
     stopwatch.stop();
 
