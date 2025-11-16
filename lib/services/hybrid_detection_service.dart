@@ -1,10 +1,16 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ultralytics_yolo/yolo.dart';
-import '../models/detection_result.dart';
+import 'package:roadfix/models/detection_result.dart';
+import 'package:roadfix/models/report_category_model.dart';
+import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
+import 'package:roadfix/services/image_proccessor_service.dart';
+import 'package:roadfix/services/sequential_detection_service.dart'; // ✅ CHANGED
+import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
+import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
+import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
+import 'package:roadfix/widgets/themes.dart';
 
 /// 🚀 SEQUENTIAL DETECTION SERVICE
 /// Runs 3 models sequentially: Pothole → Roadblocks → Utility Pole
