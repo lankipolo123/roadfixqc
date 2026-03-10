@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class HomeReportPreviewCard extends StatelessWidget {
@@ -14,21 +15,21 @@ class HomeReportPreviewCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+      padding: EdgeInsets.symmetric(vertical: 10.h, horizontal: 8.w),
       decoration: BoxDecoration(
         color: inputFill,
-        borderRadius: BorderRadius.circular(6),
+        borderRadius: BorderRadius.circular(6.r),
         border: Border.all(color: isActive ? primary : altSecondary, width: 1),
       ),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.warning_amber_outlined, size: 20, color: secondary),
-          const SizedBox(height: 4),
+          Icon(Icons.warning_amber_outlined, size: 20.r, color: secondary),
+          SizedBox(height: 4.h),
           Text(
             status,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 10.sp,
               fontWeight: FontWeight.w500,
               color: isActive ? primary : altSecondary,
             ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/services/camera_angle_service.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class CameraAngleIndicator extends StatefulWidget {
@@ -34,10 +35,10 @@ class _CameraAngleIndicatorState extends State<CameraAngleIndicator> {
     final isGood = tiltAngle <= 20;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      padding: EdgeInsets.symmetric(horizontal: 20.w, vertical: 12.h),
       decoration: BoxDecoration(
         color: secondary.withValues(alpha: 0.9),
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: color, width: 2),
       ),
       child: Column(
@@ -50,9 +51,9 @@ class _CameraAngleIndicatorState extends State<CameraAngleIndicator> {
               Icon(
                 isGood ? Icons.check_circle : Icons.warning,
                 color: color,
-                size: 24,
+                size: 24.r,
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: 12.w),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -61,46 +62,46 @@ class _CameraAngleIndicatorState extends State<CameraAngleIndicator> {
                     style: TextStyle(
                       color: color,
                       fontWeight: FontWeight.bold,
-                      fontSize: 16,
+                      fontSize: 16.sp,
                     ),
                   ),
                   Text(
                     'Tilt: ${tiltAngle.toStringAsFixed(1)}°',
-                    style: const TextStyle(color: inputFill, fontSize: 12),
+                    style: TextStyle(color: inputFill, fontSize: 12.sp),
                   ),
                 ],
               ),
             ],
           ),
 
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
 
           // Visual level bar
           SizedBox(
-            width: 200,
+            width: 200.w,
             child: Stack(
               alignment: Alignment.center,
               children: [
                 // Background bar
                 Container(
-                  height: 8,
+                  height: 8.h,
                   decoration: BoxDecoration(
                     color: altSecondary.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
                 // Level indicator
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 100),
-                  height: 8,
+                  height: 8.h,
                   width: (tiltAngle.clamp(0, 45) / 45 * 200).clamp(0, 200),
                   decoration: BoxDecoration(
                     color: color,
-                    borderRadius: BorderRadius.circular(4),
+                    borderRadius: BorderRadius.circular(4.r),
                   ),
                 ),
                 // Center marker
-                Container(width: 2, height: 12, color: inputFill),
+                Container(width: 2.w, height: 12.h, color: inputFill),
               ],
             ),
           ),

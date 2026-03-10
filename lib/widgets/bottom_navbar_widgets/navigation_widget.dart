@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart'; // for primary, secondary, altSecondary
+import 'package:roadfix/utils/responsive.dart';
 
 class NavigationWidget extends StatelessWidget {
   final int currentIndex;
@@ -19,7 +20,7 @@ class NavigationWidget extends StatelessWidget {
       color: primary,
       elevation: 0,
       child: SizedBox(
-        height: 64,
+        height: 64.h,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -43,15 +44,15 @@ class NavigationWidget extends StatelessWidget {
     return GestureDetector(
       onTap: () => onTap(index),
       child: SizedBox(
-        width: 70,
+        width: 70.w,
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(icon, size: 25, color: isSelected ? secondary : altSecondary),
+            Icon(icon, size: 25.r, color: isSelected ? secondary : altSecondary),
             Text(
               label,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 12.sp,
                 color: isSelected ? secondary : altSecondary,
               ),
             ),

@@ -1,6 +1,7 @@
 // Create a separate file: widgets/tutorial_widgets/tutorial_navigation_widget.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class TutorialNavigationWidget extends StatelessWidget {
   final int currentIndex;
@@ -28,7 +29,7 @@ class TutorialNavigationWidget extends StatelessWidget {
       color: primary,
       elevation: 0,
       child: SizedBox(
-        height: 64,
+        height: 64.h,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -51,26 +52,26 @@ class TutorialNavigationWidget extends StatelessWidget {
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
             onTap: () => onTap?.call(index),
             child: Container(
-              padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
+              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Icon(
                     icon,
-                    size: 22,
+                    size: 22.r,
                     color: isSelected
                         ? secondary
                         : altSecondary.withValues(alpha: 0.7),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     label,
                     style: TextStyle(
-                      fontSize: 10,
+                      fontSize: 10.sp,
                       fontWeight: FontWeight.normal,
                       color: isSelected
                           ? secondary

@@ -16,6 +16,7 @@ import 'package:roadfix/services/connectivity_service.dart';
 import 'package:roadfix/utils/connectivity_cache.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -269,7 +270,7 @@ class _LoginScreenState extends State<LoginScreen> {
       topPadding: 30,
       topContent: const LoginTopContent(),
       children: [
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         CustomTextField(
           label: 'Email',
           icon: Icons.email_outlined,
@@ -278,7 +279,7 @@ class _LoginScreenState extends State<LoginScreen> {
           focusNode: _emailFocus,
           onNext: () => FocusHelper.next(context, _passwordFocus),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         CustomTextField(
           label: 'Password',
           obscureText: true,
@@ -288,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
           textInputAction: TextInputAction.done,
           onNext: () => FocusHelper.next(context, null),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Align(
           alignment: Alignment.centerRight,
           child: TextButton(
@@ -298,23 +299,23 @@ class _LoginScreenState extends State<LoginScreen> {
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: statusDanger,
                 fontWeight: FontWeight.w600,
-                fontSize: 12,
+                fontSize: 12.sp,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         BigButton(
           text: _isLoading ? "Signing In..." : "Log In",
           onPressed: _isLoading ? null : _handleLogin,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         AuthRedirectTextButton(
           prompt: "Don't have an account?",
           action: "Sign Up",
           onPressed: _handleSignUpNavigation,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
       ],
     );
   }
@@ -322,24 +323,23 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     if (_isInitialLoading) {
-      return const AuthScaffold(
+      return AuthScaffold(
         topPadding: 30,
-        topContent: LoginTopContent(),
+        topContent: const LoginTopContent(),
         children: [
-          SizedBox(height: 80),
+          SizedBox(height: 80.h),
           Center(
-            // ignore: prefer_const_constructors
             child: Column(
               children: [
-                CircularProgressIndicator(
+                const CircularProgressIndicator(
                   valueColor: AlwaysStoppedAnimation<Color>(primary),
                 ),
-                SizedBox(height: 20),
+                SizedBox(height: 20.h),
                 Text(
                   'Checking connection...',
-                  style: TextStyle(color: altSecondary, fontSize: 14),
+                  style: TextStyle(color: altSecondary, fontSize: 14.sp),
                 ),
-                SizedBox(height: 40),
+                SizedBox(height: 40.h),
               ],
             ),
           ),

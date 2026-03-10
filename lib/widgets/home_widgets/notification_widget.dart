@@ -1,5 +1,6 @@
 // lib/widgets/common_widgets/notification_icon_with_badge.dart
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/services/notification_service.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -40,21 +41,21 @@ class NotificationIconWithBadge extends StatelessWidget {
         ),
         if (notificationCount > 0)
           Positioned(
-            right: 8,
-            top: 8,
+            right: 8.w,
+            top: 8.h,
             child: Container(
-              padding: const EdgeInsets.all(2),
+              padding: EdgeInsets.all(2.w),
               decoration: BoxDecoration(
                 color: Colors.red,
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(10.r),
                 border: Border.all(color: inputFill, width: 1),
               ),
-              constraints: const BoxConstraints(minWidth: 16, minHeight: 16),
+              constraints: BoxConstraints(minWidth: 16.w, minHeight: 16.h),
               child: Text(
                 notificationCount > 99 ? '99+' : notificationCount.toString(),
-                style: const TextStyle(
+                style: TextStyle(
                   color: Colors.white,
-                  fontSize: 10,
+                  fontSize: 10.sp,
                   fontWeight: FontWeight.bold,
                 ),
                 textAlign: TextAlign.center,
