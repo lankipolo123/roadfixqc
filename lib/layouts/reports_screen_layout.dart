@@ -1,6 +1,7 @@
 // layouts/report_screen_layout.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/layouts/diagonal_background.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/common_widgets/module_header.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -33,16 +34,16 @@ class ReportScreenLayout extends StatelessWidget {
                 Container(
                   width: double.infinity,
                   color: inputFill,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 6,
-                    vertical: 6,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 6.w,
+                    vertical: 6.h,
                   ),
                   child: filterTabs,
                 ),
                 Expanded(
                   child: Container(
                     color: inputFill,
-                    padding: const EdgeInsets.symmetric(horizontal: 8),
+                    padding: EdgeInsets.symmetric(horizontal: 8.w),
                     child: content,
                   ),
                 ),
@@ -78,14 +79,14 @@ class ReportScreenLayout extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, color: statusDanger, size: 48),
-          const SizedBox(height: 16),
+          Icon(Icons.error_outline, color: statusDanger, size: 48.r),
+          SizedBox(height: 16.h),
           Text(
             'Error loading reports:\n$error',
             textAlign: TextAlign.center,
             style: const TextStyle(color: statusDanger),
           ),
-          const SizedBox(height: 16),
+          SizedBox(height: 16.h),
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
@@ -109,18 +110,18 @@ class ReportScreenLayout extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, color: secondary.withValues(alpha: 0.5), size: 64),
-          const SizedBox(height: 16),
+          Icon(icon, color: secondary.withValues(alpha: 0.5), size: 64.r),
+          SizedBox(height: 16.h),
           Text(
             message,
             textAlign: TextAlign.center,
             style: TextStyle(
               color: secondary.withValues(alpha: 0.7),
-              fontSize: 16,
+              fontSize: 16.sp,
             ),
           ),
           if (actionButton != null) ...[
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             actionButton,
           ],
         ],
@@ -140,21 +141,21 @@ class ReportScreenLayout extends StatelessWidget {
         await Future.delayed(const Duration(milliseconds: 500));
       },
       child: ListView(
-        padding: const EdgeInsets.only(bottom: 120),
+        padding: EdgeInsets.only(bottom: 120.h),
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: EdgeInsets.all(8.w),
             child: Text(
               'Reports sorted by date (newest first)',
               style: TextStyle(
                 color: secondary.withValues(alpha: 0.6),
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontStyle: FontStyle.italic,
               ),
               textAlign: TextAlign.center,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           ...children,
         ],
       ),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:roadfix/screens/module_screens/navigation_screen.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'firebase_options.dart';
 import 'package:roadfix/screens/auth_screens/login_screen.dart';
 import 'package:roadfix/screens/auth_screens/signup_screen.dart';
@@ -28,6 +29,10 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSwatch(primarySwatch: Colors.blue),
       ),
       initialRoute: '/login',
+      builder: (context, child) {
+        Responsive.init(context);
+        return child!;
+      },
       routes: {
         '/login': (context) => const LoginScreen(),
         '/signup': (context) => const SignUpScreen(),

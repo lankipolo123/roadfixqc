@@ -1,6 +1,7 @@
 // layouts/profile_screen_layout.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/layouts/diagonal_background.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/common_widgets/module_header.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -56,20 +57,20 @@ class ProfileScreenLayout extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: statusDanger),
-          const SizedBox(height: 16),
+          Icon(Icons.error_outline, size: 64.r, color: statusDanger),
+          SizedBox(height: 16.h),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: secondary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             subtitle,
-            style: const TextStyle(fontSize: 14, color: secondary),
+            style: TextStyle(fontSize: 14.sp, color: secondary),
           ),
         ],
       ),
@@ -85,12 +86,12 @@ class ProfileScreenLayout extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(icon, size: 64, color: secondary),
-          const SizedBox(height: 16),
+          Icon(icon, size: 64.r, color: secondary),
+          SizedBox(height: 16.h),
           Text(
             title,
-            style: const TextStyle(
-              fontSize: 18,
+            style: TextStyle(
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: secondary,
             ),

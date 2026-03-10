@@ -1,5 +1,6 @@
 // widgets/auth_widgets/auth_scaffold.dart
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/common_widgets/diagonal_stripes.dart';
 
@@ -19,24 +20,22 @@ class AuthScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: inputFill,
-      resizeToAvoidBottomInset: false, // ✅ Prevent shrinking
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
-          // Background diagonal stripes (decorative only) - MADE TALLER
-          const Positioned(
+          Positioned(
             top: -3,
             left: 0,
             right: 0,
-            child: SizedBox(height: 120, child: DiagonalStripes()),
+            child: SizedBox(height: 120.h, child: const DiagonalStripes()),
           ),
-          const Positioned(
+          Positioned(
             bottom: -1,
             left: 0,
             right: 0,
-            child: SizedBox(height: 120, child: DiagonalStripes()),
+            child: SizedBox(height: 120.h, child: const DiagonalStripes()),
           ),
 
-          // Main content container with margins to show stripes
           Positioned(
             top: 0,
             left: 0,
@@ -44,25 +43,20 @@ class AuthScaffold extends StatelessWidget {
             bottom: 0,
             child: SafeArea(
               child: Container(
-                margin: const EdgeInsets.only(
-                  bottom: 30, // Show bottom stripes
-                ),
+                margin: EdgeInsets.only(bottom: 30.h),
                 decoration: BoxDecoration(
                   color: inputFill,
-                  borderRadius: BorderRadius.circular(24),
+                  borderRadius: BorderRadius.circular(24.r),
                 ),
                 child: Column(
                   children: [
-                    SizedBox(height: topPadding),
+                    SizedBox(height: topPadding.h),
                     topContent,
-                    const SizedBox(height: 20),
+                    SizedBox(height: 20.h),
                     Expanded(
                       child: SingleChildScrollView(
-                        padding: const EdgeInsets.fromLTRB(
-                          30,
-                          0,
-                          30,
-                          24, // ✅ Fixed padding, no viewInsets
+                        padding: EdgeInsets.fromLTRB(
+                          30.w, 0, 30.w, 24.h,
                         ),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
