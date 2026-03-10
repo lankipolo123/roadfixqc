@@ -1,13 +1,14 @@
 // lib/widgets/detection_widgets/location_textfield.dart (FIXED - WITH GPS CALLBACK)
 import 'package:flutter/material.dart';
 import 'package:roadfix/services/geolocation_services.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class LocationTextField extends StatefulWidget {
   final TextEditingController controller;
   final VoidCallback? onSuffixIconTap;
   final Function(double lat, double lng)?
-  onLocationSelected; // ✅ NEW: Pass GPS back
+  onLocationSelected; // NEW: Pass GPS back
   final bool isLoading;
   final String? hintText;
   final String? labelText;
@@ -16,7 +17,7 @@ class LocationTextField extends StatefulWidget {
     super.key,
     required this.controller,
     this.onSuffixIconTap,
-    this.onLocationSelected, // ✅ NEW
+    this.onLocationSelected, // NEW
     this.isLoading = false,
     this.hintText,
     this.labelText,
@@ -43,7 +44,7 @@ class _LocationTextFieldState extends State<LocationTextField> {
         // Set address text
         widget.controller.text = locationData.formattedAddress;
 
-        // ✅ PASS GPS COORDINATES BACK TO PARENT
+        // PASS GPS COORDINATES BACK TO PARENT
         if (widget.onLocationSelected != null) {
           widget.onLocationSelected!(
             locationData.latitude,
@@ -99,34 +100,34 @@ class _LocationTextFieldState extends State<LocationTextField> {
         if (widget.labelText != null) ...[
           Text(
             widget.labelText!,
-            style: const TextStyle(
-              fontSize: 14,
+            style: TextStyle(
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: altSecondary,
             ),
           ),
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
         ],
 
         // Text field
         TextFormField(
           controller: widget.controller,
-          style: const TextStyle(fontSize: 16, color: Colors.black87),
+          style: TextStyle(fontSize: 16.sp, color: Colors.black87),
           decoration: InputDecoration(
             labelText: widget.labelText == null ? 'Location' : null,
             hintText: widget.hintText ?? 'Enter location or tap GPS button',
-            hintStyle: const TextStyle(color: altSecondary, fontSize: 16),
+            hintStyle: TextStyle(color: altSecondary, fontSize: 16.sp),
             prefixIcon: const Icon(
               Icons.location_on_outlined,
               color: altSecondary,
             ),
             suffixIcon: isLoading
-                ? const Padding(
-                    padding: EdgeInsets.all(12.0),
+                ? Padding(
+                    padding: EdgeInsets.all(12.w),
                     child: SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
+                      width: 20.r,
+                      height: 20.r,
+                      child: CircularProgressIndicator(strokeWidth: 2.r),
                     ),
                   )
                 : IconButton(
@@ -137,28 +138,28 @@ class _LocationTextFieldState extends State<LocationTextField> {
             filled: true,
             fillColor: inputFill,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: altSecondary, width: 1),
             ),
             enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: altSecondary, width: 1),
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: Colors.blue, width: 2),
             ),
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 1),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
-            contentPadding: const EdgeInsets.symmetric(
-              horizontal: 16,
-              vertical: 12,
+            contentPadding: EdgeInsets.symmetric(
+              horizontal: 16.w,
+              vertical: 12.h,
             ),
           ),
           validator: (value) {

@@ -8,6 +8,7 @@ import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/home_widgets/banner_widget.dart';
 import 'package:roadfix/services/user_service.dart';
 import 'package:roadfix/models/user_model.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -134,14 +135,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
     // Fallback welcome header
     return Container(
-      height: 120,
+      height: 120.h,
       color: primary,
-      child: const Center(
+      child: Center(
         child: Text(
           'Welcome!',
           style: TextStyle(
             color: altSecondary,
-            fontSize: 18,
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -151,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildLoadingHeader() {
     return Container(
-      height: 120,
+      height: 120.h,
       color: primary,
       child: const Center(
         child: CircularProgressIndicator(color: altSecondary),
@@ -161,21 +162,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildErrorHeader() {
     return Container(
-      height: 120,
+      height: 120.h,
       color: primary,
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Text(
+            Text(
               'Error loading profile',
               style: TextStyle(
                 color: altSecondary,
-                fontSize: 16,
+                fontSize: 16.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
-            const SizedBox(height: 8),
+            SizedBox(height: 8.h),
             TextButton(
               onPressed: _loadUserData,
               child: const Text('Retry', style: TextStyle(color: altSecondary)),
@@ -188,21 +189,21 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildReportSummary() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(12, 16, 12, 0),
+      padding: EdgeInsets.fromLTRB(12.w, 16.h, 12.w, 0),
       color: inputFill,
-      child: const Column(
+      child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             'Your Reports Summary',
             style: TextStyle(
-              fontSize: 16,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: secondary,
             ),
           ),
-          SizedBox(height: 12),
-          StatusSummaryRow(),
+          SizedBox(height: 12.h),
+          const StatusSummaryRow(),
         ],
       ),
     );
@@ -222,11 +223,11 @@ class _HomeScreenState extends State<HomeScreen> {
     // Show normal content
     return [
       _buildReportSummary(),
-      const SizedBox(height: 20),
+      SizedBox(height: 20.h),
       const BannerWidget(),
-      const SizedBox(height: 20),
+      SizedBox(height: 20.h),
       const RecentReportsSection(),
-      const SizedBox(height: 12),
+      SizedBox(height: 12.h),
     ];
   }
 
@@ -244,22 +245,22 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.error_outline, size: 64, color: statusDanger),
-            const SizedBox(height: 16),
-            const Text(
+            Icon(Icons.error_outline, size: 64.r, color: statusDanger),
+            SizedBox(height: 16.h),
+            Text(
               'Failed to load user data',
               style: TextStyle(
-                fontSize: 18,
+                fontSize: 18.sp,
                 fontWeight: FontWeight.w600,
                 color: altSecondary,
               ),
             ),
-            const SizedBox(height: 8),
-            const Text(
+            SizedBox(height: 8.h),
+            Text(
               'Please try again later',
-              style: TextStyle(fontSize: 14, color: altSecondary),
+              style: TextStyle(fontSize: 14.sp, color: altSecondary),
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
             ElevatedButton(
               onPressed: _loadUserData,
               child: const Text('Retry'),

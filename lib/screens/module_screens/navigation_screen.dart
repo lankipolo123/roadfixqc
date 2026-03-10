@@ -8,6 +8,7 @@ import 'profile_screen.dart' as profile;
 
 import 'package:roadfix/widgets/bottom_navbar_widgets/navigation_widget.dart';
 import 'package:roadfix/widgets/themes.dart'; // includes `primary`, `secondary`, etc.
+import 'package:roadfix/utils/responsive.dart';
 
 class NavigationScreen extends StatefulWidget {
   const NavigationScreen({super.key});

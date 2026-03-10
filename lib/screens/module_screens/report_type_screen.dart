@@ -4,6 +4,7 @@ import 'package:roadfix/utils/detection_navigation_helper.dart';
 import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/common_widgets/dual_color_text.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class ReportTypeScreen extends StatelessWidget {
   const ReportTypeScreen({super.key});
@@ -16,17 +17,17 @@ class ReportTypeScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
 
             // Logo
             Center(
               child: Image.asset(
                 'assets/images/roadfix_logo_alt2.webp',
-                height: 100,
+                height: 100.h,
               ),
             ),
 
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             const DualColorText(
               leftText: 'Report ',
@@ -35,7 +36,7 @@ class ReportTypeScreen extends StatelessWidget {
               rightColor: secondary,
             ),
 
-            const SizedBox(height: 60),
+            SizedBox(height: 60.h),
 
             // Big detection button with circles
             Expanded(
@@ -47,31 +48,31 @@ class ReportTypeScreen extends StatelessWidget {
                     children: [
                       // Big circle with question mark and text inside
                       Container(
-                        width: 250,
-                        height: 250,
+                        width: 250.r,
+                        height: 250.r,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: primary.withValues(alpha: 0.1),
                           border: Border.all(color: primary, width: 4),
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               // Question mark
                               Icon(
                                 Icons.question_mark_rounded,
-                                size: 100,
+                                size: 100.r,
                                 color: primary,
                               ),
 
-                              SizedBox(height: 16),
+                              SizedBox(height: 16.h),
 
                               // Text inside circle
                               Text(
                                 'Detect Road Issues',
                                 style: TextStyle(
-                                  fontSize: 20,
+                                  fontSize: 20.sp,
                                   fontWeight: FontWeight.bold,
                                   color: secondary,
                                 ),
@@ -82,14 +83,14 @@ class ReportTypeScreen extends StatelessWidget {
                         ),
                       ),
 
-                      const SizedBox(height: 32),
+                      SizedBox(height: 32.h),
 
                       // Subtitle below circle
-                      const Padding(
-                        padding: EdgeInsets.symmetric(horizontal: 40),
+                      Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 40.w),
                         child: Text(
                           'Tap to detect potholes, cracks, poles, and roadblocks',
-                          style: TextStyle(fontSize: 14, color: altSecondary),
+                          style: TextStyle(fontSize: 14.sp, color: altSecondary),
                           textAlign: TextAlign.center,
                         ),
                       ),

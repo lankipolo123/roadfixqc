@@ -10,6 +10,7 @@ import 'package:roadfix/screens/secondary_screens/report_detail_screen.dart';
 import 'package:roadfix/utils/pagination_helper.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/user_report_widgets/pagination_fab.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class ReportScreen extends StatefulWidget {
   const ReportScreen({super.key});
@@ -109,9 +110,9 @@ class _ReportScreenState extends State<ReportScreen> {
                 .map(
                   (report) => Center(
                     child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 330),
+                      constraints: BoxConstraints(maxWidth: 330.w),
                       child: Padding(
-                        padding: const EdgeInsets.only(bottom: 10),
+                        padding: EdgeInsets.only(bottom: 10.h),
                         child: GestureDetector(
                           onTap: () => _showReportDetails(context, report),
                           child: ReportCard(report: report),

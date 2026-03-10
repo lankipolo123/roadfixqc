@@ -18,6 +18,7 @@ import 'package:roadfix/models/user_model.dart';
 import 'package:roadfix/services/user_service.dart';
 import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -66,16 +67,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   List<Widget> _buildProfileContent(UserModel user) {
     return [
-      const SizedBox(height: 2),
+      SizedBox(height: 2.h),
       ProfileCard(user: user),
-      const SizedBox(height: 12),
+      SizedBox(height: 12.h),
       const StatusSummaryRow(),
-      const SizedBox(height: 12),
+      SizedBox(height: 12.h),
       _buildSettingsSection(user),
       _buildAppInfoSection(),
       _buildHowToUseTile(),
       _buildLogoutTile(),
-      const SizedBox(height: 24),
+      SizedBox(height: 24.h),
     ];
   }
 
