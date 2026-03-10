@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/models/report_category_model.dart';
-import 'package:roadfix/screens/secondary_screens/hybrid_detection_screen.dart';
+import 'package:roadfix/screens/secondary_screens/unified_detection_screen.dart';
 import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
 
-/// 🚀 SEQUENTIAL NAVIGATION: 3 models running sequentially!
+/// Navigation helper for detection - routes to Unified Detection (single model)
 class NavigationHelper {
-  /// Navigate to sequential detection screen - runs 3 models (Pothole → Roadblocks → Utility Pole)
+  /// Navigate to unified detection screen - one model detects all hazards
   static Future<void> navigateToDetection(
     BuildContext context,
     ReportCategory category,
     ImageSourceOption imageSourceOption,
   ) async {
-    debugPrint('🧭 Sequential Navigation: ${category.type} with $imageSourceOption');
-    debugPrint('   → Using Sequential Detection (3 Models)');
+    debugPrint('🧭 Navigation: ${category.type} with $imageSourceOption');
+    debugPrint('   → Using Unified Detection (Single Model)');
 
     // Convert ImageSourceOption to ImageSource
     ImageSource? source;
@@ -23,11 +23,11 @@ class NavigationHelper {
       source = ImageSource.gallery;
     }
 
-    // Navigate to hybrid detection screen
+    // Navigate to unified detection screen
     await Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => HybridDetectionScreen(
+        builder: (context) => UnifiedDetectionScreen(
           initialImageSource: source,
           category: category,
         ),
