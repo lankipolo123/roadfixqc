@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import '../../models/detection_result.dart';
 
@@ -19,10 +20,10 @@ class DetectionBottomCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: inputFill,
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(15.r),
         boxShadow: const [
           BoxShadow(color: secondary, blurRadius: 10, offset: Offset(0, 5)),
         ],
@@ -32,7 +33,7 @@ class DetectionBottomCard extends StatelessWidget {
         children: [
           // Detection tags
           _buildDetectionTags(),
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
           // Buttons
           _buildButtons(),
         ],
@@ -50,17 +51,17 @@ class DetectionBottomCard extends StatelessWidget {
       }
 
       return Wrap(
-        spacing: 8,
-        runSpacing: 8,
+        spacing: 8.w,
+        runSpacing: 8.h,
         children: detectionCounts.entries.map((entry) {
           final className = entry.key;
           final count = entry.value;
 
           return Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
             decoration: BoxDecoration(
               color: Colors.red[50],
-              borderRadius: BorderRadius.circular(20),
+              borderRadius: BorderRadius.circular(20.r),
               border: Border.all(color: Colors.red[200]!),
             ),
             child: Text(
@@ -75,10 +76,10 @@ class DetectionBottomCard extends StatelessWidget {
       );
     } else {
       return Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
         decoration: BoxDecoration(
           color: inputFill,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(20.r),
           border: Border.all(color: altSecondary),
         ),
         child: Text(
@@ -99,17 +100,17 @@ class DetectionBottomCard extends StatelessWidget {
         TextButton(
           onPressed: onCancel,
           style: TextButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
           ),
-          child: const Text('Cancel', style: TextStyle(fontSize: 16)),
+          child: Text('Cancel', style: TextStyle(fontSize: 16.sp)),
         ),
-        const SizedBox(width: 20),
+        SizedBox(width: 20.w),
         ElevatedButton(
           onPressed: onConfirm,
           style: ElevatedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 12),
+            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
           ),
-          child: const Text('Confirm', style: TextStyle(fontSize: 16)),
+          child: Text('Confirm', style: TextStyle(fontSize: 16.sp)),
         ),
       ],
     );

@@ -11,6 +11,7 @@ import 'package:roadfix/models/user_model.dart';
 import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/dialog_widgets/dialog_utils.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -190,7 +191,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       topPadding: 25,
       topContent: const SignupTopContent(),
       children: [
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         NameRow(
           firstNameController: fnameController,
           middleInitialController: miController,
@@ -200,7 +201,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           lastNameFocus: lnameFocus,
           nextFocus: emailFocus,
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         CustomTextField(
           label: 'Email Address',
           keyboardType: TextInputType.emailAddress,
@@ -209,7 +210,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           focusNode: emailFocus,
           onNext: () => FocusHelper.next(context, contactNumberFocus),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         CustomTextField(
           label: 'Contact Number',
           keyboardType: TextInputType.phone,
@@ -218,7 +219,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           focusNode: contactNumberFocus,
           onNext: () => FocusHelper.next(context, addressFocus),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         CustomTextField(
           label: 'Address',
           icon: Icons.home_outlined,
@@ -226,7 +227,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
           focusNode: addressFocus,
           onNext: () => FocusHelper.next(context, passwordFocus),
         ),
-        const SizedBox(height: 10),
+        SizedBox(height: 10.h),
         CustomTextField(
           label: 'Password',
           obscureText: true,
@@ -236,12 +237,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
           textInputAction: TextInputAction.done,
           onNext: () => FocusHelper.next(context, null),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         BigButton(
           text: _isLoading ? "Creating Account..." : "Sign Up",
           onPressed: _isLoading ? null : _handleSignUp,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         AuthRedirectTextButton(
           prompt: "Already have an account?",
           action: "Sign In",
@@ -254,7 +255,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
             }
           },
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
       ],
     );
   }
