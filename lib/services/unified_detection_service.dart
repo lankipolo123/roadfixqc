@@ -1,9 +1,9 @@
 import 'dart:io';
 import 'dart:typed_data';
-import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:ultralytics_yolo/yolo.dart';
+import 'package:path_provider/path_provider.dart';
+import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import '../models/detection_result.dart';
 
 /// Unified Detection Service - ONE model to detect ALL hazards
@@ -18,7 +18,7 @@ class UnifiedDetectionService {
 
   /// Load the unified YOLO model
   Future<void> loadModel() async {
-    dispose();
+    await dispose();
 
     _yolo = YOLO(
       modelPath: 'roadfix-model_float32',
@@ -31,8 +31,9 @@ class UnifiedDetectionService {
   }
 
   /// Dispose the model
-  void dispose() {
+  Future<void> dispose() async {
     if (_yolo != null) {
+      await _yolo!.dispose();
       _yolo = null;
       _isModelLoaded = false;
     }
@@ -46,45 +47,49 @@ class UnifiedDetectionService {
     return File(image.path);
   }
 
-  /// Decode image to ui.Image
-  Future<ui.Image> decodeImage(File file) async {
-    final Uint8List bytes = await file.readAsBytes();
-    final codec = await ui.instantiateImageCodec(bytes);
-    final frame = await codec.getNextFrame();
-    return frame.image;
-  }
-
-  /// Run detection on image
-  Future<List<DetectionResult>> detectObjects(
+  /// Run detection on image — returns detections and annotated image bytes
+  Future<DetectionOutput> detectObjects(
     File imageFile, {
     double confidenceThreshold = 0.3,
+    double iouThreshold = 0.45,
   }) async {
     if (!_isModelLoaded || _yolo == null) {
       throw Exception('Unified model not loaded');
     }
 
     final Uint8List bytes = await imageFile.readAsBytes();
-    final output = await _yolo!.predict(bytes);
-    final rawBoxes = output['boxes'];
+    final output = await _yolo!.predict(
+      bytes,
+      confidenceThreshold: confidenceThreshold,
+      iouThreshold: iouThreshold,
+    );
 
-    if (rawBoxes == null || rawBoxes.isEmpty) {
+    // Extract annotated image from the model output
+    final Uint8List? annotatedImage = output['annotatedImage'] as Uint8List?;
+
+    // Parse detection boxes
+    final rawBoxes = output['boxes'];
+    if (rawBoxes == null || rawBoxes is! List || rawBoxes.isEmpty) {
       debugPrint('No objects detected');
-      return [];
+      return DetectionOutput(
+        detections: [],
+        annotatedImage: annotatedImage,
+      );
     }
 
     final List<DetectionResult> results = [];
 
     for (var box in rawBoxes) {
+      final double conf = (box['confidence'] ?? 0).toDouble();
+      final String className = box['className'] ?? 'Unknown';
+
+      if (conf < confidenceThreshold) continue;
+      if (filteredClasses.contains(className)) continue;
+
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
       final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
       final double x2Norm = (box['x2_norm'] ?? 0).toDouble();
       final double y2Norm = (box['y2_norm'] ?? 0).toDouble();
-      final double conf = (box['confidence'] ?? 0).toDouble();
-      final String className = box['className'] ?? 'Unknown';
-
-      // Skip low confidence or filtered classes
-      if (conf < confidenceThreshold) continue;
-      if (filteredClasses.contains(className)) continue;
 
       results.add(
         DetectionResult(
@@ -99,6 +104,32 @@ class UnifiedDetectionService {
     }
 
     debugPrint('Detected ${results.length} of ${rawBoxes.length} objects');
-    return results;
+    return DetectionOutput(
+      detections: results,
+      annotatedImage: annotatedImage,
+    );
   }
+
+  /// Save annotated image bytes to a temp file, returns the file path
+  static Future<String?> saveAnnotatedImage(Uint8List imageBytes) async {
+    try {
+      final directory = await getTemporaryDirectory();
+      final file = File(
+        '${directory.path}/annotated_${DateTime.now().millisecondsSinceEpoch}.png',
+      );
+      await file.writeAsBytes(imageBytes);
+      return file.path;
+    } catch (e) {
+      debugPrint('Error saving annotated image: $e');
+      return null;
+    }
+  }
+}
+
+/// Container for detection results + annotated image
+class DetectionOutput {
+  final List<DetectionResult> detections;
+  final Uint8List? annotatedImage;
+
+  DetectionOutput({required this.detections, this.annotatedImage});
 }

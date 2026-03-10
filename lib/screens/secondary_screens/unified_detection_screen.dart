@@ -1,19 +1,16 @@
 import 'dart:io';
-import 'dart:ui' as ui;
+import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
-import 'package:roadfix/services/image_proccessor_service.dart';
 import 'package:roadfix/services/unified_detection_service.dart';
-import 'package:roadfix/widgets/detection_widgets/bounding_box.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 
-/// 🎯 UNIFIED DETECTION SCREEN - Detects ALL hazards at once!
-/// Shows potholes, broken poles, fallen cones, fallen barriers, road cracks, and roadblocks
+/// Unified Detection Screen - Detects ALL hazards at once
 class UnifiedDetectionScreen extends StatefulWidget {
   final ImageSource? initialImageSource;
   final ReportCategory? category;
@@ -34,7 +31,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   bool _isZoomedView = false;
 
   File? _selectedImage;
-  ui.Image? _decodedImage;
+  Uint8List? _annotatedImageBytes;
   List<DetectionResult> _detections = [];
 
   @override
@@ -50,42 +47,26 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   }
 
   Future<void> _initializeAndPickImage() async {
-    debugPrint('🔄 Initializing unified detection...');
-    await _loadModel();
+    await _detectionService.loadModel();
 
     if (widget.initialImageSource != null && mounted) {
-      debugPrint('📸 Auto-picking image from ${widget.initialImageSource}');
       await _pickImageFromSource(widget.initialImageSource!);
     }
   }
 
-  Future<void> _loadModel() async {
-    debugPrint('📥 Loading unified model...');
-    await _detectionService.loadModel();
-    debugPrint('✅ Unified model ready!');
-    if (mounted) {
-      setState(() {});
-    }
-  }
-
   Future<void> _pickImageFromSource(ImageSource source) async {
-    debugPrint('🎯 Calling ImagePicker with source: $source');
     final imageFile = await _detectionService.pickImageFromSource(source);
 
     if (imageFile == null) {
-      debugPrint('❌ User cancelled image selection');
       if (mounted) Navigator.pop(context);
       return;
     }
 
-    debugPrint('✅ Image selected: ${imageFile.path}');
-
-    final decodedImage = await _detectionService.decodeImage(imageFile);
     if (!mounted) return;
 
     setState(() {
       _selectedImage = imageFile;
-      _decodedImage = decodedImage;
+      _annotatedImageBytes = null;
       _isProcessing = true;
       _detections.clear();
       _isZoomedView = false;
@@ -98,44 +79,21 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     );
 
     try {
-      debugPrint('\n========================================');
-      debugPrint('🚀 UNIFIED DETECTION - DETECTING ALL HAZARDS');
-      debugPrint('========================================');
-
-      // 🎯 Detect EVERYTHING at once (no filter)
-      final detections = await _detectionService.detectObjects(
+      final output = await _detectionService.detectObjects(
         imageFile,
         confidenceThreshold: 0.3,
       );
 
-      debugPrint('\n📊 DETECTION SUMMARY:');
-      debugPrint('   Total hazards detected: ${detections.length}');
-
-      // Group by type
-      final Map<String, int> counts = {};
-      for (var d in detections) {
-        counts[d.className] = (counts[d.className] ?? 0) + 1;
-      }
-
-      if (detections.isEmpty) {
-        debugPrint('   ⚠️ No hazards detected!');
-      } else {
-        debugPrint('\n   Detected by type:');
-        for (var entry in counts.entries) {
-          debugPrint('      - ${entry.key}: ${entry.value}');
-        }
-      }
-      debugPrint('========================================\n');
-
       if (!mounted) return;
       setState(() {
-        _detections = detections;
+        _detections = output.detections;
+        _annotatedImageBytes = output.annotatedImage;
         _isProcessing = false;
       });
 
       LoadingModal.hide(context);
     } catch (e) {
-      debugPrint('❌ Detection failed: $e');
+      debugPrint('Detection failed: $e');
       if (!mounted) return;
 
       setState(() => _isProcessing = false);
@@ -166,11 +124,13 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     CompactLoadingModal.show(context, message: "Preparing report...");
 
-    final processedImagePath = await ImageProcessorService.createProcessedImage(
-      _selectedImage!,
-      _decodedImage!,
-      _detections,
-    );
+    // Save annotated image (from YOLO) or fall back to original
+    String? processedImagePath;
+    if (_annotatedImageBytes != null) {
+      processedImagePath =
+          await UnifiedDetectionService.saveAnnotatedImage(_annotatedImageBytes!);
+    }
+    processedImagePath ??= _selectedImage!.path;
 
     if (!mounted) return;
     CompactLoadingModal.hide(context);
@@ -193,35 +153,32 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     }).toList();
 
     final descriptionParts = <String>[];
-    descriptionParts.add('🤖 Unified AI Detection Results:');
+    descriptionParts.add('AI Detection Results:');
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
       final displayName = _formatDisplayName(entry.key);
       descriptionParts.add(
-        '• ${entry.value}x $displayName${entry.value > 1 ? 's' : ''}',
+        '${entry.value}x $displayName${entry.value > 1 ? 's' : ''}',
       );
     }
 
     descriptionParts.add('');
-    descriptionParts.add('📊 Average confidence: $avgConfidence%');
-    descriptionParts.add('🎯 Unified YOLOv11 model (all hazards in one detection)');
+    descriptionParts.add('Average confidence: $avgConfidence%');
 
     final autoDescription = descriptionParts.join('\n');
 
-    if (processedImagePath != null) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => SendReportScreen(
-            imagePath: processedImagePath,
-            reportType: widget.category?.label ?? 'Road Hazard',
-            detections: detectionTags,
-            autoDescription: autoDescription,
-          ),
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => SendReportScreen(
+          imagePath: processedImagePath!,
+          reportType: widget.category?.label ?? 'Road Hazard',
+          detections: detectionTags,
+          autoDescription: autoDescription,
         ),
-      );
-    }
+      ),
+    );
   }
 
   String _formatDisplayName(String className) {
@@ -253,7 +210,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   void _retakePhoto() {
     setState(() {
       _selectedImage = null;
-      _decodedImage = null;
+      _annotatedImageBytes = null;
       _detections.clear();
       _isZoomedView = false;
     });
@@ -327,40 +284,26 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   Widget _buildDetectionView() {
     final displayScale = _isZoomedView ? 2.0 : 1.0;
 
+    // Show annotated image (with YOLO bounding boxes) if available, else original
+    final Widget imageWidget = _annotatedImageBytes != null && !_isProcessing
+        ? Image.memory(_annotatedImageBytes!, fit: BoxFit.contain)
+        : Image.file(_selectedImage!, fit: BoxFit.contain);
+
     return Stack(
       children: [
-        if (_selectedImage != null && _decodedImage != null)
-          Center(
-            child: GestureDetector(
-              onTap: _toggleZoomView,
-              child: AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeInOut,
-                child: AspectRatio(
-                  aspectRatio: _decodedImage!.width / _decodedImage!.height,
-                  child: Stack(
-                    children: [
-                      Transform.scale(
-                        scale: displayScale,
-                        child: Image.file(_selectedImage!, fit: BoxFit.contain),
-                      ),
-                      if (!_isProcessing)
-                        Positioned.fill(
-                          child: Transform.scale(
-                            scale: displayScale,
-                            child: CustomPaint(
-                              painter: BoundingBoxPainter(
-                                detections: _detections,
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
-                  ),
-                ),
+        Center(
+          child: GestureDetector(
+            onTap: _toggleZoomView,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+              child: Transform.scale(
+                scale: displayScale,
+                child: imageWidget,
               ),
             ),
           ),
+        ),
 
         if (_selectedImage != null)
           Positioned(

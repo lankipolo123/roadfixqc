@@ -10,7 +10,7 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ultralytics_yolo: ^0.1.36
+  ultralytics_yolo: ^0.2.0
   image_picker: ^1.0.4
   permission_handler: ^11.4.0
   camera: ^0.10.6
