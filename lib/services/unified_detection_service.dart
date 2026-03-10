@@ -37,13 +37,12 @@ class UnifiedDetectionService {
     dispose();
 
     _yolo = YOLO(
-      modelPath:
-          'lanki_capstone_FP32', // Unified model (train new one with all categories)
+      modelPath: 'roadfix-model_float32',
       task: YOLOTask.detect,
-      useGpu: true, // Enable GPU for better performance
+      useGpu: true,
     );
     await _yolo!.loadModel();
-    debugPrint('✅ Unified RoadFix YOLO model loaded (lanki_capstone_FP32)');
+    debugPrint('✅ Unified RoadFix YOLO model loaded (roadfix-model_float32)');
     _isModelLoaded = true;
   }
 
@@ -89,7 +88,7 @@ class UnifiedDetectionService {
   }) async {
     debugPrint('\n========================================');
     debugPrint('🚀 UNIFIED DETECTION START');
-    debugPrint('   Model: unified_roadfix_model.tflite');
+    debugPrint('   Model: roadfix-model_float32.tflite');
     if (filterCategory != null) {
       debugPrint('   Filter: $filterCategory only');
     }
