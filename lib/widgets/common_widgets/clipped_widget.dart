@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class CurvedClipper extends CustomClipper<Path> {
   @override

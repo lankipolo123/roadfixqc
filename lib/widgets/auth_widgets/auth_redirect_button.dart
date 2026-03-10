@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import '../themes.dart';
 
 class AuthRedirectTextButton extends StatelessWidget {
@@ -16,7 +17,7 @@ class AuthRedirectTextButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(top: 22.0),
+      padding: EdgeInsets.only(top: 22.h),
       child: TextButton(
         onPressed: onPressed,
         child: RichText(
@@ -24,13 +25,13 @@ class AuthRedirectTextButton extends StatelessWidget {
             text: "$prompt ",
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: secondary,
-              fontSize: 15,
+              fontSize: 15.sp,
               fontWeight: FontWeight.w600,
             ),
             children: [
               TextSpan(
                 text: action,
-                style: const TextStyle(
+                style: TextStyle(
                   color: primary,
                   fontWeight: FontWeight.bold,
                 ),

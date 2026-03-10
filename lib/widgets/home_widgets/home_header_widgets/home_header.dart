@@ -1,6 +1,7 @@
 // lib/widgets/home_widgets/home_header.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/user_model.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 import 'package:roadfix/screens/secondary_screens/notification_screen.dart';
 import 'package:roadfix/widgets/common_widgets/user_avatar.dart';
@@ -30,10 +31,10 @@ class HomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
         color: inputFill,
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
@@ -41,12 +42,12 @@ class HomeHeader extends StatelessWidget {
           // Avatar - NOW PASSES lastUpdated for cache busting
           UserAvatar(
             imageUrl: user.userProfile,
-            radius: 24,
+            radius: 24.r,
             onTap: onAvatarTap,
             showBorder: true,
             lastUpdated: user.lastUpdated, // This ensures fresh images!
           ),
-          const SizedBox(width: 12),
+          SizedBox(width: 12.w),
 
           // Greeting and name
           Expanded(
@@ -55,42 +56,42 @@ class HomeHeader extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 const GreetingText(text: 'Hi, Welcome'),
-                const SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 UserNameText(name: user.fullName),
               ],
             ),
           ),
 
-          const SizedBox(width: 6),
+          SizedBox(width: 6.w),
 
           // Location Badge
           GestureDetector(
             onTap: onLocationTap,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
               decoration: BoxDecoration(
                 color: primary,
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   if (isLoadingLocation)
-                    const SizedBox(
-                      width: 10,
-                      height: 10,
-                      child: CircularProgressIndicator(
+                    SizedBox(
+                      width: 10.r,
+                      height: 10.r,
+                      child: const CircularProgressIndicator(
                         strokeWidth: 1.5,
                         valueColor: AlwaysStoppedAnimation<Color>(secondary),
                       ),
                     )
                   else
-                    const Icon(Icons.location_on, size: 12, color: secondary),
-                  const SizedBox(width: 4),
+                    Icon(Icons.location_on, size: 12.r, color: secondary),
+                  SizedBox(width: 4.w),
                   Text(
                     locationText,
-                    style: const TextStyle(
-                      fontSize: 10,
+                    style: TextStyle(
+                      fontSize: 10.sp,
                       color: secondary,
                       fontWeight: FontWeight.w600,
                     ),
@@ -100,7 +101,7 @@ class HomeHeader extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
 
           // Notification icon with badge - UPDATED!
           NotificationIconWithBadge(

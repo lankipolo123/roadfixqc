@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/common_widgets/dual_color_text.dart';
 
@@ -13,40 +14,40 @@ class BannerWidget extends StatelessWidget {
           children: [
             // Background gradient bar (positioned behind)
             Container(
-              height: 96, // Same height as main banner
-              margin: const EdgeInsets.symmetric(horizontal: 12),
+              height: 96.h, // Same height as main banner
+              margin: EdgeInsets.symmetric(horizontal: 12.w),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [statusDanger, orangeAccent, statusSuccess],
                   begin: Alignment.centerLeft,
                   end: Alignment.centerRight,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
             ),
 
             // Main banner (on top)
             Container(
-              margin: const EdgeInsets.symmetric(horizontal: 12),
-              padding: const EdgeInsets.all(16),
+              margin: EdgeInsets.symmetric(horizontal: 12.w),
+              padding: EdgeInsets.all(16.w),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [secondary, secondary],
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
               ),
               child: Row(
                 children: [
                   Container(
-                    width: 70,
-                    height: 60,
+                    width: 70.w,
+                    height: 60.h,
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(10),
+                      borderRadius: BorderRadius.circular(10.r),
                       child: Image.asset(
                         'assets/images/icons/roadFixLogo.png',
                         fit: BoxFit.contain,
@@ -54,32 +55,32 @@ class BannerWidget extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(width: 16),
+                  SizedBox(width: 16.w),
 
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.center,
                       children: [
-                        const DualColorText(
+                        DualColorText(
                           leftText: 'ROAD',
                           rightText: 'FIX',
                           leftColor: inputFill,
                           rightColor: primary,
-                          fontSize: 28,
+                          fontSize: 28.sp,
                           fontWeight: FontWeight.w800,
                           letterSpacing: 12,
                         ),
 
-                        const SizedBox(height: 12),
+                        SizedBox(height: 12.h),
 
                         RichText(
-                          text: const TextSpan(
+                          text: TextSpan(
                             children: [
                               TextSpan(
                                 text: '•Detect ',
                                 style: TextStyle(
                                   color: statusDanger,
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
                                 ),
@@ -88,7 +89,7 @@ class BannerWidget extends StatelessWidget {
                                 text: '•Report ',
                                 style: TextStyle(
                                   color: orangeAccent,
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
                                 ),
@@ -97,7 +98,7 @@ class BannerWidget extends StatelessWidget {
                                 text: '•Action ',
                                 style: TextStyle(
                                   color: statusSuccess,
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
                                 ),
@@ -106,7 +107,7 @@ class BannerWidget extends StatelessWidget {
                                 text: '•ROAD',
                                 style: TextStyle(
                                   color: inputFill,
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
                                 ),
@@ -115,7 +116,7 @@ class BannerWidget extends StatelessWidget {
                                 text: 'FIXED',
                                 style: TextStyle(
                                   color: primary,
-                                  fontSize: 12,
+                                  fontSize: 12.sp,
                                   fontWeight: FontWeight.w800,
                                   letterSpacing: 1.5,
                                 ),
@@ -132,7 +133,7 @@ class BannerWidget extends StatelessWidget {
           ],
         ),
 
-        const SizedBox(height: 4),
+        SizedBox(height: 4.h),
 
         // Separate gradient bar below
       ],

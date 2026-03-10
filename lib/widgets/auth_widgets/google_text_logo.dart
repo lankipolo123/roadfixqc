@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class GoogleTextLogo extends StatelessWidget {
   final double fontSize;
@@ -30,7 +31,7 @@ class GoogleTextLogo extends StatelessWidget {
                   fontSize: fontSize,
                   fontWeight: FontWeight.bold,
                   color: Colors.white,
-                  letterSpacing: 10, // Needed for ShaderMask
+                  letterSpacing: 10.w,
                 ),
               ),
             ),
@@ -42,7 +43,7 @@ class GoogleTextLogo extends StatelessWidget {
               fontSize: fontSize,
               fontWeight: FontWeight.w600,
               color: Colors.black, // Or `secondary` if themed
-              letterSpacing: 8,
+              letterSpacing: 8.w,
             ),
           ),
         ],

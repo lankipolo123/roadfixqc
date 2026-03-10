@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class UserNameText extends StatelessWidget {
@@ -9,13 +10,13 @@ class UserNameText extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ConstrainedBox(
-      constraints: const BoxConstraints(
-        maxWidth: 200, // Adjust this value based on your needs
+      constraints: BoxConstraints(
+        maxWidth: 200.w, // Adjust this value based on your needs
       ),
       child: Text(
         name,
-        style: const TextStyle(
-          fontSize: 15,
+        style: TextStyle(
+          fontSize: 15.sp,
           fontWeight: FontWeight.bold,
           color: secondary,
           height: 1.3,

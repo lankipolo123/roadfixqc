@@ -1,18 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class ReportActionButtons extends StatelessWidget {
   final VoidCallback onSubmit;
   final VoidCallback onReportAnother;
   final VoidCallback onDone;
-  final bool isLoading; // ✅ added loading flag
+  final bool isLoading;
 
   const ReportActionButtons({
     super.key,
     required this.onSubmit,
     required this.onReportAnother,
     required this.onDone,
-    this.isLoading = false, // ✅ default false
+    this.isLoading = false,
   });
 
   @override
@@ -25,25 +26,25 @@ class ReportActionButtons extends StatelessWidget {
           child: ElevatedButton(
             onPressed: isLoading ? null : onSubmit,
             style: ElevatedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16.h),
               backgroundColor: statusSuccess,
             ),
             child: isLoading
-                ? const SizedBox(
-                    width: 20,
-                    height: 20,
+                ? SizedBox(
+                    width: 20.r,
+                    height: 20.r,
                     child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor: AlwaysStoppedAnimation<Color>(inputFill),
+                      strokeWidth: 2.r,
+                      valueColor: const AlwaysStoppedAnimation<Color>(inputFill),
                     ),
                   )
-                : const Text(
+                : Text(
                     'Send Report',
-                    style: TextStyle(fontSize: 16, color: inputFill),
+                    style: TextStyle(fontSize: 16.sp, color: inputFill),
                   ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
 
         // Report Another Issue button
         SizedBox(
@@ -51,15 +52,15 @@ class ReportActionButtons extends StatelessWidget {
           child: OutlinedButton(
             onPressed: isLoading ? null : onReportAnother,
             style: OutlinedButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16.h),
             ),
-            child: const Text(
+            child: Text(
               'Report Another Issue',
-              style: TextStyle(fontSize: 16),
+              style: TextStyle(fontSize: 16.sp),
             ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
 
         // Done button
         SizedBox(
@@ -67,9 +68,9 @@ class ReportActionButtons extends StatelessWidget {
           child: TextButton(
             onPressed: isLoading ? null : onDone,
             style: TextButton.styleFrom(
-              padding: const EdgeInsets.symmetric(vertical: 16),
+              padding: EdgeInsets.symmetric(vertical: 16.h),
             ),
-            child: const Text('Done', style: TextStyle(fontSize: 16)),
+            child: Text('Done', style: TextStyle(fontSize: 16.sp)),
           ),
         ),
       ],

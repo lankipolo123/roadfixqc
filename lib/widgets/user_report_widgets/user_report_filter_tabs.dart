@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/constant/report_constant.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class ReportFilterTabs extends StatelessWidget {
@@ -23,7 +24,7 @@ class ReportFilterTabs extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         _buildFilterRow(firstRow, 0),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         _buildFilterRow(secondRow, 4),
       ],
     );
@@ -41,21 +42,21 @@ class ReportFilterTabs extends StatelessWidget {
 
         return Expanded(
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 3),
+            padding: EdgeInsets.symmetric(horizontal: 3.w),
             child: GestureDetector(
               onTap: () => onChanged(globalIndex),
               behavior: HitTestBehavior.opaque,
               child: AnimatedContainer(
                 duration: const Duration(milliseconds: 200),
                 curve: Curves.easeInOut,
-                padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 6),
+                padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 6.w),
                 decoration: BoxDecoration(
                   color: isActive ? secondary : Colors.transparent,
                   border: Border.all(
                     color: isActive ? secondary : filterColor,
                     width: 1.5,
                   ),
-                  borderRadius: BorderRadius.circular(20),
+                  borderRadius: BorderRadius.circular(20.r),
                 ),
                 child: Center(
                   child: Text(
@@ -64,7 +65,7 @@ class ReportFilterTabs extends StatelessWidget {
                     style: TextStyle(
                       color: isActive ? primary : filterColor,
                       fontWeight: isActive ? FontWeight.bold : FontWeight.w600,
-                      fontSize: 12,
+                      fontSize: 12.sp,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,

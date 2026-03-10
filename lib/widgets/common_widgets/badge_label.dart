@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class BadgeLabel extends StatefulWidget {
   final String? text; // Optional - if null, will show location
@@ -87,10 +88,10 @@ class _BadgeLabelState extends State<BadgeLabel> {
   @override
   Widget build(BuildContext context) {
     Widget badgeContent = Container(
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
       decoration: BoxDecoration(
         color: widget.backgroundColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -99,21 +100,21 @@ class _BadgeLabelState extends State<BadgeLabel> {
           if (widget.isLocationBadge) ...[
             if (_isLoading)
               SizedBox(
-                width: 10,
-                height: 10,
+                width: 10.w,
+                height: 10.h,
                 child: CircularProgressIndicator(
                   strokeWidth: 1.5,
                   valueColor: AlwaysStoppedAnimation<Color>(widget.textColor),
                 ),
               )
             else
-              Icon(Icons.location_on, size: 12, color: widget.textColor),
-            const SizedBox(width: 4),
+              Icon(Icons.location_on, size: 12.r, color: widget.textColor),
+            SizedBox(width: 4.w),
           ],
           Text(
             _displayText,
             style: TextStyle(
-              fontSize: 10,
+              fontSize: 10.sp,
               color: widget.textColor,
               fontWeight: FontWeight.w600,
             ),

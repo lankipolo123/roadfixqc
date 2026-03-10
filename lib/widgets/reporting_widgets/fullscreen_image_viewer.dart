@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class FullScreenImageViewer extends StatelessWidget {
@@ -38,7 +39,7 @@ class FullScreenImageViewer extends StatelessWidget {
             Center(
               child: InteractiveViewer(
                 panEnabled: true,
-                boundaryMargin: const EdgeInsets.all(20),
+                boundaryMargin: EdgeInsets.all(20.w),
                 minScale: 0.5,
                 maxScale: 4.0,
                 child: Image.file(
@@ -51,20 +52,20 @@ class FullScreenImageViewer extends StatelessWidget {
                       width: MediaQuery.of(context).size.width,
                       height: MediaQuery.of(context).size.height,
                       color: Colors.grey[900],
-                      child: const Column(
+                      child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           Icon(
                             Icons.error_outline,
                             color: Colors.white54,
-                            size: 60,
+                            size: 60.r,
                           ),
-                          SizedBox(height: 16),
+                          SizedBox(height: 16.h),
                           Text(
                             'Could not load image',
                             style: TextStyle(
                               color: Colors.white54,
-                              fontSize: 16,
+                              fontSize: 16.sp,
                             ),
                           ),
                         ],
@@ -78,12 +79,12 @@ class FullScreenImageViewer extends StatelessWidget {
             // Custom back button if no app bar
             if (!showAppBar)
               Positioned(
-                top: 20,
-                left: 20,
+                top: 20.h,
+                left: 20.w,
                 child: Container(
                   decoration: BoxDecoration(
                     color: Colors.black54,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
                   child: IconButton(
                     onPressed: () => Navigator.pop(context),
@@ -94,22 +95,22 @@ class FullScreenImageViewer extends StatelessWidget {
 
             // Zoom instructions (optional)
             Positioned(
-              bottom: 50,
+              bottom: 50.h,
               left: 0,
               right: 0,
               child: Center(
                 child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 16,
-                    vertical: 8,
+                  padding: EdgeInsets.symmetric(
+                    horizontal: 16.w,
+                    vertical: 8.h,
                   ),
                   decoration: BoxDecoration(
                     color: Colors.black54,
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(20.r),
                   ),
-                  child: const Text(
+                  child: Text(
                     'Pinch to zoom • Drag to pan',
-                    style: TextStyle(color: altSecondary, fontSize: 12),
+                    style: TextStyle(color: altSecondary, fontSize: 12.sp),
                   ),
                 ),
               ),
@@ -187,7 +188,7 @@ class _FullScreenImageViewerWithControlsState
             child: InteractiveViewer(
               transformationController: _transformationController,
               panEnabled: true,
-              boundaryMargin: const EdgeInsets.all(20),
+              boundaryMargin: EdgeInsets.all(20.w),
               minScale: 0.5,
               maxScale: 4.0,
               child: Image.file(File(widget.imagePath)),
@@ -196,8 +197,8 @@ class _FullScreenImageViewerWithControlsState
 
           // Zoom controls
           Positioned(
-            bottom: 50,
-            right: 20,
+            bottom: 50.h,
+            right: 20.w,
             child: Column(
               children: [
                 FloatingActionButton(
@@ -206,7 +207,7 @@ class _FullScreenImageViewerWithControlsState
                   onPressed: _zoomIn,
                   child: const Icon(Icons.zoom_in, color: inputFill),
                 ),
-                const SizedBox(height: 8),
+                SizedBox(height: 8.h),
                 FloatingActionButton(
                   mini: true,
                   backgroundColor: secondary,

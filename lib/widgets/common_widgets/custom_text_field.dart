@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class CustomTextField extends StatelessWidget {
   final TextEditingController controller;
@@ -26,7 +27,7 @@ class CustomTextField extends StatelessWidget {
   final double borderRadius;
   final EdgeInsets padding;
 
-  const CustomTextField({
+  CustomTextField({
     super.key,
     required this.controller,
     required this.label,
@@ -49,8 +50,8 @@ class CustomTextField extends StatelessWidget {
     this.backgroundColor,
     this.borderColor,
     this.borderRadius = 8.0,
-    this.padding = const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-  });
+    EdgeInsets? padding,
+  }) : padding = padding ?? EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h);
 
   @override
   Widget build(BuildContext context) {
@@ -59,13 +60,13 @@ class CustomTextField extends StatelessWidget {
       children: [
         Text(
           label,
-          style: const TextStyle(
-            fontSize: 14,
+          style: TextStyle(
+            fontSize: 14.sp,
             fontWeight: FontWeight.w600,
             color: altSecondary,
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         TextFormField(
           controller: controller,
           keyboardType: keyboardType,
@@ -81,12 +82,12 @@ class CustomTextField extends StatelessWidget {
           focusNode: focusNode,
           textCapitalization: textCapitalization,
           style: TextStyle(
-            fontSize: 16,
+            fontSize: 16.sp,
             color: enabled ? secondary : altSecondary,
           ),
           decoration: InputDecoration(
             hintText: hintText ?? 'Enter $label',
-            hintStyle: const TextStyle(color: altSecondary, fontSize: 16),
+            hintStyle: TextStyle(color: altSecondary, fontSize: 16.sp),
             prefixIcon: prefixIcon != null
                 ? Icon(prefixIcon, color: altSecondary)
                 : null,

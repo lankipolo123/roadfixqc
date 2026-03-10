@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/utils/pagination_helper.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class PaginationFAB extends StatelessWidget {
@@ -24,10 +25,10 @@ class PaginationFAB extends StatelessWidget {
         alignment: Alignment.bottomCenter,
         child: Container(
           margin: EdgeInsets.only(bottom: effectiveBottomMargin),
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 8.h),
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.circular(30),
+            borderRadius: BorderRadius.circular(30.r),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withAlpha(40),
@@ -41,7 +42,7 @@ class PaginationFAB extends StatelessWidget {
             children: [
               // Previous Arrow
               IconButton(
-                icon: const Icon(Icons.arrow_back_ios_new, size: 18),
+                icon: Icon(Icons.arrow_back_ios_new, size: 18.r),
                 color: currentPage > 1 ? Colors.black87 : Colors.grey,
                 onPressed: currentPage > 1
                     ? () => onPageSelected(currentPage - 1)
@@ -57,14 +58,14 @@ class PaginationFAB extends StatelessWidget {
                   onTap: () => onPageSelected(page),
                   child: AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
-                    margin: const EdgeInsets.symmetric(horizontal: 4),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 14,
-                      vertical: 8,
+                    margin: EdgeInsets.symmetric(horizontal: 4.w),
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 14.w,
+                      vertical: 8.h,
                     ),
                     decoration: BoxDecoration(
                       color: isSelected ? primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8),
+                      borderRadius: BorderRadius.circular(8.r),
                     ),
                     child: Text(
                       '$page',
@@ -73,7 +74,7 @@ class PaginationFAB extends StatelessWidget {
                         fontWeight: isSelected
                             ? FontWeight.bold
                             : FontWeight.w500,
-                        fontSize: 15,
+                        fontSize: 15.sp,
                       ),
                     ),
                   ),
@@ -82,7 +83,7 @@ class PaginationFAB extends StatelessWidget {
 
               // Next Arrow
               IconButton(
-                icon: const Icon(Icons.arrow_forward_ios, size: 18),
+                icon: Icon(Icons.arrow_forward_ios, size: 18.r),
                 color: currentPage < pageCount ? Colors.black87 : Colors.grey,
                 onPressed: currentPage < pageCount
                     ? () => onPageSelected(currentPage + 1)

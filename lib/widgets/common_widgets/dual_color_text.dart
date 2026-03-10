@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class DualColorText extends StatelessWidget {
   final String leftText;
@@ -30,7 +31,7 @@ class DualColorText extends StatelessWidget {
             text: leftText,
             style: TextStyle(
               color: leftColor,
-              fontSize: fontSize,
+              fontSize: fontSize.sp,
               fontWeight: fontWeight,
               letterSpacing: letterSpacing,
               fontFamily: 'Roboto', // built-in font
@@ -40,7 +41,7 @@ class DualColorText extends StatelessWidget {
             text: rightText,
             style: TextStyle(
               color: rightColor,
-              fontSize: fontSize,
+              fontSize: fontSize.sp,
               fontWeight: fontWeight,
               letterSpacing: letterSpacing,
               fontFamily: 'Roboto',

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class BigButton extends StatelessWidget {
   final String text;
@@ -11,7 +12,7 @@ class BigButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return SizedBox(
       width: double.infinity,
-      height: 46, // ↓ slightly shorter
+      height: 46.h, // slightly shorter
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
@@ -19,12 +20,12 @@ class BigButton extends StatelessWidget {
           foregroundColor: secondary,
           elevation: 0,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
           ),
         ),
         child: Text(
           text,
-          style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
+          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
         ),
       ),
     );

@@ -7,6 +7,7 @@ import 'package:roadfix/widgets/auth_widgets/auth_redirect_button.dart';
 import 'package:roadfix/screens/module_screens/navigation_screen.dart';
 import 'package:roadfix/screens/auth_screens/login_screen.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class EmailVerificationScreen extends StatefulWidget {
   const EmailVerificationScreen({super.key});
@@ -117,15 +118,15 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         children: [
           // Email verification icon
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(24.w),
             decoration: BoxDecoration(
               color: primary.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: const Icon(Icons.email_outlined, size: 64, color: primary),
+            child: Icon(Icons.email_outlined, size: 64.r, color: primary),
           ),
 
-          const SizedBox(height: 24),
+          SizedBox(height: 24.h),
 
           // Title
           Text(
@@ -137,7 +138,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
 
           // Description
           Text(
@@ -148,7 +149,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 6),
+          SizedBox(height: 6.h),
 
           // User email
           Text(
@@ -160,20 +161,20 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             textAlign: TextAlign.center,
           ),
 
-          const SizedBox(height: 20),
+          SizedBox(height: 20.h),
 
           // Instructions
           Container(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             decoration: BoxDecoration(
               color: statusWarning.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
               border: Border.all(color: statusWarning.withValues(alpha: 0.3)),
             ),
             child: Row(
               children: [
-                const Icon(Icons.info_outline, color: statusWarning, size: 20),
-                const SizedBox(width: 12),
+                Icon(Icons.info_outline, color: statusWarning, size: 20.r),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Text(
                     'Check your email and click the verification link, then tap "I\'ve Verified" below.',
@@ -188,7 +189,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
         ],
       ),
       children: [
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
 
         // Check verification button
         BigButton(
@@ -198,30 +199,30 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           onPressed: _isCheckingVerification ? null : _checkEmailVerification,
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
 
         // Resend email button
         OutlinedButton(
           onPressed: _isResendingEmail ? null : _resendVerificationEmail,
           style: OutlinedButton.styleFrom(
-            padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
+            padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
             side: const BorderSide(color: primary),
             shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            minimumSize: const Size(double.infinity, 54),
+            minimumSize: Size(double.infinity, 54.h),
           ),
           child: Text(
             _isResendingEmail ? "Sending..." : "Resend Verification Email",
-            style: const TextStyle(
+            style: TextStyle(
               color: primary,
               fontWeight: FontWeight.w600,
-              fontSize: 16,
+              fontSize: 16.sp,
             ),
           ),
         ),
 
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
 
         // Sign out redirect button
         AuthRedirectTextButton(
@@ -230,7 +231,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           onPressed: _signOut,
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
 
         // Help text
         Text(
@@ -241,7 +242,7 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
           textAlign: TextAlign.center,
         ),
 
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
       ],
     );
   }

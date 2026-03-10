@@ -1,6 +1,7 @@
 // lib/widgets/home_widgets/recent_report_item.dart
 
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/models/recent_report_model.dart';
 
@@ -27,11 +28,11 @@ class RecentReportItem extends StatelessWidget {
     }
 
     return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.all(12),
+      margin: EdgeInsets.only(bottom: 8.h),
+      padding: EdgeInsets.all(12.w),
       decoration: BoxDecoration(
         color: inputFill,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.r),
         border: Border(left: BorderSide(color: statusColor, width: 4)),
         boxShadow: [
           BoxShadow(
@@ -53,29 +54,29 @@ class RecentReportItem extends StatelessWidget {
                   report.title,
                   style: textTheme.bodyLarge?.copyWith(
                     fontWeight: FontWeight.bold,
-                    fontSize: 14,
+                    fontSize: 14.sp,
                     color: secondary,
                   ),
                 ),
-                const SizedBox(height: 6),
+                SizedBox(height: 6.h),
                 Row(
                   children: [
-                    const Icon(Icons.calendar_today, size: 14, color: secondary),
-                    const SizedBox(width: 4),
+                    Icon(Icons.calendar_today, size: 14.r, color: secondary),
+                    SizedBox(width: 4.w),
                     Text(
                       report.date,
                       style: textTheme.bodySmall?.copyWith(
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         color: altSecondary,
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    const Icon(Icons.access_time, size: 14, color: altSecondary),
-                    const SizedBox(width: 4),
+                    SizedBox(width: 12.w),
+                    Icon(Icons.access_time, size: 14.r, color: altSecondary),
+                    SizedBox(width: 4.w),
                     Text(
                       report.time,
                       style: textTheme.bodySmall?.copyWith(
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         color: altSecondary,
                       ),
                     ),
@@ -86,15 +87,15 @@ class RecentReportItem extends StatelessWidget {
           ),
           // Right side status icon
           Container(
-            padding: const EdgeInsets.all(6),
+            padding: EdgeInsets.all(6.w),
             decoration: BoxDecoration(
               color: statusColor.withAlpha(25),
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
             ),
             child: Icon(
               Icons.warning_amber_rounded,
               color: statusColor,
-              size: 20,
+              size: 20.r,
             ),
           ),
         ],

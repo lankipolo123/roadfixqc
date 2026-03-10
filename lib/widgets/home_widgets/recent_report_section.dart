@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/screens/secondary_screens/public_report_detail.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/services/report_service.dart';
 import 'package:roadfix/models/report_model.dart';
@@ -13,27 +14,27 @@ class RecentReportsSection extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Title stays fixed at top-left
-        const Padding(
-          padding: EdgeInsets.symmetric(horizontal: 12),
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 12.w),
           child: Text(
             'Recent Reports',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.bold,
               color: secondary,
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
 
         // Reports - no fixed height
         StreamBuilder<List<ReportModel>>(
           stream: ReportService().getAcceptedReportsStream(limit: 5),
           builder: (context, snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const SizedBox(
-                height: 100,
-                child: Center(
+              return SizedBox(
+                height: 100.h,
+                child: const Center(
                   child: CircularProgressIndicator(
                     color: primary,
                     strokeWidth: 2,
@@ -43,12 +44,12 @@ class RecentReportsSection extends StatelessWidget {
             }
 
             if (snapshot.hasError) {
-              return const SizedBox(
-                height: 100,
+              return SizedBox(
+                height: 100.h,
                 child: Center(
                   child: Text(
                     'No recent reports at the moment',
-                    style: TextStyle(fontSize: 14, color: altSecondary),
+                    style: TextStyle(fontSize: 14.sp, color: altSecondary),
                   ),
                 ),
               );
@@ -66,12 +67,12 @@ class RecentReportsSection extends StatelessWidget {
             }).toList();
 
             if (recentReports.isEmpty) {
-              return const SizedBox(
-                height: 100,
+              return SizedBox(
+                height: 100.h,
                 child: Center(
                   child: Text(
                     'No recent reports at the moment',
-                    style: TextStyle(fontSize: 14, color: altSecondary),
+                    style: TextStyle(fontSize: 14.sp, color: altSecondary),
                   ),
                 ),
               );
@@ -80,7 +81,7 @@ class RecentReportsSection extends StatelessWidget {
             return ListView(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              padding: const EdgeInsets.symmetric(horizontal: 12),
+              padding: EdgeInsets.symmetric(horizontal: 12.w),
               children: recentReports
                   .map((report) => _buildReportItem(context, report))
                   .toList(),
@@ -103,11 +104,11 @@ class RecentReportsSection extends StatelessWidget {
         );
       },
       child: Container(
-        margin: const EdgeInsets.only(bottom: 8),
-        padding: const EdgeInsets.all(12),
+        margin: EdgeInsets.only(bottom: 8.h),
+        padding: EdgeInsets.all(12.w),
         decoration: BoxDecoration(
           color: inputFill,
-          borderRadius: BorderRadius.circular(8),
+          borderRadius: BorderRadius.circular(8.r),
           border: Border.all(
             color: const Color.fromARGB(255, 0, 0, 0).withValues(alpha: 0.3),
           ),
@@ -124,14 +125,14 @@ class RecentReportsSection extends StatelessWidget {
           children: [
             // Status indicator
             Container(
-              width: 8,
-              height: 8,
+              width: 8.r,
+              height: 8.r,
               decoration: const BoxDecoration(
                 color: statusSuccess,
                 shape: BoxShape.circle,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
 
             // Report info
             Expanded(
@@ -142,39 +143,39 @@ class RecentReportsSection extends StatelessWidget {
                     report.description.length > 50
                         ? '${report.description.substring(0, 50)}...'
                         : report.description,
-                    style: const TextStyle(
-                      fontSize: 14,
+                    style: TextStyle(
+                      fontSize: 14.sp,
                       fontWeight: FontWeight.w500,
                       color: secondary,
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     '${report.location} • ${report.formattedReportedAt}',
                     style: TextStyle(
-                      fontSize: 12,
+                      fontSize: 12.sp,
                       color: altSecondary.withValues(alpha: 0.7),
                     ),
                   ),
                   // Add reporter name
-                  const SizedBox(height: 2),
+                  SizedBox(height: 2.h),
                 ],
               ),
             ),
 
             // Type badge
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 4.h),
               decoration: BoxDecoration(
                 color: statusSuccess.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(4),
+                borderRadius: BorderRadius.circular(4.r),
               ),
               child: Text(
                 report.reportType,
-                style: const TextStyle(
-                  fontSize: 10,
+                style: TextStyle(
+                  fontSize: 10.sp,
                   fontWeight: FontWeight.w600,
                   color: statusSuccess,
                 ),
@@ -182,10 +183,10 @@ class RecentReportsSection extends StatelessWidget {
             ),
 
             // Arrow indicator
-            const SizedBox(width: 8),
+            SizedBox(width: 8.w),
             Icon(
               Icons.arrow_forward_ios,
-              size: 14,
+              size: 14.r,
               color: altSecondary.withValues(alpha: 0.6),
             ),
           ],

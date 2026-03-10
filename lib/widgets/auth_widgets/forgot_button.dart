@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/screens/auth_screens/forgot_password_screen.dart';
 
@@ -23,7 +24,7 @@ class ForgotPasswordButton extends StatelessWidget {
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             color: statusDanger,
             fontWeight: FontWeight.w600,
-            fontSize: 12,
+            fontSize: 12.sp,
           ),
         ),
       ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import '../themes.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -26,7 +27,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 6.0),
+      padding: EdgeInsets.symmetric(vertical: 6.h),
       child: TextFormField(
         controller: controller,
         focusNode: focusNode,
@@ -37,32 +38,32 @@ class CustomTextField extends StatelessWidget {
         decoration: InputDecoration(
           prefixIcon: icon != null ? Icon(icon, color: primary) : null,
           labelText: label,
-          labelStyle: const TextStyle(
+          labelStyle: TextStyle(
             fontWeight: FontWeight.w500,
             color: altSecondary,
           ),
-          hintStyle: const TextStyle(color: altSecondary),
+          hintStyle: TextStyle(color: altSecondary),
           filled: true,
           fillColor: inputFill,
-          contentPadding: const EdgeInsets.symmetric(
-            horizontal: 16.0,
-            vertical: 12.0,
+          contentPadding: EdgeInsets.symmetric(
+            horizontal: 16.w,
+            vertical: 12.h,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
             borderSide: const BorderSide(color: primary, width: 1.4),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
             borderSide: const BorderSide(color: primary, width: 1.4),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(16.r),
             borderSide: const BorderSide(color: primary, width: 2),
           ),
         ),
-        style: const TextStyle(
-          fontSize: 15,
+        style: TextStyle(
+          fontSize: 15.sp,
           fontWeight: FontWeight.w500,
           color: secondary,
         ),

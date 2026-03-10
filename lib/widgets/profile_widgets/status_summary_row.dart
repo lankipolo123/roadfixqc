@@ -1,6 +1,7 @@
 // lib/widgets/profile_widgets/status_summary_row.dart (DYNAMIC VERSION)
 import 'package:flutter/material.dart';
 import 'package:roadfix/services/report_service.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class StatusSummaryRow extends StatelessWidget {
@@ -54,12 +55,12 @@ class StatusSummaryRow extends StatelessWidget {
   Widget _statusBox(String label, int count, Color color) {
     return Expanded(
       child: Container(
-        margin: const EdgeInsets.symmetric(horizontal: 4),
-        padding: const EdgeInsets.symmetric(vertical: 6),
+        margin: EdgeInsets.symmetric(horizontal: 4.w),
+        padding: EdgeInsets.symmetric(vertical: 6.h),
         decoration: BoxDecoration(
           color: color.withValues(alpha: 0.1),
           border: Border.all(color: color),
-          borderRadius: BorderRadius.circular(10),
+          borderRadius: BorderRadius.circular(10.r),
         ),
         child: Column(
           children: [
@@ -68,10 +69,10 @@ class StatusSummaryRow extends StatelessWidget {
               style: TextStyle(
                 color: color,
                 fontWeight: FontWeight.bold,
-                fontSize: 14,
+                fontSize: 14.sp,
               ),
             ),
-            Text(label, style: TextStyle(color: color, fontSize: 12)),
+            Text(label, style: TextStyle(color: color, fontSize: 12.sp)),
           ],
         ),
       ),

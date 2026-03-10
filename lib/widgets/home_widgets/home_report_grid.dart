@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/home_widgets/home_report_preview_card.dart';
 
 class HomeReportGrid extends StatelessWidget {
@@ -9,14 +10,14 @@ class HomeReportGrid extends StatelessWidget {
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      padding: const EdgeInsets.only(
-        left: 12,
-        right: 12,
-      ), // ❌ No vertical padding
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      padding: EdgeInsets.only(
+        left: 12.w,
+        right: 12.w,
+      ), // No vertical padding
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        mainAxisSpacing: 6,
-        crossAxisSpacing: 6,
+        mainAxisSpacing: 6.h,
+        crossAxisSpacing: 6.w,
         childAspectRatio: 2.6, // Small box shape
       ),
       itemCount: 4,

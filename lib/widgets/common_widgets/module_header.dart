@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class ModuleHeader extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -27,25 +28,25 @@ class ModuleHeader extends StatelessWidget implements PreferredSizeWidget {
         // Replace the solid color container with DiagonalStripes
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: const BoxDecoration(
+          padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+          decoration: BoxDecoration(
             color: inputFill,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
           ),
           child: Row(
             children: [
               if (showBack)
                 GestureDetector(
                   onTap: onBack ?? () => Navigator.pop(context),
-                  child: const Icon(Icons.arrow_back_ios_new, size: 20),
+                  child: Icon(Icons.arrow_back_ios_new, size: 20.r),
                 ),
-              if (showBack) const SizedBox(width: 8),
+              if (showBack) SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   title,
                   textAlign: textAlign,
                   style: TextStyle(
-                    fontSize: 18,
+                    fontSize: 18.sp,
                     fontWeight: FontWeight.bold,
                     color: secondary,
                     letterSpacing: spacing,

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class ReportInfoCard extends StatelessWidget {
@@ -30,10 +31,10 @@ class ReportInfoCard extends StatelessWidget {
     final tColor = textColor ?? secondary;
 
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: bgColor,
-        borderRadius: BorderRadius.circular(12),
+        borderRadius: BorderRadius.circular(12.r),
         border: Border.all(color: bColor),
       ),
       child: Column(
@@ -42,23 +43,23 @@ class ReportInfoCard extends StatelessWidget {
           Row(
             children: [
               Icon(icon, color: iColor),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Expanded(
                 child: Text(
                   title,
                   style: TextStyle(
                     fontWeight: FontWeight.bold,
                     color: tColor,
-                    fontSize: 16,
+                    fontSize: 16.sp,
                   ),
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Text(
             description,
-            style: const TextStyle(fontSize: 14, color: secondary),
+            style: TextStyle(fontSize: 14.sp, color: secondary),
           ),
         ],
       ),

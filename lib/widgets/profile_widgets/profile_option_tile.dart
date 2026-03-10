@@ -1,6 +1,7 @@
 // lib/widgets/profile_widgets/profile_option_tile.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/profile_option_model.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class ProfileOptionTile extends StatelessWidget {
@@ -14,23 +15,23 @@ class ProfileOptionTile extends StatelessWidget {
 
     final TextStyle labelStyle =
         option.labelStyle ??
-        textTheme.bodyMedium!.copyWith(fontSize: 14, color: secondary);
+        textTheme.bodyMedium!.copyWith(fontSize: 14.sp, color: secondary);
 
     return Material(
       color: transparent,
       child: InkWell(
         onTap: option.mode == ProfileOptionMode.toggle ? null : option.onTap,
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(10.r),
         child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 6, horizontal: 8),
+          padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
           child: Row(
             children: [
               CircleAvatar(
-                radius: 14,
+                radius: 14.r,
                 backgroundColor: option.iconBackgroundColor,
-                child: Icon(option.icon, color: inputFill, size: 12),
+                child: Icon(option.icon, color: inputFill, size: 12.r),
               ),
-              const SizedBox(width: 8),
+              SizedBox(width: 8.w),
               Expanded(child: Text(option.label, style: labelStyle)),
               _buildTrailingWidget(),
             ],
@@ -57,18 +58,18 @@ class ProfileOptionTile extends StatelessWidget {
           inactiveThumbColor: inputFill, // Thumb color when OFF
           inactiveTrackColor: secondary, // Track color when OFF
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          splashRadius: 10,
+          splashRadius: 10.r,
         );
 
       case ProfileOptionMode.iconOnly:
         return Icon(
           option.trailingIcon ?? Icons.check_circle,
-          size: 10,
+          size: 10.r,
           color: option.trailingIconColor ?? statusSuccess,
         );
 
       case ProfileOptionMode.normal:
-        return const Icon(Icons.chevron_right, size: 20, color: altSecondary);
+        return Icon(Icons.chevron_right, size: 20.r, color: altSecondary);
     }
   }
 }

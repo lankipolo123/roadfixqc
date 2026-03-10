@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class SuccessHeader extends StatelessWidget {
   final String title;
@@ -18,22 +19,22 @@ class SuccessHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        Icon(icon, color: iconColor, size: 60),
-        const SizedBox(height: 16),
+        Icon(icon, color: iconColor, size: 60.r),
+        SizedBox(height: 16.h),
         Text(
           title,
           style: TextStyle(
-            fontSize: 20,
+            fontSize: 20.sp,
             fontWeight: FontWeight.bold,
             color: iconColor,
           ),
           textAlign: TextAlign.center,
         ),
         if (subtitle != null) ...[
-          const SizedBox(height: 8),
+          SizedBox(height: 8.h),
           Text(
             subtitle!,
-            style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            style: TextStyle(fontSize: 14.sp, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ],

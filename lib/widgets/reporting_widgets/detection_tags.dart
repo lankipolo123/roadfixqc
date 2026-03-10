@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class DetectionTags extends StatelessWidget {
   final List<String> detections;
@@ -12,14 +13,14 @@ class DetectionTags extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Text(
+        Text(
           'Tags:',
-          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+          style: TextStyle(fontSize: 16.sp, fontWeight: FontWeight.bold),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Wrap(
-          spacing: 8,
-          runSpacing: 4,
+          spacing: 8.w,
+          runSpacing: 4.h,
           children: detections
               .map(
                 (detection) => Chip(
@@ -30,7 +31,7 @@ class DetectionTags extends StatelessWidget {
               )
               .toList(),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
       ],
     );
   }

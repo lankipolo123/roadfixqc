@@ -1,6 +1,7 @@
 // lib/widgets/common_widgets/app_toast.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 enum ToastType { success, error, warning, info }
 
@@ -184,9 +185,9 @@ class _ToastWidgetState extends State<_ToastWidget>
   @override
   Widget build(BuildContext context) {
     return Positioned(
-      top: MediaQuery.of(context).viewPadding.top + 16,
-      left: 16,
-      right: 16,
+      top: MediaQuery.of(context).viewPadding.top + 16.h,
+      left: 16.w,
+      right: 16.w,
       child: FadeTransition(
         opacity: _fadeAnimation,
         child: SlideTransition(
@@ -194,10 +195,10 @@ class _ToastWidgetState extends State<_ToastWidget>
           child: Material(
             color: Colors.transparent,
             child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
               decoration: BoxDecoration(
                 color: _getBackgroundColor(),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(12.r),
                 boxShadow: [
                   BoxShadow(
                     color: Colors.black.withValues(alpha: 0.2),
@@ -208,8 +209,8 @@ class _ToastWidgetState extends State<_ToastWidget>
               ),
               child: Row(
                 children: [
-                  Icon(_getIcon(), color: Colors.white, size: 24),
-                  const SizedBox(width: 12),
+                  Icon(_getIcon(), color: Colors.white, size: 24.r),
+                  SizedBox(width: 12.w),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -218,41 +219,41 @@ class _ToastWidgetState extends State<_ToastWidget>
                         if (widget.title != null) ...[
                           Text(
                             widget.title!,
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: Colors.white,
-                              fontSize: 14,
+                              fontSize: 14.sp,
                               fontWeight: FontWeight.w600,
                             ),
                           ),
-                          const SizedBox(height: 2),
+                          SizedBox(height: 2.h),
                         ],
                         Text(
                           widget.message,
                           style: TextStyle(
                             color: Colors.white,
-                            fontSize: widget.title != null ? 13 : 14,
+                            fontSize: widget.title != null ? 13.sp : 14.sp,
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  SizedBox(width: 8.w),
                   GestureDetector(
                     onTap: () async {
                       await _animationController.reverse();
                       widget.onDismiss();
                     },
                     child: Container(
-                      padding: const EdgeInsets.all(4),
+                      padding: EdgeInsets.all(4.w),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.2),
                         shape: BoxShape.circle,
                       ),
-                      child: const Icon(
+                      child: Icon(
                         Icons.close,
                         color: Colors.white,
-                        size: 16,
+                        size: 16.r,
                       ),
                     ),
                   ),

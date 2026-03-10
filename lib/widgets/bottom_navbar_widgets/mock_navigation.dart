@@ -1,6 +1,7 @@
 // lib/widgets/bottom_navbar_widgets/mock_navigation.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class MockNavigationWidget extends StatelessWidget {
   final int currentIndex;
@@ -23,7 +24,7 @@ class MockNavigationWidget extends StatelessWidget {
       color: primary,
       elevation: 0,
       child: SizedBox(
-        height: 64,
+        height: 64.h,
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
@@ -46,8 +47,8 @@ class MockNavigationWidget extends StatelessWidget {
         onTap: () => onTap?.call(index),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 300),
-          padding: const EdgeInsets.symmetric(vertical: 6),
-          margin: const EdgeInsets.symmetric(horizontal: 4),
+          padding: EdgeInsets.symmetric(vertical: 6.h),
+          margin: EdgeInsets.symmetric(horizontal: 4.w),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.min,
@@ -57,20 +58,20 @@ class MockNavigationWidget extends StatelessWidget {
                 child: Icon(
                   icon,
                   size: shouldHighlight
-                      ? 28
-                      : 22, // Larger size for highlighted tab
+                      ? 28.r
+                      : 22.r, // Larger size for highlighted tab
                   color: shouldHighlight
                       ? secondary
                       : (isSelected ? secondary : altSecondary),
                 ),
               ),
-              const SizedBox(height: 2),
+              SizedBox(height: 2.h),
               AnimatedDefaultTextStyle(
                 duration: const Duration(milliseconds: 200),
                 style: TextStyle(
                   fontSize: shouldHighlight
-                      ? 12
-                      : 10, // Larger text for highlighted tab
+                      ? 12.sp
+                      : 10.sp, // Larger text for highlighted tab
                   fontWeight: shouldHighlight
                       ? FontWeight.bold
                       : FontWeight.normal,

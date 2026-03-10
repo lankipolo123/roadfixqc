@@ -1,5 +1,6 @@
 // lib/widgets/home_widgets/home_header_widgets/mock_home_header.dart
 import 'package:flutter/material.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class MockHomeHeader extends StatelessWidget {
@@ -9,49 +10,49 @@ class MockHomeHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: const BoxDecoration(
+      padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+      decoration: BoxDecoration(
         color: inputFill, // Transparent background
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24.r)),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
           // Avatar
-          const MockUserAvatar(radius: 24, showBorder: true),
-          const SizedBox(width: 12),
+          MockUserAvatar(radius: 24.r, showBorder: true),
+          SizedBox(width: 12.w),
 
           // Greeting and name
-          const Expanded(
+          Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
                 MockGreetingText(text: 'Hi, Welcome'),
-                SizedBox(height: 2),
+                SizedBox(height: 2.h),
                 MockUserNameText(name: 'John Doe'),
               ],
             ),
           ),
 
-          const SizedBox(width: 6),
+          SizedBox(width: 6.w),
 
           // Location Badge
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
             decoration: BoxDecoration(
               color: primary,
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(12.r),
             ),
-            child: const Row(
+            child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Icon(Icons.location_on, size: 12, color: secondary),
-                SizedBox(width: 4),
+                Icon(Icons.location_on, size: 12.r, color: secondary),
+                SizedBox(width: 4.w),
                 Text(
                   'Current Location',
                   style: TextStyle(
-                    fontSize: 10,
+                    fontSize: 10.sp,
                     color: secondary,
                     fontWeight: FontWeight.w600,
                   ),
@@ -60,7 +61,7 @@ class MockHomeHeader extends StatelessWidget {
             ),
           ),
 
-          const SizedBox(width: 8),
+          SizedBox(width: 8.w),
 
           // Notification icon with badge
           const MockNotificationIconWithBadge(),
@@ -108,9 +109,9 @@ class MockGreetingText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: const TextStyle(
+      style: TextStyle(
         color: altSecondary,
-        fontSize: 14,
+        fontSize: 14.sp,
         fontWeight: FontWeight.w400,
       ),
     );
@@ -127,9 +128,9 @@ class MockUserNameText extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       name,
-      style: const TextStyle(
+      style: TextStyle(
         color: secondary,
-        fontSize: 16,
+        fontSize: 16.sp,
         fontWeight: FontWeight.w600,
       ),
     );
@@ -157,11 +158,11 @@ class MockNotificationIconWithBadge extends StatelessWidget {
         ),
         // Notification badge
         Positioned(
-          right: 8,
-          top: 8,
+          right: 8.w,
+          top: 8.h,
           child: Container(
-            width: 8,
-            height: 8,
+            width: 8.r,
+            height: 8.r,
             decoration: BoxDecoration(
               color: statusDanger,
               shape: BoxShape.circle,

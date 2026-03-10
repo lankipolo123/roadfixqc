@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/widgets/themes.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class DiagonalStripes extends StatelessWidget {
   final double height;

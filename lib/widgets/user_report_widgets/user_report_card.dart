@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:intl/intl.dart';
 
@@ -16,16 +17,16 @@ class ReportCard extends StatelessWidget {
     final statusColor = ReportStatusUtils.getStatusColor(report.status);
 
     return Card(
-      margin: const EdgeInsets.symmetric(vertical: 8),
+      margin: EdgeInsets.symmetric(vertical: 8.h),
       elevation: 1,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8.r)),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         child: Container(
           decoration: BoxDecoration(
-            border: Border(left: BorderSide(color: statusColor, width: 4)),
-            borderRadius: const BorderRadius.all(Radius.circular(8)),
+            border: Border(left: BorderSide(color: statusColor, width: 4.w)),
+            borderRadius: BorderRadius.all(Radius.circular(8.r)),
             color: inputFill,
             boxShadow: [
               BoxShadow(
@@ -36,7 +37,7 @@ class ReportCard extends StatelessWidget {
             ],
           ),
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 10.h),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -46,10 +47,10 @@ class ReportCard extends StatelessWidget {
                   child: Icon(
                     ReportStatusUtils.getStatusIcon(report.status),
                     color: Colors.white,
-                    size: 20,
+                    size: 20.r,
                   ),
                 ),
-                const SizedBox(width: 12),
+                SizedBox(width: 12.w),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -61,58 +62,58 @@ class ReportCard extends StatelessWidget {
                               report.reportType,
                               style: textTheme.bodyLarge?.copyWith(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 16.sp,
                                 color: secondary,
                               ),
                             ),
                           ),
                           // Status badge
                           Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
+                            padding: EdgeInsets.symmetric(
+                              horizontal: 8.w,
+                              vertical: 4.h,
                             ),
                             decoration: BoxDecoration(
                               color: statusColor,
-                              borderRadius: BorderRadius.circular(12),
+                              borderRadius: BorderRadius.circular(12.r),
                             ),
                             child: Text(
                               ReportStatusUtils.getStatusText(
                                 report.status,
                               ).toUpperCase(),
-                              style: const TextStyle(
+                              style: TextStyle(
                                 color: Colors.white,
                                 fontWeight: FontWeight.bold,
-                                fontSize: 11,
+                                fontSize: 11.sp,
                               ),
                             ),
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Text(
                         report.description,
                         style: textTheme.bodyMedium?.copyWith(
-                          fontSize: 14,
+                          fontSize: 14.sp,
                           color: altSecondary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Row(
                         children: [
                           Icon(
                             Icons.location_on,
-                            size: 12,
+                            size: 12.r,
                             color: Colors.grey[600],
                           ),
-                          const SizedBox(width: 4),
+                          SizedBox(width: 4.w),
                           Expanded(
                             child: Text(
                               report.location,
                               style: textTheme.bodySmall?.copyWith(
-                                fontSize: 12,
+                                fontSize: 12.sp,
                                 color: Colors.grey[600],
                               ),
                               maxLines: 1,
@@ -121,7 +122,7 @@ class ReportCard extends StatelessWidget {
                           ),
                         ],
                       ),
-                      const SizedBox(height: 4),
+                      SizedBox(height: 4.h),
                       Row(
                         children: [
                           Text(
@@ -129,7 +130,7 @@ class ReportCard extends StatelessWidget {
                               'MMM dd, yyyy',
                             ).format(report.reportedAt.toDate()),
                             style: textTheme.bodySmall?.copyWith(
-                              fontSize: 12,
+                              fontSize: 12.sp,
                               color: altSecondary,
                             ),
                           ),
@@ -137,30 +138,30 @@ class ReportCard extends StatelessWidget {
                           // Show completion badge if resolved with image
                           if (report.hasResolvedImage)
                             Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 6.w,
+                                vertical: 2.h,
                               ),
                               decoration: BoxDecoration(
                                 color: statusSuccess.withValues(alpha: 0.2),
-                                borderRadius: BorderRadius.circular(8),
+                                borderRadius: BorderRadius.circular(8.r),
                                 border: Border.all(
                                   color: statusSuccess.withValues(alpha: 0.4),
                                 ),
                               ),
-                              child: const Row(
+                              child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
                                   Icon(
                                     Icons.check_circle,
-                                    size: 12,
+                                    size: 12.r,
                                     color: statusSuccess,
                                   ),
-                                  SizedBox(width: 4),
+                                  SizedBox(width: 4.w),
                                   Text(
                                     'Completed',
                                     style: TextStyle(
-                                      fontSize: 10,
+                                      fontSize: 10.sp,
                                       color: statusSuccess,
                                       fontWeight: FontWeight.w600,
                                     ),
@@ -174,14 +175,14 @@ class ReportCard extends StatelessWidget {
                               children: [
                                 Icon(
                                   Icons.touch_app,
-                                  size: 14,
+                                  size: 14.r,
                                   color: Colors.grey[600],
                                 ),
-                                const SizedBox(width: 4),
+                                SizedBox(width: 4.w),
                                 Text(
                                   'Click to view',
                                   style: TextStyle(
-                                    fontSize: 11,
+                                    fontSize: 11.sp,
                                     color: Colors.grey[600],
                                     fontWeight: FontWeight.w500,
                                   ),

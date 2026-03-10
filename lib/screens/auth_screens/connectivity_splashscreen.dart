@@ -5,6 +5,7 @@ import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/common_widgets/diagonal_stripes.dart';
 import 'package:roadfix/layouts/auth_scaffold.dart';
+import 'package:roadfix/utils/responsive.dart';
 
 class ConnectivitySplashScreen extends StatefulWidget {
   const ConnectivitySplashScreen({super.key});
@@ -139,17 +140,17 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
       body: Stack(
         children: [
           // Background diagonal stripes
-          const Positioned(
+          Positioned(
             top: -3,
             left: 0,
             right: 0,
-            child: SizedBox(height: 120, child: DiagonalStripes()),
+            child: SizedBox(height: 120.h, child: const DiagonalStripes()),
           ),
-          const Positioned(
+          Positioned(
             bottom: -1,
             left: 0,
             right: 0,
-            child: SizedBox(height: 120, child: DiagonalStripes()),
+            child: SizedBox(height: 120.h, child: const DiagonalStripes()),
           ),
 
           // Main content using your AuthScaffold style
@@ -167,8 +168,8 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
                         return Transform.scale(
                           scale: _isChecking ? _pulseAnimation.value : 1.0,
                           child: Container(
-                            width: 100,
-                            height: 100,
+                            width: 100.r,
+                            height: 100.r,
                             decoration: BoxDecoration(
                               color: primary.withValues(alpha: 0.1),
                               shape: BoxShape.circle,
@@ -183,7 +184,7 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
                                   : _isChecking
                                   ? Icons.wifi_find
                                   : Icons.wifi_off,
-                              size: 48,
+                              size: 48.r,
                               color: _hasConnection && !_isChecking
                                   ? statusSuccess
                                   : _isChecking
@@ -195,13 +196,13 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
                       },
                     ),
 
-                    const SizedBox(height: 32),
+                    SizedBox(height: 32.h),
 
                     // App name
-                    const Text(
+                    Text(
                       'RoadFix',
                       style: TextStyle(
-                        fontSize: 32,
+                        fontSize: 32.sp,
                         fontWeight: FontWeight.bold,
                         color: primary,
                         letterSpacing: 1.2,
@@ -211,13 +212,13 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
                 ),
               ),
               children: [
-                const SizedBox(height: 48),
+                SizedBox(height: 48.h),
 
                 // Status message
                 Text(
                   _statusMessage,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: 16.sp,
                     color: _hasConnection && !_isChecking
                         ? statusSuccess
                         : _isChecking
@@ -228,7 +229,7 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
                   textAlign: TextAlign.center,
                 ),
 
-                const SizedBox(height: 24),
+                SizedBox(height: 24.h),
 
                 // Loading indicator or retry button
                 if (_isChecking)
@@ -238,7 +239,7 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
                 else if (!_hasConnection)
                   Column(
                     children: [
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       ElevatedButton.icon(
                         onPressed: _retryConnection,
                         icon: const Icon(Icons.refresh),
@@ -246,33 +247,33 @@ class _ConnectivitySplashScreenState extends State<ConnectivitySplashScreen>
                         style: ElevatedButton.styleFrom(
                           backgroundColor: primary,
                           foregroundColor: Colors.white,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 24,
-                            vertical: 12,
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 24.w,
+                            vertical: 12.h,
                           ),
                           shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(25),
+                            borderRadius: BorderRadius.circular(25.r),
                           ),
                         ),
                       ),
-                      const SizedBox(height: 16),
+                      SizedBox(height: 16.h),
                       TextButton(
                         onPressed: () {
                           ConnectivityCache.setConnectionStatus(true);
                           Navigator.pushReplacementNamed(context, '/login');
                         },
-                        child: const Text(
+                        child: Text(
                           'Continue Anyway',
-                          style: TextStyle(color: altSecondary, fontSize: 14),
+                          style: TextStyle(color: altSecondary, fontSize: 14.sp),
                         ),
                       ),
                     ],
                   )
                 else
-                  const Icon(
+                  Icon(
                     Icons.check_circle,
                     color: statusSuccess,
-                    size: 32,
+                    size: 32.r,
                   ),
               ],
             ),
