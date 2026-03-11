@@ -127,9 +127,9 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
     return value;
   }
 
-  /// Text box positioning (offset farther out so it won’t overlap the icon)
+  /// Text box positioning (offset farther out so it won't overlap the icon)
   Map<String, double> _getGesturePositions(Size screenSize) {
-    if (_targetRects.isEmpty) return {‘left’: 0, ‘top’: 0};
+    if (_targetRects.isEmpty) return {'left': 0, 'top': 0};
 
     final targetRect = _targetRects.first;
     final centerX = targetRect.center.dx;
@@ -138,19 +138,19 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
     double left, top;
 
     switch (widget.gesturePosition) {
-      case ‘top’:
+      case 'top':
         left = centerX - 50;
         top = targetRect.top - widget.gestureOffset - 80;
         break;
-      case ‘bottom’:
+      case 'bottom':
         left = centerX - 50;
         top = targetRect.bottom + widget.gestureOffset + 40;
         break;
-      case ‘left’:
+      case 'left':
         left = targetRect.left - widget.gestureOffset - 140;
         top = centerY - 25;
         break;
-      case ‘right’:
+      case 'right':
         left = targetRect.right + widget.gestureOffset + 40;
         top = centerY - 25;
         break;
@@ -160,14 +160,14 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
     }
 
     return {
-      ‘left’: _clamp(left, 8, screenSize.width - 108),
-      ‘top’: _clamp(top, 8, screenSize.height - 40),
+      'left': _clamp(left, 8, screenSize.width - 108),
+      'top': _clamp(top, 8, screenSize.height - 40),
     };
   }
 
   /// Icon positioning (always hugs the highlight edge, centered)
   Map<String, double> _getBouncyIconPositions(Size screenSize) {
-    if (_targetRects.isEmpty) return {‘left’: 0, ‘top’: 0};
+    if (_targetRects.isEmpty) return {'left': 0, 'top': 0};
 
     final targetRect = _targetRects.first;
     final centerX = targetRect.center.dx;
@@ -176,19 +176,19 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
     double left, top;
 
     switch (widget.gesturePosition) {
-      case ‘top’:
+      case 'top':
         left = centerX - 15;
         top = targetRect.top - widget.gestureOffset;
         break;
-      case ‘bottom’:
+      case 'bottom':
         left = centerX - 15;
         top = targetRect.bottom + widget.gestureOffset;
         break;
-      case ‘left’:
+      case 'left':
         left = targetRect.left - widget.gestureOffset - 30;
         top = centerY - 15;
         break;
-      case ‘right’:
+      case 'right':
         left = targetRect.right + widget.gestureOffset;
         top = centerY - 15;
         break;
@@ -198,8 +198,8 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
     }
 
     return {
-      ‘left’: _clamp(left, 8, screenSize.width - 38),
-      ‘top’: _clamp(top, 8, screenSize.height - 38),
+      'left': _clamp(left, 8, screenSize.width - 38),
+      'top': _clamp(top, 8, screenSize.height - 38),
     };
   }
 
