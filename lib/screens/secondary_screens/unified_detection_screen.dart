@@ -8,7 +8,6 @@ import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/unified_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
-import 'package:roadfix/widgets/dialog_widgets/image_source_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 /// Unified Detection Screen - Detects ALL hazards at once
@@ -54,8 +53,8 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     if (widget.initialImageSource != null) {
       await _pickImageFromSource(widget.initialImageSource!);
     } else {
-      // No source provided — show dialog automatically
-      await _showImageSourceDialog();
+      // No source provided — go back, dialog should happen before navigation
+      Navigator.pop(context);
     }
   }
 
@@ -212,70 +211,25 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     }
   }
 
-  Future<void> _showImageSourceDialog() async {
-    final source = await ImageSourceDialog.show(context);
-    if (source != null && mounted) {
-      await _pickImageFromSource(source);
-    }
-  }
-
   void _retakePhoto() async {
-    setState(() {
-      _selectedImage = null;
-      _annotatedImageBytes = null;
-      _detections.clear();
-    });
     if (widget.initialImageSource != null) {
+      setState(() {
+        _selectedImage = null;
+        _annotatedImageBytes = null;
+        _detections.clear();
+      });
       await _pickImageFromSource(widget.initialImageSource!);
-    } else {
-      await _showImageSourceDialog();
     }
   }
 
-@override
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: secondary,
       body: SafeArea(
         child: _selectedImage == null
-            ? _buildEmptyState()
+            ? const Center(child: CircularProgressIndicator(color: primary))
             : _buildDetectionView(),
-      ),
-    );
-  }
-
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          const Icon(Icons.image_outlined, size: 80, color: altSecondary),
-          const SizedBox(height: 16),
-          const Text(
-            'No image selected',
-            style: TextStyle(color: inputFill, fontSize: 18),
-          ),
-          const SizedBox(height: 8),
-          const Padding(
-            padding: EdgeInsets.symmetric(horizontal: 40),
-            child: Text(
-              'Select an image to detect all road hazards',
-              style: TextStyle(color: altSecondary, fontSize: 14),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          const SizedBox(height: 24),
-          ElevatedButton.icon(
-            onPressed: _showImageSourceDialog,
-            icon: const Icon(Icons.add_a_photo),
-            label: const Text('Select Image'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: inputFill,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-        ],
       ),
     );
   }
