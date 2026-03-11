@@ -29,7 +29,6 @@ class UnifiedDetectionScreen extends StatefulWidget {
 class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   final UnifiedDetectionService _detectionService = UnifiedDetectionService();
   bool _isProcessing = false;
-  bool _isZoomedView = false;
 
   File? _selectedImage;
   Uint8List? _annotatedImageBytes;
@@ -70,7 +69,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       _annotatedImageBytes = null;
       _isProcessing = true;
       _detections.clear();
-      _isZoomedView = false;
+
     });
 
     LoadingModal.show(
@@ -220,18 +219,12 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       _selectedImage = null;
       _annotatedImageBytes = null;
       _detections.clear();
-      _isZoomedView = false;
+
     });
     await _showImageSourceDialog();
   }
 
-  void _toggleZoomView() {
-    setState(() {
-      _isZoomedView = !_isZoomedView;
-    });
-  }
-
-  @override
+@override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: secondary,
@@ -280,8 +273,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   }
 
   Widget _buildDetectionView() {
-    final displayScale = _isZoomedView ? 2.0 : 1.0;
-
     // Show annotated image (with YOLO bounding boxes) if available, else original
     final Widget imageWidget = _annotatedImageBytes != null && !_isProcessing
         ? Image.memory(_annotatedImageBytes!, fit: BoxFit.contain)
@@ -289,55 +280,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     return Stack(
       children: [
-        Center(
-          child: GestureDetector(
-            onTap: _toggleZoomView,
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-              child: Transform.scale(
-                scale: displayScale,
-                child: imageWidget,
-              ),
-            ),
-          ),
-        ),
-
-        if (_selectedImage != null)
-          Positioned(
-            top: 80,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
-                ),
-                decoration: BoxDecoration(
-                  color: secondary.withValues(alpha: 0.8),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(
-                      _isZoomedView ? Icons.zoom_in : Icons.zoom_out,
-                      color: primary,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    Text(
-                      _isZoomedView
-                          ? 'Zoomed 2x - Tap to see full'
-                          : 'Full view - Tap to zoom',
-                      style: const TextStyle(color: inputFill, fontSize: 12),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+        Center(child: imageWidget),
 
         if (!_isProcessing && _selectedImage != null)
           Positioned(
