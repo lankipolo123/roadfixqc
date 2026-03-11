@@ -219,9 +219,12 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       _selectedImage = null;
       _annotatedImageBytes = null;
       _detections.clear();
-
     });
-    await _showImageSourceDialog();
+    if (widget.initialImageSource != null) {
+      await _pickImageFromSource(widget.initialImageSource!);
+    } else {
+      await _showImageSourceDialog();
+    }
   }
 
 @override
