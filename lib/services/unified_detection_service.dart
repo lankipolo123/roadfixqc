@@ -14,7 +14,16 @@ class UnifiedDetectionService {
   bool get isModelLoaded => _isModelLoaded;
 
   /// Classes to filter out (ignore these detections)
-  static const List<String> filteredClasses = ['Tires_with_rim', 'Stable_Tree'];
+  static const List<String> filteredClasses = [
+    'Tires_with_rim',
+    'Stable_Tree',
+    'Tires',
+    'Traffic_Cones',
+    'Broken_Pole',
+    'Compromised-Pole',
+    'Fallen_Tree',
+    'Road_Barrier',
+  ];
 
   /// Load the unified YOLO model
   Future<void> loadModel() async {
