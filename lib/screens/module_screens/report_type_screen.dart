@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/constant/report_categories.dart';
 import 'package:roadfix/utils/detection_navigation_helper.dart';
-import 'package:roadfix/widgets/dialog_widgets/detection_image_source.dart';
+import 'package:roadfix/widgets/dialog_widgets/image_source_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/common_widgets/dual_color_text.dart';
 import 'package:roadfix/utils/responsive.dart';
@@ -108,18 +108,15 @@ class ReportTypeScreen extends StatelessWidget {
   Future<void> _handleDetectionTap(BuildContext context) async {
     try {
       // Show camera/gallery dialog
-      final imageSourceOption = await DetectionImageSourceDialog.show(
-        context,
-        allowGallery: true,
-      );
+      final source = await ImageSourceDialog.show(context);
 
-      if (imageSourceOption != null && context.mounted) {
+      if (source != null && context.mounted) {
         // Use first category as default (doesn't matter since unified detection)
         final category = reportCategories.first;
         await NavigationHelper.navigateToDetection(
           context,
           category,
-          imageSourceOption,
+          source,
         );
       }
     } catch (e) {

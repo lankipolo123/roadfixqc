@@ -8,6 +8,7 @@ import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/unified_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
+import 'package:roadfix/widgets/dialog_widgets/image_source_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 /// Unified Detection Screen - Detects ALL hazards at once
@@ -207,13 +208,21 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     }
   }
 
-  void _retakePhoto() {
+  Future<void> _showImageSourceDialog() async {
+    final source = await ImageSourceDialog.show(context);
+    if (source != null && mounted) {
+      await _pickImageFromSource(source);
+    }
+  }
+
+  void _retakePhoto() async {
     setState(() {
       _selectedImage = null;
       _annotatedImageBytes = null;
       _detections.clear();
       _isZoomedView = false;
     });
+    await _showImageSourceDialog();
   }
 
   void _toggleZoomView() {
@@ -256,20 +265,9 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
           ),
           const SizedBox(height: 24),
           ElevatedButton.icon(
-            onPressed: () => _pickImageFromSource(ImageSource.gallery),
-            icon: const Icon(Icons.photo_library),
-            label: const Text('Pick from Gallery'),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: primary,
-              foregroundColor: inputFill,
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
-            ),
-          ),
-          const SizedBox(height: 12),
-          ElevatedButton.icon(
-            onPressed: () => _pickImageFromSource(ImageSource.camera),
-            icon: const Icon(Icons.camera_alt),
-            label: const Text('Take Photo'),
+            onPressed: _showImageSourceDialog,
+            icon: const Icon(Icons.add_a_photo),
+            label: const Text('Select Image'),
             style: ElevatedButton.styleFrom(
               backgroundColor: primary,
               foregroundColor: inputFill,
