@@ -49,8 +49,13 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   Future<void> _initializeAndPickImage() async {
     await _detectionService.loadModel();
 
-    if (widget.initialImageSource != null && mounted) {
+    if (!mounted) return;
+
+    if (widget.initialImageSource != null) {
       await _pickImageFromSource(widget.initialImageSource!);
+    } else {
+      // No source provided — show dialog automatically
+      await _showImageSourceDialog();
     }
   }
 
