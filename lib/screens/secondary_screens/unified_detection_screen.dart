@@ -1,5 +1,6 @@
 import 'dart:io';
 import 'dart:typed_data';
+import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/models/detection_result.dart';
@@ -32,6 +33,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   File? _selectedImage;
   Uint8List? _annotatedImageBytes;
   List<DetectionResult> _detections = [];
+  double? _imageAspectRatio;
 
   @override
   void initState() {
@@ -68,12 +70,18 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     if (!mounted) return;
 
+    // Decode image dimensions so CustomPaint aligns with BoxFit.contain
+    final imageBytes = await imageFile.readAsBytes();
+    final ui.Image decoded = await decodeImageFromList(imageBytes);
+
+    if (!mounted) return;
+
     setState(() {
       _selectedImage = imageFile;
       _annotatedImageBytes = null;
       _isProcessing = true;
       _detections.clear();
-
+      _imageAspectRatio = decoded.width / decoded.height;
     });
 
     LoadingModal.show(
@@ -237,26 +245,26 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   Widget _buildDetectionView() {
     return Stack(
       children: [
-        // Always show the original image at full resolution, with detection
-        // boxes painted on top so nothing looks zoomed/cropped.
+        // Constrain the Stack to the image's aspect ratio so CustomPaint
+        // lines up exactly with the rendered image (no letterbox offset).
         Center(
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return Stack(
-                children: [
-                  Image.file(_selectedImage!, fit: BoxFit.contain),
-                  if (!_isProcessing && _detections.isNotEmpty)
-                    Positioned.fill(
-                      child: CustomPaint(
-                        painter: _DetectionBoxPainter(
-                          detections: _detections,
+          child: _imageAspectRatio != null
+              ? AspectRatio(
+                  aspectRatio: _imageAspectRatio!,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      Image.file(_selectedImage!, fit: BoxFit.cover),
+                      if (!_isProcessing && _detections.isNotEmpty)
+                        CustomPaint(
+                          painter: _DetectionBoxPainter(
+                            detections: _detections,
+                          ),
                         ),
-                      ),
-                    ),
-                ],
-              );
-            },
-          ),
+                    ],
+                  ),
+                )
+              : Image.file(_selectedImage!, fit: BoxFit.contain),
         ),
 
         if (!_isProcessing && _selectedImage != null)
