@@ -109,21 +109,24 @@ class MockReportTypeScreenWithTutorial extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+    final logoHeight = screenHeight < 700 ? 70.0 : 100.0;
+
     return SafeArea(
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
-          const SizedBox(height: 24),
+          SizedBox(height: screenHeight * 0.02),
 
           // Logo
           Center(
             child: Image.asset(
               'assets/images/roadfix_logo_alt2.webp',
-              height: 100,
+              height: logoHeight,
               errorBuilder: (context, error, stackTrace) {
                 return Container(
-                  height: 100,
-                  width: 100,
+                  height: logoHeight,
+                  width: logoHeight,
                   decoration: BoxDecoration(
                     color: primary,
                     borderRadius: BorderRadius.circular(8),

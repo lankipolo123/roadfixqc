@@ -39,6 +39,8 @@ class _TutorialStep1ScreenState extends State<TutorialStep1Screen> {
 
   @override
   Widget build(BuildContext context) {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     return TutorialOverlay(
       enabled: _isTutorialEnabled,
       targetKey: _photoTabKey,
@@ -48,8 +50,8 @@ class _TutorialStep1ScreenState extends State<TutorialStep1Screen> {
       actionText: 'Tap Photo Tab',
       currentStep: 1,
       totalSteps: 5,
-      cardTop: 150, // Lower on screen - not so high up
-      isCardCompact: false, // Regular size for Step 1
+      cardTop: screenHeight * 0.18,
+      isCardCompact: false,
       onComplete: _goToStep2,
       onSkip: _skipTutorial,
       child: Scaffold(

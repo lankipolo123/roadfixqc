@@ -21,54 +21,68 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
   final GlobalKey _descriptionFieldKey = GlobalKey();
   final GlobalKey _submitButtonKey = GlobalKey();
 
-  final List<Map<String, dynamic>> _tutorialSteps = [
-    {
-      'targetKey': null, // Will be set to _imagePreviewKey
-      'title': 'Review Image',
-      'description': 'This is your captured photo',
-      'actionText': 'Click the Image ',
-      'cardBottom': 80.0, // Position card at bottom
-      'cardTop': null,
-      'gesturePosition': 'bottom', // Gesture icons above target
-      'gestureOffset': 20.0,
-    },
-    {
-      'targetKey': null, // Will be set to _locationFieldKey
-      'title': 'Add Location',
-      'description': 'Tap the GPS button for your location',
-      'actionText': 'Tap GPS',
-      'cardTop': 250.0, // Keep same position
-      'cardBottom': null,
-      'gesturePosition': 'bottom', // Gesture icons to the right
-      'gestureOffset': 20.00,
-    },
-    {
-      'targetKey': null, // Will be st to _descriptionFieldKey
-      'title': 'Describe Issue',
-      'description': 'Add details about the road problem',
-      'actionText': 'Tap to Type',
-      'cardTop': 100.0, // Position card on top
-      'cardBottom': null,
-      'gesturePosition': 'top', // Default - above the highlight
-      'gestureOffset': 40.0,
-    },
-    {
-      'targetKey': null, // Will be set to _submitButtonKey
-      'title': 'Submit Report',
-      'description': 'Send your report to help fix the road',
-      'actionText': 'Submit Now',
-      'cardBottom': 80.0, // Position card at bottom
-      'cardTop': null,
-      'gesturePosition': 'top', // Default gesture position
-      'gestureOffset': 45.0,
-    },
-  ];
+  late List<Map<String, dynamic>> _tutorialSteps;
+
+  List<Map<String, dynamic>> _buildTutorialSteps(double screenHeight) {
+    return [
+      {
+        'targetKey': null, // Will be set to _imagePreviewKey
+        'title': 'Review Image',
+        'description': 'This is your captured photo',
+        'actionText': 'Click the Image ',
+        'cardBottom': screenHeight * 0.1,
+        'cardTop': null,
+        'gesturePosition': 'bottom',
+        'gestureOffset': 20.0,
+      },
+      {
+        'targetKey': null, // Will be set to _locationFieldKey
+        'title': 'Add Location',
+        'description': 'Tap the GPS button for your location',
+        'actionText': 'Tap GPS',
+        'cardTop': screenHeight * 0.3,
+        'cardBottom': null,
+        'gesturePosition': 'bottom',
+        'gestureOffset': 20.0,
+      },
+      {
+        'targetKey': null, // Will be set to _descriptionFieldKey
+        'title': 'Describe Issue',
+        'description': 'Add details about the road problem',
+        'actionText': 'Tap to Type',
+        'cardTop': screenHeight * 0.12,
+        'cardBottom': null,
+        'gesturePosition': 'top',
+        'gestureOffset': 40.0,
+      },
+      {
+        'targetKey': null, // Will be set to _submitButtonKey
+        'title': 'Submit Report',
+        'description': 'Send your report to help fix the road',
+        'actionText': 'Submit Now',
+        'cardBottom': screenHeight * 0.1,
+        'cardTop': null,
+        'gesturePosition': 'top',
+        'gestureOffset': 45.0,
+      },
+    ];
+  }
 
   @override
   void initState() {
     super.initState();
+    // Initialize with default, will be rebuilt with actual screen size in didChangeDependencies
+    _tutorialSteps = _buildTutorialSteps(812);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final screenHeight = MediaQuery.of(context).size.height;
+    _tutorialSteps = _buildTutorialSteps(screenHeight);
     // Set the target keys after widget creation
     WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
       setState(() {
         _tutorialSteps[0]['targetKey'] = _imagePreviewKey;
         _tutorialSteps[1]['targetKey'] = _locationFieldKey;
@@ -141,10 +155,13 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
           children: [
             // Image preview
             Center(
-              child: Container(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final imageSize = MediaQuery.of(context).size.width * 0.42;
+                  return Container(
                 key: _imagePreviewKey,
-                width: 180,
-                height: 180,
+                width: imageSize,
+                height: imageSize,
                 decoration: BoxDecoration(
                   color: altSecondary,
                   borderRadius: BorderRadius.circular(12),
@@ -162,6 +179,8 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
                     child: Icon(Icons.image, size: 60, color: inputFill),
                   ),
                 ),
+              );
+                },
               ),
             ),
             const SizedBox(height: 24),

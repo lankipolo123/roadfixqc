@@ -63,7 +63,7 @@ class MockHomeScreen extends StatelessWidget {
       );
     }
 
-    return SizedBox(width: double.infinity, child: content);
+    return SafeArea(child: SizedBox(width: double.infinity, child: content));
   }
 
   Widget _buildReportSummary() {

@@ -64,6 +64,8 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
 
   // Get tutorial configuration based on current state
   Map<String, dynamic> _getTutorialConfig() {
+    final screenHeight = MediaQuery.of(context).size.height;
+
     switch (_currentState) {
       case TutorialStep3State.takePhoto:
         return {
@@ -76,7 +78,7 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
             'Make sure issue is visible',
           ],
           'actionText': 'Tap to Capture',
-          'cardTop': 80.0,
+          'cardTop': screenHeight * 0.1,
         };
       case TutorialStep3State.acceptPhoto:
         return {
@@ -85,7 +87,7 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
           'description': 'Tap green button',
           'bulletPoints': null,
           'actionText': 'Accept the Image',
-          'cardTop': 90.0,
+          'cardTop': screenHeight * 0.11,
         };
     }
   }
@@ -222,70 +224,67 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
   Widget _buildPhotoAcceptanceScreen() {
     return Scaffold(
       backgroundColor: Colors.black,
-      body: Stack(
-        children: [
-          // Photo - positioned below the instruction card
-          Positioned(
-            top: 100,
-            left: 0,
-            right: 0,
-            child: Container(
-              width: double.infinity,
-              height: 550,
-              color: Colors.grey[600],
-              child: const Center(
-                child: Icon(Icons.image, size: 100, color: Colors.white54),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Photo preview - takes available space
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                margin: const EdgeInsets.symmetric(horizontal: 0, vertical: 16),
+                color: Colors.grey[600],
+                child: const Center(
+                  child: Icon(Icons.image, size: 100, color: Colors.white54),
+                ),
               ),
             ),
-          ),
 
-          // Buttons at bottom
-          Positioned(
-            bottom: 100,
-            left: 0,
-            right: 0,
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // X (Reject)
-                GestureDetector(
-                  onTap: _rejectPhoto,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Colors.grey,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.close,
-                      color: Colors.white,
-                      size: 30,
-                    ),
-                  ),
-                ),
-                // Check (Accept)
-                GestureDetector(
-                  key: _acceptButtonKey,
-                  onTap: _acceptPhoto,
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.check,
-                      color: Colors.white,
-                      size: 20,
+            // Buttons at bottom
+            Padding(
+              padding: const EdgeInsets.only(bottom: 32),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // X (Reject)
+                  GestureDetector(
+                    onTap: _rejectPhoto,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Colors.grey,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.close,
+                        color: Colors.white,
+                        size: 30,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                  // Check (Accept)
+                  GestureDetector(
+                    key: _acceptButtonKey,
+                    onTap: _acceptPhoto,
+                    child: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: const BoxDecoration(
+                        color: Colors.green,
+                        shape: BoxShape.circle,
+                      ),
+                      child: const Icon(
+                        Icons.check,
+                        color: Colors.white,
+                        size: 20,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
