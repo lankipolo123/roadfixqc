@@ -235,14 +235,29 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   }
 
   Widget _buildDetectionView() {
-    // Show annotated image (with YOLO bounding boxes) if available, else original
-    final Widget imageWidget = _annotatedImageBytes != null && !_isProcessing
-        ? Image.memory(_annotatedImageBytes!, fit: BoxFit.contain)
-        : Image.file(_selectedImage!, fit: BoxFit.contain);
-
     return Stack(
       children: [
-        Center(child: imageWidget),
+        // Always show the original image at full resolution, with detection
+        // boxes painted on top so nothing looks zoomed/cropped.
+        Center(
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return Stack(
+                children: [
+                  Image.file(_selectedImage!, fit: BoxFit.contain),
+                  if (!_isProcessing && _detections.isNotEmpty)
+                    Positioned.fill(
+                      child: CustomPaint(
+                        painter: _DetectionBoxPainter(
+                          detections: _detections,
+                        ),
+                      ),
+                    ),
+                ],
+              );
+            },
+          ),
+        ),
 
         if (!_isProcessing && _selectedImage != null)
           Positioned(
@@ -270,5 +285,60 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
         ),
       ],
     );
+  }
+}
+
+/// Paints bounding boxes over the original image using normalized coordinates.
+class _DetectionBoxPainter extends CustomPainter {
+  final List<DetectionResult> detections;
+
+  _DetectionBoxPainter({required this.detections});
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    for (final det in detections) {
+      final left = (det.centerX - det.width / 2) * size.width;
+      final top = (det.centerY - det.height / 2) * size.height;
+      final right = (det.centerX + det.width / 2) * size.width;
+      final bottom = (det.centerY + det.height / 2) * size.height;
+
+      final rect = Rect.fromLTRB(left, top, right, bottom);
+
+      // Box outline
+      final boxPaint = Paint()
+        ..color = Colors.redAccent
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = 2.5;
+      canvas.drawRect(rect, boxPaint);
+
+      // Label background
+      final label =
+          '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(0)}%';
+      final textPainter = TextPainter(
+        text: TextSpan(
+          text: label,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        textDirection: TextDirection.ltr,
+      )..layout();
+
+      final bgRect = Rect.fromLTWH(
+        left,
+        top - textPainter.height - 4,
+        textPainter.width + 8,
+        textPainter.height + 4,
+      );
+      canvas.drawRect(bgRect, Paint()..color = Colors.redAccent);
+      textPainter.paint(canvas, Offset(left + 4, top - textPainter.height - 2));
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _DetectionBoxPainter oldDelegate) {
+    return oldDelegate.detections != detections;
   }
 }
