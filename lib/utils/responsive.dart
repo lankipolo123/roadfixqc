@@ -11,13 +11,10 @@ class Responsive {
   static const double _designWidth = 375;
   static const double _designHeight = 812;
 
-  static bool _initialized = false;
-
   static void init(BuildContext context) {
     final size = MediaQuery.sizeOf(context);
     _screenWidth = size.width;
     _screenHeight = size.height;
-    _initialized = true;
   }
 
   /// Scale value by width ratio

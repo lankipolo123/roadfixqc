@@ -2,7 +2,6 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 
 import 'package:roadfix/utils/custom_annotation_controller.dart';
-import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class CustomAnnotationWidget extends StatefulWidget {

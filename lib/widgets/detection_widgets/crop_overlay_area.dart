@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class CameraGuideOverlay extends CustomPainter {
