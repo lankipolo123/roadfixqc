@@ -20,7 +20,6 @@ class UnifiedDetectionService {
     'Tires',
     'Traffic_Cones',
     'Broken_Pole',
-    'Compromised-Pole',
     'Fallen_Tree',
     'Road_Barrier',
   ];
