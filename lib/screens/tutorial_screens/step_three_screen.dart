@@ -323,15 +323,18 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
   }
 
   Widget _buildCameraModes() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        _buildModeTab('VIDEO', false),
-        _buildModeTab('PHOTO', true),
-        _buildModeTab('AI CAM', false),
-        _buildModeTab('BEAUTY', false),
-        _buildModeTab('PORTRAIT', false),
-      ],
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildModeTab('VIDEO', false),
+          _buildModeTab('PHOTO', true),
+          _buildModeTab('AI CAM', false),
+          _buildModeTab('BEAUTY', false),
+          _buildModeTab('PORTRAIT', false),
+        ],
+      ),
     );
   }
 

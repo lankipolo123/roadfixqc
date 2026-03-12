@@ -239,13 +239,20 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
               right: widget.cardRight,
               top: widget.cardTop,
               bottom: widget.cardBottom ?? (widget.cardTop == null ? screenSize.height * 0.1 : null),
-              child: TutorialInstructionCard(
-                title: widget.title,
-                description: widget.description,
-                bulletPoints: widget.bulletPoints,
-                currentStep: widget.currentStep,
-                totalSteps: widget.totalSteps,
-                isCompact: widget.isCardCompact,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxHeight: screenSize.height * 0.4,
+                ),
+                child: SingleChildScrollView(
+                  child: TutorialInstructionCard(
+                    title: widget.title,
+                    description: widget.description,
+                    bulletPoints: widget.bulletPoints,
+                    currentStep: widget.currentStep,
+                    totalSteps: widget.totalSteps,
+                    isCompact: widget.isCardCompact,
+                  ),
+                ),
               ),
             ),
 
