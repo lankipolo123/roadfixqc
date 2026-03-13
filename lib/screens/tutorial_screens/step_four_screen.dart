@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/screens/tutorial_screens/step_five_screen.dart';
+import 'package:roadfix/services/tutorial_service.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/tutorial_widgets/tutorial_overlay.dart';
 
@@ -20,6 +21,11 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
   final GlobalKey _locationFieldKey = GlobalKey();
   final GlobalKey _descriptionFieldKey = GlobalKey();
   final GlobalKey _submitButtonKey = GlobalKey();
+
+  // Form validation
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+  final TextEditingController _locationController = TextEditingController();
+  final TextEditingController _descriptionController = TextEditingController();
 
   late List<Map<String, dynamic>> _tutorialSteps;
 
@@ -92,6 +98,13 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
     });
   }
 
+  @override
+  void dispose() {
+    _locationController.dispose();
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
   void _nextStep() {
     if (_currentStep < _tutorialSteps.length - 1) {
       setState(() {
@@ -106,7 +119,9 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
     }
   }
 
-  void _skipTutorial() {
+  Future<void> _skipTutorial() async {
+    await TutorialService.markTutorialSeen();
+    if (!mounted) return;
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const TutorialStep5Screen()),
@@ -150,7 +165,9 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
-        child: Column(
+        child: Form(
+          key: _formKey,
+          child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             // Image preview
@@ -196,6 +213,7 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
             // Submit button
             _buildSubmitButton(),
           ],
+          ),
         ),
       ),
     );
@@ -215,6 +233,8 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          controller: _locationController,
+          validator: (value) => (value == null || value.trim().isEmpty) ? 'Location is required' : null,
           style: const TextStyle(fontSize: 16, color: secondary),
           decoration: InputDecoration(
             hintText: 'Enter location or tap GPS button',
@@ -243,6 +263,14 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: primary, width: 2),
             ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: statusDanger, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: statusDanger, width: 2),
+            ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
               vertical: 12,
@@ -270,6 +298,8 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
         const SizedBox(height: 8),
         TextFormField(
           key: _descriptionFieldKey,
+          controller: _descriptionController,
+          validator: (value) => (value == null || value.trim().isEmpty) ? 'Describe the road issue' : null,
           style: const TextStyle(fontSize: 16, color: secondary),
           decoration: InputDecoration(
             hintText: 'Describe the road issue in detail...',
@@ -287,6 +317,14 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
             focusedBorder: OutlineInputBorder(
               borderRadius: BorderRadius.circular(8),
               borderSide: const BorderSide(color: primary, width: 2),
+            ),
+            errorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: statusDanger, width: 1),
+            ),
+            focusedErrorBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(8),
+              borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
             contentPadding: const EdgeInsets.symmetric(
               horizontal: 16,
@@ -306,7 +344,9 @@ class _TutorialStep4ScreenState extends State<TutorialStep4Screen> {
       height: 50,
       child: ElevatedButton(
         key: _submitButtonKey,
-        onPressed: () {}, // Mock - no functionality needed
+        onPressed: () {
+          _formKey.currentState?.validate();
+        },
         style: ElevatedButton.styleFrom(
           backgroundColor: primary,
           foregroundColor: inputFill,

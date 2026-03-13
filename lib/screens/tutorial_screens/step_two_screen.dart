@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/screens/tutorial_screens/step_three_screen.dart';
+import 'package:roadfix/services/tutorial_service.dart';
 import 'package:roadfix/widgets/bottom_navbar_widgets/tutorial_navigation_widget.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/tutorial_widgets/tutorial_overlay.dart';
@@ -28,10 +29,12 @@ class _TutorialStep2ScreenState extends State<TutorialStep2Screen> {
     );
   }
 
-  void _skipTutorial() {
+  Future<void> _skipTutorial() async {
     setState(() {
       _isTutorialEnabled = false;
     });
+    await TutorialService.markTutorialSeen();
+    if (!mounted) return;
     Navigator.pop(context);
   }
 

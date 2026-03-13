@@ -1,5 +1,6 @@
 // lib/screens/tutorial_screens/tutorial_step5_screen.dart
 import 'package:flutter/material.dart';
+import 'package:roadfix/services/tutorial_service.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class TutorialStep5Screen extends StatelessWidget {
@@ -167,7 +168,9 @@ class TutorialStep5Screen extends StatelessWidget {
                       width: double.infinity,
                       height: 54,
                       child: ElevatedButton(
-                        onPressed: () {
+                        onPressed: () async {
+                          await TutorialService.markTutorialSeen();
+                          if (!context.mounted) return;
                           Navigator.pushNamedAndRemoveUntil(
                             context,
                             '/home',
@@ -192,7 +195,9 @@ class TutorialStep5Screen extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     TextButton(
-                      onPressed: () {
+                      onPressed: () async {
+                        await TutorialService.markTutorialSeen();
+                        if (!context.mounted) return;
                         Navigator.pushNamedAndRemoveUntil(
                           context,
                           '/home',

@@ -277,6 +277,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
               categoryLabel: 'All Hazards',
               onConfirm: _confirmReport,
               onCancel: _retakePhoto,
+              onRetry: _retakePhoto,
             ),
           ),
 

@@ -8,6 +8,7 @@ class DetectionBottomCard extends StatelessWidget {
   final String? categoryLabel;
   final VoidCallback onConfirm;
   final VoidCallback onCancel;
+  final VoidCallback? onRetry;
 
   const DetectionBottomCard({
     super.key,
@@ -15,6 +16,7 @@ class DetectionBottomCard extends StatelessWidget {
     required this.onConfirm,
     required this.onCancel,
     this.categoryLabel,
+    this.onRetry,
   });
 
   @override
@@ -28,16 +30,49 @@ class DetectionBottomCard extends StatelessWidget {
           BoxShadow(color: secondary, blurRadius: 10, offset: Offset(0, 5)),
         ],
       ),
-      child: Column(
+      child: detections.isEmpty ? _buildEmptyState() : Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Detection tags
           _buildDetectionTags(),
           SizedBox(height: 20.h),
-          // Buttons
           _buildButtons(),
         ],
       ),
+    );
+  }
+
+  Widget _buildEmptyState() {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.search_off, size: 40.w, color: altSecondary),
+        SizedBox(height: 12.h),
+        Text(
+          'No issues detected',
+          style: TextStyle(
+            fontSize: 16.sp,
+            fontWeight: FontWeight.w600,
+            color: altSecondary,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Text(
+          'Try another photo to detect road hazards',
+          style: TextStyle(
+            fontSize: 13.sp,
+            color: altSecondary,
+          ),
+          textAlign: TextAlign.center,
+        ),
+        SizedBox(height: 20.h),
+        ElevatedButton(
+          onPressed: onRetry ?? onCancel,
+          style: ElevatedButton.styleFrom(
+            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
+          ),
+          child: Text('Retry', style: TextStyle(fontSize: 16.sp)),
+        ),
+      ],
     );
   }
 
