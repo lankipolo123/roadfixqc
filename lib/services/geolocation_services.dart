@@ -10,21 +10,23 @@ class GeolocationService {
   static DateTime? _lastLocationTime;
   static const Duration _cacheExpiry = Duration(minutes: 10);
 
-  Future<Position> getCurrentPosition() async {
+  Future<Position> getCurrentPosition({bool openSettings = true}) async {
     if (!await LocationPermissionManager.checkLocationService()) {
       throw Exception(
         'Location services are disabled. Please enable location services in your device settings.',
       );
     }
 
-    if (!await LocationPermissionManager.checkLocationPermission()) {
+    if (!await LocationPermissionManager.checkLocationPermission(
+      openSettings: openSettings,
+    )) {
       throw Exception(
         'Location permissions are denied. Please grant location access to use this feature.',
       );
     }
 
     return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.best,
+      desiredAccuracy: LocationAccuracy.high,
       timeLimit: const Duration(seconds: 15),
     );
   }
@@ -112,7 +114,22 @@ class GeolocationService {
         }
       }
 
-      Position position = await getCurrentPosition();
+      // Try last known position first for an instant result (no GPS wait)
+      if (await LocationPermissionManager.hasLocationPermission()) {
+        final lastKnown = await Geolocator.getLastKnownPosition();
+        if (lastKnown != null) {
+          LocationData locationData = await getAddressFromCoordinates(
+            lastKnown.latitude,
+            lastKnown.longitude,
+          );
+          _cachedLocation = locationData;
+          _lastLocationTime = DateTime.now();
+          return locationData;
+        }
+      }
+
+      // Fall back to active GPS position (don't open settings automatically)
+      Position position = await getCurrentPosition(openSettings: false);
       LocationData locationData = await getAddressFromCoordinates(
         position.latitude,
         position.longitude,
