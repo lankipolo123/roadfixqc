@@ -96,7 +96,7 @@ class _SendReportScreenState extends State<SendReportScreen> {
     });
 
     try {
-      final locationData = await _geoService.getCurrentLocationForced();
+      final locationData = await _geoService.getCurrentLocationForReports();
 
       if (mounted) {
         setState(() {

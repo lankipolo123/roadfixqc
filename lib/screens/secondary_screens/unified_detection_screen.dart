@@ -136,13 +136,10 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     CompactLoadingModal.show(context, message: "Preparing report...");
 
-    // Save annotated image (from YOLO) or fall back to original
-    String? processedImagePath;
-    if (_annotatedImageBytes != null) {
-      processedImagePath =
-          await UnifiedDetectionService.saveAnnotatedImage(_annotatedImageBytes!);
-    }
-    processedImagePath ??= _selectedImage!.path;
+    // Use the ORIGINAL image for the report — the YOLO annotated image
+    // includes bounding boxes for ALL classes (including excluded/filtered ones),
+    // so it must NOT be sent to the finalized report.
+    final String processedImagePath = _selectedImage!.path;
 
     if (!mounted) return;
     CompactLoadingModal.hide(context);
