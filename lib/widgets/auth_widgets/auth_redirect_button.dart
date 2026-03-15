@@ -31,7 +31,7 @@ class AuthRedirectTextButton extends StatelessWidget {
             children: [
               TextSpan(
                 text: action,
-                style: TextStyle(
+                style: const TextStyle(
                   color: primary,
                   fontWeight: FontWeight.bold,
                 ),

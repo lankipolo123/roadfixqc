@@ -28,9 +28,9 @@ class MockHomeHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                MockGreetingText(text: 'Hi, Welcome'),
+                const MockGreetingText(text: 'Hi, Welcome'),
                 SizedBox(height: 2.h),
-                MockUserNameText(name: 'John Doe'),
+                const MockUserNameText(name: 'John Doe'),
               ],
             ),
           ),

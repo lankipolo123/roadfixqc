@@ -38,11 +38,11 @@ class CustomTextField extends StatelessWidget {
         decoration: InputDecoration(
           prefixIcon: icon != null ? Icon(icon, color: primary) : null,
           labelText: label,
-          labelStyle: TextStyle(
+          labelStyle: const TextStyle(
             fontWeight: FontWeight.w500,
             color: altSecondary,
           ),
-          hintStyle: TextStyle(color: altSecondary),
+          hintStyle: const TextStyle(color: altSecondary),
           filled: true,
           fillColor: inputFill,
           contentPadding: EdgeInsets.symmetric(
