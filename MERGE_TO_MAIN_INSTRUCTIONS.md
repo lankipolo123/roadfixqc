@@ -16,6 +16,10 @@
 - Created `LocationPermissionScreen` shown once on first launch to request location permission
 - Updated login and email verification to route through permission screen on first launch
 - Added `NSLocationWhenInUseUsageDescription` to iOS Info.plist (was missing — would crash on iOS)
+- City-level badge address (e.g., "Taytay, Rizal") instead of street-level
+- Updated tutorial Step 2 to match actual report screen (single detect circle instead of 3 category buttons)
+- Changed detect circle styling: white background with black question mark
+- Added login attempt lockout: after 5 failed attempts, shows non-dismissible dialog forcing app close (in-memory counter, resets on restart)
 
 **Files Changed:**
 - `lib/screens/module_screens/home_screen.dart`
@@ -27,6 +31,11 @@
 - `lib/screens/auth_screens/login_screen.dart`
 - `lib/screens/auth_screens/email_verification_screen.dart`
 - `ios/Runner/Info.plist`
+- `lib/utils/address_fortmatter.dart`
+- `lib/models/location_models.dart`
+- `lib/screens/tutorial_screens/step_two_screen.dart`
+- `lib/screens/module_screens/report_type_screen.dart`
+- `lib/widgets/dialog_widgets/login_lockout_dialog.dart` (new)
 
 ---
 
