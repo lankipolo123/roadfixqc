@@ -34,10 +34,11 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _initializeData() async {
-    // Load user data once
-    await _loadUserData();
-    // Load location once
-    await _getCurrentLocation();
+    // Load user data and location in parallel so location starts fetching immediately
+    await Future.wait([
+      _loadUserData(),
+      _getCurrentLocation(),
+    ]);
   }
 
   Future<void> _loadUserData() async {
