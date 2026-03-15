@@ -1,7 +1,21 @@
 import 'package:geolocator/geolocator.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:roadfix/services/geolocation_services.dart';
 
 class LocationPermissionManager {
+  /// Returns the current location status without requesting permission.
+  static Future<LocationStatus> getLocationStatus() async {
+    if (!await Geolocator.isLocationServiceEnabled()) {
+      return LocationStatus.serviceOff;
+    }
+    LocationPermission perm = await Geolocator.checkPermission();
+    if (perm == LocationPermission.deniedForever) {
+      return LocationStatus.deniedForever;
+    }
+    if (perm == LocationPermission.denied) return LocationStatus.denied;
+    return LocationStatus.loaded;
+  }
+
   /// Requests location permission. If [openSettings] is true and permission is
   /// permanently denied, opens app settings. Set to false for background/init
   /// calls to avoid kicking the user out of the app.

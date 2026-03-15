@@ -1,6 +1,7 @@
 // lib/widgets/home_widgets/home_header.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/user_model.dart';
+import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/utils/responsive.dart';
 
 import 'package:roadfix/screens/secondary_screens/notification_screen.dart';
@@ -15,6 +16,7 @@ class HomeHeader extends StatelessWidget {
   final UserModel user;
   final String locationText;
   final bool isLoadingLocation;
+  final LocationStatus locationStatus;
   final VoidCallback? onLocationTap;
   final VoidCallback? onAvatarTap;
 
@@ -23,6 +25,7 @@ class HomeHeader extends StatelessWidget {
     required this.user,
     required this.locationText,
     required this.isLoadingLocation,
+    required this.locationStatus,
     this.onLocationTap,
     this.onAvatarTap,
   });
@@ -87,7 +90,17 @@ class HomeHeader extends StatelessWidget {
                         ),
                       )
                     else
-                      Icon(Icons.location_on, size: 12.r, color: secondary),
+                      Icon(
+                        locationStatus == LocationStatus.serviceOff
+                            ? Icons.gps_off
+                            : (locationStatus == LocationStatus.denied ||
+                                    locationStatus ==
+                                        LocationStatus.deniedForever)
+                                ? Icons.location_disabled
+                                : Icons.location_on,
+                        size: 12.r,
+                        color: secondary,
+                      ),
                     SizedBox(width: 4.w),
                     Flexible(
                       child: Text(

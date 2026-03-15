@@ -1,6 +1,10 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:roadfix/layouts/homescreen_layout.dart';
 import 'package:roadfix/services/geolocation_services.dart';
+import 'package:roadfix/utils/location_permission_manager.dart';
+import 'package:roadfix/widgets/dialog_widgets/location_guidance_dialog.dart';
 import 'package:roadfix/widgets/home_widgets/home_header_widgets/home_header.dart';
 import 'package:roadfix/widgets/home_widgets/recent_report_section.dart';
 import 'package:roadfix/widgets/profile_widgets/status_summary_row.dart';
@@ -23,14 +27,41 @@ class _HomeScreenState extends State<HomeScreen> {
 
   String _locationText = 'Getting location...';
   bool _isLoadingLocation = true;
+  LocationStatus _locationStatus = LocationStatus.loading;
   UserModel? _currentUser;
   bool _isLoadingUser = true;
   bool _hasUserError = false;
+
+  StreamSubscription<ServiceStatus>? _serviceStatusSubscription;
 
   @override
   void initState() {
     super.initState();
     _initializeData();
+    _listenToServiceStatus();
+  }
+
+  @override
+  void dispose() {
+    _serviceStatusSubscription?.cancel();
+    super.dispose();
+  }
+
+  void _listenToServiceStatus() {
+    _serviceStatusSubscription = Geolocator.getServiceStatusStream().listen(
+      (ServiceStatus status) {
+        if (!mounted) return;
+        if (status == ServiceStatus.enabled) {
+          _getCurrentLocation();
+        } else {
+          setState(() {
+            _locationText = 'Enable GPS';
+            _locationStatus = LocationStatus.serviceOff;
+            _isLoadingLocation = false;
+          });
+        }
+      },
+    );
   }
 
   Future<void> _initializeData() async {
@@ -48,9 +79,7 @@ class _HomeScreenState extends State<HomeScreen> {
         _hasUserError = false;
       });
 
-      // Get current user once instead of using stream
-      final user = await _userService
-          .getCurrentUser(); // You might need to add this method
+      final user = await _userService.getCurrentUser();
 
       if (mounted) {
         setState(() {
@@ -71,11 +100,56 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _getCurrentLocation() async {
+    if (mounted) {
+      setState(() {
+        _isLoadingLocation = true;
+        _locationStatus = LocationStatus.loading;
+      });
+    }
+
+    // Check status first to give specific feedback
+    final status = await LocationPermissionManager.getLocationStatus();
+
+    if (status == LocationStatus.serviceOff) {
+      if (mounted) {
+        setState(() {
+          _locationText = 'Enable GPS';
+          _locationStatus = LocationStatus.serviceOff;
+          _isLoadingLocation = false;
+        });
+      }
+      return;
+    }
+
+    if (status == LocationStatus.denied) {
+      if (mounted) {
+        setState(() {
+          _locationText = 'Allow location';
+          _locationStatus = LocationStatus.denied;
+          _isLoadingLocation = false;
+        });
+      }
+      return;
+    }
+
+    if (status == LocationStatus.deniedForever) {
+      if (mounted) {
+        setState(() {
+          _locationText = 'Location blocked';
+          _locationStatus = LocationStatus.deniedForever;
+          _isLoadingLocation = false;
+        });
+      }
+      return;
+    }
+
+    // Permission granted and service on — fetch location
     try {
       final locationData = await _geoService.getCurrentLocation();
       if (mounted) {
         setState(() {
           _locationText = locationData.shortAddress;
+          _locationStatus = LocationStatus.loaded;
           _isLoadingLocation = false;
         });
       }
@@ -83,6 +157,7 @@ class _HomeScreenState extends State<HomeScreen> {
       if (mounted) {
         setState(() {
           _locationText = 'Location unavailable';
+          _locationStatus = LocationStatus.error;
           _isLoadingLocation = false;
         });
       }
@@ -90,26 +165,59 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _onLocationTap() async {
-    setState(() {
-      _isLoadingLocation = true;
-      _locationText = 'Refreshing...';
-    });
+    switch (_locationStatus) {
+      case LocationStatus.serviceOff:
+        final result = await LocationGuidanceDialog.show(
+          context,
+          LocationGuidanceType.serviceOff,
+        );
+        if (result && mounted) _getCurrentLocation();
+        break;
 
-    try {
-      final locationData = await _geoService.getCurrentLocationForced();
-      if (mounted) {
+      case LocationStatus.denied:
+        final granted = await LocationPermissionManager.checkLocationPermission(
+          openSettings: false,
+        );
+        if (granted && mounted) _getCurrentLocation();
+        break;
+
+      case LocationStatus.deniedForever:
+        final result = await LocationGuidanceDialog.show(
+          context,
+          LocationGuidanceType.permanentlyDenied,
+        );
+        if (result && mounted) _getCurrentLocation();
+        break;
+
+      case LocationStatus.loaded:
+      case LocationStatus.error:
+      case LocationStatus.loading:
+        // Refresh location (existing behavior)
         setState(() {
-          _locationText = locationData.shortAddress;
-          _isLoadingLocation = false;
+          _isLoadingLocation = true;
+          _locationText = 'Refreshing...';
+          _locationStatus = LocationStatus.loading;
         });
-      }
-    } catch (e) {
-      if (mounted) {
-        setState(() {
-          _locationText = 'Location unavailable';
-          _isLoadingLocation = false;
-        });
-      }
+
+        try {
+          final locationData = await _geoService.getCurrentLocationForced();
+          if (mounted) {
+            setState(() {
+              _locationText = locationData.shortAddress;
+              _locationStatus = LocationStatus.loaded;
+              _isLoadingLocation = false;
+            });
+          }
+        } catch (e) {
+          if (mounted) {
+            setState(() {
+              _locationText = 'Location unavailable';
+              _locationStatus = LocationStatus.error;
+              _isLoadingLocation = false;
+            });
+          }
+        }
+        break;
     }
   }
 
@@ -130,6 +238,7 @@ class _HomeScreenState extends State<HomeScreen> {
         user: _currentUser!,
         locationText: _locationText,
         isLoadingLocation: _isLoadingLocation,
+        locationStatus: _locationStatus,
         onLocationTap: _onLocationTap,
       );
     }

@@ -4,6 +4,8 @@ import 'package:roadfix/services/geo_coding_service.dart';
 import 'package:roadfix/utils/address_fortmatter.dart';
 import 'package:roadfix/utils/location_permission_manager.dart';
 
+enum LocationStatus { loaded, loading, serviceOff, denied, deniedForever, error }
+
 class GeolocationService {
   // Cache variables
   static LocationData? _cachedLocation;

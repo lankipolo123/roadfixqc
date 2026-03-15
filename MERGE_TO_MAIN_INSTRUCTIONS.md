@@ -9,11 +9,24 @@
 - Added `getLastKnownPosition()` as instant fallback before active GPS in `getCurrentLocation()`
 - Added `openSettings` parameter to `checkLocationPermission()` so the header badge doesn't auto-redirect to app settings on startup
 - Changed `LocationAccuracy.best` to `LocationAccuracy.high` for faster GPS locks
+- Added `LocationStatus` enum and `getLocationStatus()` for granular state tracking
+- Smart location badge: shows "Enable GPS" / "Allow location" / "Location blocked" with context-aware tap actions
+- GPS service status listener: auto-retries location when GPS is toggled on, updates badge when toggled off
+- Created `LocationGuidanceDialog` for guiding users to enable GPS or grant permissions
+- Created `LocationPermissionScreen` shown once on first launch to request location permission
+- Updated login and email verification to route through permission screen on first launch
+- Added `NSLocationWhenInUseUsageDescription` to iOS Info.plist (was missing — would crash on iOS)
 
 **Files Changed:**
 - `lib/screens/module_screens/home_screen.dart`
 - `lib/services/geolocation_services.dart`
 - `lib/utils/location_permission_manager.dart`
+- `lib/widgets/dialog_widgets/location_guidance_dialog.dart` (new)
+- `lib/widgets/home_widgets/home_header_widgets/home_header.dart`
+- `lib/screens/secondary_screens/location_permission_screen.dart` (new)
+- `lib/screens/auth_screens/login_screen.dart`
+- `lib/screens/auth_screens/email_verification_screen.dart`
+- `ios/Runner/Info.plist`
 
 ---
 
