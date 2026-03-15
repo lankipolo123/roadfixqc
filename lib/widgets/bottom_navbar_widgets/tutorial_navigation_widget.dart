@@ -28,17 +28,14 @@ class TutorialNavigationWidget extends StatelessWidget {
       notchMargin: 6.0,
       color: primary,
       elevation: 0,
-      child: SizedBox(
-        height: 64.h,
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildNavItem(Icons.home, 'Home', 0, homeTabKey),
-            _buildNavItem(Icons.camera_alt, 'Photo', 1, photoTabKey),
-            _buildNavItem(Icons.receipt_long, 'Reports', 2, reportsTabKey),
-            _buildNavItem(Icons.person, 'Profile', 3, profileTabKey),
-          ],
-        ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(Icons.home, 'Home', 0, homeTabKey),
+          _buildNavItem(Icons.camera_alt, 'Photo', 1, photoTabKey),
+          _buildNavItem(Icons.receipt_long, 'Reports', 2, reportsTabKey),
+          _buildNavItem(Icons.person, 'Profile', 3, profileTabKey),
+        ],
       ),
     );
   }
@@ -54,34 +51,37 @@ class TutorialNavigationWidget extends StatelessWidget {
           child: InkWell(
             borderRadius: BorderRadius.circular(8.r),
             onTap: () => onTap?.call(index),
-            child: Container(
-              padding: EdgeInsets.symmetric(vertical: 8.h, horizontal: 4.w),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    icon,
-                    size: 22.r,
-                    color: isSelected
-                        ? secondary
-                        : altSecondary.withValues(alpha: 0.7),
-                  ),
-                  SizedBox(height: 4.h),
-                  Text(
-                    label,
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      fontWeight: FontWeight.normal,
+            child: Padding(
+              padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 4.w),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(
+                      icon,
+                      size: 22.r,
                       color: isSelected
                           ? secondary
                           : altSecondary.withValues(alpha: 0.7),
                     ),
-                    textAlign: TextAlign.center,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: 1,
-                  ),
-                ],
+                    SizedBox(height: 4.h),
+                    Text(
+                      label,
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        fontWeight: FontWeight.normal,
+                        color: isSelected
+                            ? secondary
+                            : altSecondary.withValues(alpha: 0.7),
+                      ),
+                      textAlign: TextAlign.center,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

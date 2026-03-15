@@ -194,7 +194,6 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
             left: 0,
             right: 0,
             child: Container(
-              height: screenHeight * 0.25,
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
@@ -207,14 +206,18 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
                 ),
               ),
               child: SafeArea(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    // Camera modes
-                    SizedBox(height: 40, child: _buildCameraModes()),
-                    // Main controls - only camera controls
-                    SizedBox(height: 80, child: _buildCameraControls()),
-                  ],
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Camera modes
+                      _buildCameraModes(),
+                      const SizedBox(height: 16),
+                      // Main controls - only camera controls
+                      _buildCameraControls(),
+                    ],
+                  ),
                 ),
               ),
             ),

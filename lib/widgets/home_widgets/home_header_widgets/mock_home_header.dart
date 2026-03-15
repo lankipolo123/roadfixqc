@@ -38,26 +38,32 @@ class MockHomeHeader extends StatelessWidget {
           SizedBox(width: 6.w),
 
           // Location Badge
-          Container(
-            padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-            decoration: BoxDecoration(
-              color: primary,
-              borderRadius: BorderRadius.circular(12.r),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.location_on, size: 12.r, color: secondary),
-                SizedBox(width: 4.w),
-                Text(
-                  'Current Location',
-                  style: TextStyle(
-                    fontSize: 10.sp,
-                    color: secondary,
-                    fontWeight: FontWeight.w600,
+          Flexible(
+            child: Container(
+              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+              decoration: BoxDecoration(
+                color: primary,
+                borderRadius: BorderRadius.circular(12.r),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.location_on, size: 12.r, color: secondary),
+                  SizedBox(width: 4.w),
+                  Flexible(
+                    child: Text(
+                      'Current Location',
+                      style: TextStyle(
+                        fontSize: 10.sp,
+                        color: secondary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 1,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
 
