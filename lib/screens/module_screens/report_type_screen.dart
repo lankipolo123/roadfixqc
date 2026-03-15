@@ -60,7 +60,7 @@ class ReportTypeScreen extends StatelessWidget {
                           height: 250.r,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: primary.withValues(alpha: 0.1),
+                            color: inputFill,
                           ),
                           child: Center(
                           child: Column(
@@ -70,7 +70,7 @@ class ReportTypeScreen extends StatelessWidget {
                               Icon(
                                 Icons.question_mark_rounded,
                                 size: 100.r,
-                                color: primary,
+                                color: secondary,
                               ),
 
                               SizedBox(height: 16.h),

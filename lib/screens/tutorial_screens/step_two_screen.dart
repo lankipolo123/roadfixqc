@@ -140,7 +140,7 @@ class _MockReportTypeScreen extends StatelessWidget {
                         height: circleSize,
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          color: primary.withValues(alpha: 0.1),
+                          color: inputFill,
                         ),
                         child: Center(
                           child: Column(
@@ -149,7 +149,7 @@ class _MockReportTypeScreen extends StatelessWidget {
                               Icon(
                                 Icons.question_mark_rounded,
                                 size: iconSize,
-                                color: primary,
+                                color: secondary,
                               ),
                               const SizedBox(height: 16),
                               const Text(
