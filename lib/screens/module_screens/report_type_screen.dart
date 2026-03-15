@@ -47,15 +47,22 @@ class ReportTypeScreen extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       // Big circle with question mark and text inside
-                      Container(
-                        width: 250.r,
-                        height: 250.r,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: primary.withValues(alpha: 0.1),
-                          border: Border.all(color: primary, width: 4),
+                      CustomPaint(
+                        foregroundPainter: const _StripedCircleBorderPainter(
+                          borderWidth: 6,
+                          stripeColor: altSecondary,
+                          backgroundColor: primary,
+                          stripeWidth: 12,
+                          gapWidth: 12,
                         ),
-                        child: Center(
+                        child: Container(
+                          width: 250.r,
+                          height: 250.r,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: primary.withValues(alpha: 0.1),
+                          ),
+                          child: Center(
                           child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -81,6 +88,7 @@ class ReportTypeScreen extends StatelessWidget {
                             ],
                           ),
                         ),
+                      ),
                       ),
 
                       SizedBox(height: 32.h),
@@ -131,4 +139,62 @@ class ReportTypeScreen extends StatelessWidget {
       }
     }
   }
+}
+
+class _StripedCircleBorderPainter extends CustomPainter {
+  final double borderWidth;
+  final Color stripeColor;
+  final Color backgroundColor;
+  final double stripeWidth;
+  final double gapWidth;
+
+  const _StripedCircleBorderPainter({
+    required this.borderWidth,
+    required this.stripeColor,
+    required this.backgroundColor,
+    required this.stripeWidth,
+    required this.gapWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final outerRadius = size.width / 2;
+    final innerRadius = outerRadius - borderWidth;
+
+    // Create annulus (ring) clip path
+    final ringPath = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: outerRadius))
+      ..addOval(Rect.fromCircle(center: center, radius: innerRadius))
+      ..fillType = PathFillType.evenOdd;
+
+    canvas.save();
+    canvas.clipPath(ringPath);
+
+    final paint = Paint()..isAntiAlias = false;
+
+    // Fill ring with background color
+    paint.color = backgroundColor;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+
+    // Draw diagonal stripes (same logic as _StripesPainter)
+    paint.color = stripeColor;
+    final totalWidth = stripeWidth + gapWidth;
+    final double hypotenuse = size.height * 3.5;
+
+    for (double x = -hypotenuse; x < size.width + hypotenuse; x += totalWidth) {
+      final path = Path();
+      path.moveTo(x, 0);
+      path.lineTo(x + stripeWidth, 0);
+      path.lineTo(x + stripeWidth - size.height, size.height);
+      path.lineTo(x - size.height, size.height);
+      path.close();
+      canvas.drawPath(path, paint);
+    }
+
+    canvas.restore();
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
