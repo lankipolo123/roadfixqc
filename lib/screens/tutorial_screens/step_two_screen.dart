@@ -15,9 +15,7 @@ class TutorialStep2Screen extends StatefulWidget {
 
 class _TutorialStep2ScreenState extends State<TutorialStep2Screen> {
   bool _isTutorialEnabled = true;
-  final GlobalKey _categoryButton1Key = GlobalKey();
-  final GlobalKey _categoryButton2Key = GlobalKey();
-  final GlobalKey _categoryButton3Key = GlobalKey();
+  final GlobalKey _detectButtonKey = GlobalKey();
 
   void _completeTutorial() {
     setState(() {
@@ -42,78 +40,49 @@ class _TutorialStep2ScreenState extends State<TutorialStep2Screen> {
   Widget build(BuildContext context) {
     return TutorialOverlay(
       enabled: _isTutorialEnabled,
-      targetKeys: [
-        _categoryButton1Key,
-        _categoryButton2Key,
-        _categoryButton3Key,
-      ],
-      title: 'Choose Category',
-      description: 'Select what type of road issue you found',
+      targetKey: _detectButtonKey,
+      title: 'Detect Road Issues',
+      description: 'Tap the button to start detecting road issues',
       bulletPoints: const [
-        'Pick matching category',
-        'Read descriptions carefully',
-        'Tap any category to continue',
+        'Tap the detect button',
+        'Choose camera or gallery',
+        'AI will detect issues',
       ],
-      actionText: 'Tap Category',
+      actionText: 'Tap to Detect',
       currentStep: 2,
       totalSteps: 5,
       onComplete: _completeTutorial,
       onSkip: _skipTutorial,
       child: Scaffold(
         backgroundColor: inputFill,
-        body: MockReportTypeScreenWithTutorial(
-          categoryButtonKeys: [
-            _categoryButton1Key,
-            _categoryButton2Key,
-            _categoryButton3Key,
-          ],
-          onCategoryTap: _completeTutorial,
+        body: _MockReportTypeScreen(
+          detectButtonKey: _detectButtonKey,
+          onDetectTap: _completeTutorial,
         ),
         bottomNavigationBar: TutorialNavigationWidget(
-          currentIndex: 1, // Photo tab is selected
-          onTap: (index) {
-            // No navigation during tutorial
-          },
-          // No keys needed for step 2 since nav isn't being highlighted
+          currentIndex: 1,
+          onTap: (index) {},
         ),
       ),
     );
   }
 }
 
-class MockReportTypeScreenWithTutorial extends StatelessWidget {
-  final List<GlobalKey> categoryButtonKeys;
-  final VoidCallback? onCategoryTap;
+class _MockReportTypeScreen extends StatelessWidget {
+  final GlobalKey detectButtonKey;
+  final VoidCallback? onDetectTap;
 
-  const MockReportTypeScreenWithTutorial({
-    super.key,
-    required this.categoryButtonKeys,
-    this.onCategoryTap,
+  const _MockReportTypeScreen({
+    required this.detectButtonKey,
+    this.onDetectTap,
   });
-
-  // Mock data copying the structure from your report_categories.dart
-  static const List<Map<String, dynamic>> _mockCategories = [
-    {
-      'label': 'Potholes',
-      'description': 'A huge crack or hole in the road',
-      'imagePath': 'assets/images/pothole_report.webp',
-    },
-    {
-      'label': 'Utility Poles',
-      'description': 'Leaning or fallen utility pole',
-      'imagePath': 'assets/images/utility_pole_report.webp',
-    },
-    {
-      'label': 'Road Concerns',
-      'description': 'General road issues',
-      'imagePath': 'assets/images/road_concerns.webp',
-    },
-  ];
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final logoHeight = screenHeight < 700 ? 70.0 : 100.0;
+    final circleSize = screenHeight < 700 ? 200.0 : 250.0;
+    final iconSize = screenHeight < 700 ? 70.0 : 100.0;
 
     return SafeArea(
       child: Column(
@@ -149,137 +118,127 @@ class MockReportTypeScreenWithTutorial extends StatelessWidget {
             rightColor: secondary,
           ),
 
-          const SizedBox(height: 24),
-
-          // Report category list
+          // Big detection circle
           Expanded(
-            child: ListView.separated(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-              itemCount: _mockCategories.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 16),
-              itemBuilder: (context, index) {
-                final category = _mockCategories[index];
-                return _buildReportCategoryButton(
-                  category['label']!,
-                  category['description']!,
-                  category['imagePath']!,
-                  index,
-                );
-              },
+            child: Center(
+              child: GestureDetector(
+                key: detectButtonKey,
+                onTap: onDetectTap,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    CustomPaint(
+                      foregroundPainter: const _StripedCircleBorderPainter(
+                        borderWidth: 6,
+                        stripeColor: altSecondary,
+                        backgroundColor: primary,
+                        stripeWidth: 12,
+                        gapWidth: 12,
+                      ),
+                      child: Container(
+                        width: circleSize,
+                        height: circleSize,
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: primary.withValues(alpha: 0.1),
+                        ),
+                        child: Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.question_mark_rounded,
+                                size: iconSize,
+                                color: primary,
+                              ),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'Detect Road Issues',
+                                style: TextStyle(
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.bold,
+                                  color: secondary,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 32),
+
+                    const Padding(
+                      padding: EdgeInsets.symmetric(horizontal: 40),
+                      child: Text(
+                        'Tap to detect potholes, cracks, poles, and roadblocks',
+                        style: TextStyle(fontSize: 14, color: altSecondary),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _buildReportCategoryButton(
-    String label,
-    String description,
-    String imagePath,
-    int index,
-  ) {
-    // All category buttons get keys for targeting
-    GlobalKey? buttonKey;
-    if (index < categoryButtonKeys.length) {
-      buttonKey = categoryButtonKeys[index];
+class _StripedCircleBorderPainter extends CustomPainter {
+  final double borderWidth;
+  final Color stripeColor;
+  final Color backgroundColor;
+  final double stripeWidth;
+  final double gapWidth;
+
+  const _StripedCircleBorderPainter({
+    required this.borderWidth,
+    required this.stripeColor,
+    required this.backgroundColor,
+    required this.stripeWidth,
+    required this.gapWidth,
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final center = Offset(size.width / 2, size.height / 2);
+    final outerRadius = size.width / 2;
+    final innerRadius = outerRadius - borderWidth;
+
+    final ringPath = Path()
+      ..addOval(Rect.fromCircle(center: center, radius: outerRadius))
+      ..addOval(Rect.fromCircle(center: center, radius: innerRadius))
+      ..fillType = PathFillType.evenOdd;
+
+    canvas.save();
+    canvas.clipPath(ringPath);
+
+    final paint = Paint()..isAntiAlias = false;
+
+    paint.color = backgroundColor;
+    canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), paint);
+
+    paint.color = stripeColor;
+    final totalWidth = stripeWidth + gapWidth;
+    final double hypotenuse = size.height * 3.5;
+
+    for (double x = -hypotenuse; x < size.width + hypotenuse; x += totalWidth) {
+      final path = Path();
+      path.moveTo(x, 0);
+      path.lineTo(x + stripeWidth, 0);
+      path.lineTo(x + stripeWidth - size.height, size.height);
+      path.lineTo(x - size.height, size.height);
+      path.close();
+      canvas.drawPath(path, paint);
     }
 
-    return InkWell(
-      key: buttonKey,
-      onTap: () {
-        if (onCategoryTap != null) {
-          onCategoryTap!();
-        }
-      },
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: inputFill,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: secondary, width: 1),
-          boxShadow: [
-            BoxShadow(
-              color: secondary.withValues(alpha: 0.05),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            // Category image
-            Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: transparent, width: 2),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: Image.asset(
-                  imagePath,
-                  width: 60,
-                  height: 60,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: primary,
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: const Icon(
-                        Icons.warning,
-                        color: Colors.white,
-                        size: 30,
-                      ),
-                    );
-                  },
-                ),
-              ),
-            ),
-            const SizedBox(width: 16),
-
-            // Category info
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    label,
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: secondary,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    description,
-                    style: const TextStyle(color: altSecondary, fontSize: 14),
-                  ),
-                ],
-              ),
-            ),
-
-            // Arrow icon with background
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: secondary,
-                borderRadius: BorderRadius.circular(6),
-              ),
-              child: const Icon(
-                Icons.arrow_forward_ios,
-                color: inputFill,
-                size: 16,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
+    canvas.restore();
   }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }
