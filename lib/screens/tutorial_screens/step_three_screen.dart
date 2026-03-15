@@ -126,8 +126,6 @@ class _TutorialStep3ScreenState extends State<TutorialStep3Screen> {
   }
 
   Widget _buildCameraScreen() {
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: Stack(

@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -34,7 +33,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   bool _isProcessing = false;
 
   File? _selectedImage;
-  Uint8List? _annotatedImageBytes;
   List<DetectionResult> _detections = [];
   double? _imageAspectRatio;
 
@@ -81,7 +79,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     setState(() {
       _selectedImage = imageFile;
-      _annotatedImageBytes = null;
       _isProcessing = true;
       _detections.clear();
       _imageAspectRatio = decoded.width / decoded.height;
@@ -102,7 +99,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       if (!mounted) return;
       setState(() {
         _detections = output.detections;
-        _annotatedImageBytes = output.annotatedImage;
         _isProcessing = false;
       });
 
@@ -247,7 +243,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     if (widget.initialImageSource != null) {
       setState(() {
         _selectedImage = null;
-        _annotatedImageBytes = null;
         _detections.clear();
       });
       await _pickImageFromSource(widget.initialImageSource!);
