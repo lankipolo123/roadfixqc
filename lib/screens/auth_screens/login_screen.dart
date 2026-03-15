@@ -17,6 +17,7 @@ import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/services/connectivity_service.dart';
 import 'package:roadfix/utils/connectivity_cache.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
+import 'package:roadfix/widgets/dialog_widgets/login_lockout_dialog.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/utils/responsive.dart';
 
@@ -33,6 +34,9 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _authService = AuthService();
+
+  static const int _maxLoginAttempts = 5;
+  int _failedAttempts = 0;
 
   bool _isLoading = false;
   bool _isInitialLoading = true;
@@ -168,8 +172,17 @@ class _LoginScreenState extends State<LoginScreen> {
       if (!mounted) return;
 
       if (result['success'] != true) {
+        _failedAttempts++;
+        if (_failedAttempts >= _maxLoginAttempts) {
+          if (mounted) {
+            setState(() => _isLoading = false);
+            await LoginLockoutDialog.show(context);
+          }
+          return;
+        }
         SnackbarUtils.showError(context, result['message'] ?? 'Login failed');
       } else {
+        _failedAttempts = 0;
         // Check what type of success we got
         if (result['requiresEmailVerification'] == true) {
           debugPrint('🔍 Navigating to email verification');
