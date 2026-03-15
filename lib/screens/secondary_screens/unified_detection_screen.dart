@@ -9,6 +9,9 @@ import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/unified_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
+import 'package:roadfix/widgets/dialog_widgets/location_required_dialog.dart';
+import 'package:roadfix/services/geolocation_services.dart';
+import 'package:roadfix/models/location_models.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 /// Unified Detection Screen - Detects ALL hazards at once
@@ -134,15 +137,38 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       return;
     }
 
-    CompactLoadingModal.show(context, message: "Preparing report...");
+    // Show location dialog before proceeding to report
+    final shouldGetLocation = await LocationRequiredDialog.show(context);
+    if (!mounted) return;
+    if (!shouldGetLocation) return;
+
+    // Fetch GPS location with enhanced accuracy
+    CompactLoadingModal.show(context, message: "Getting your location...");
+
+    LocationData? locationData;
+    try {
+      final geoService = GeolocationService();
+      locationData = await geoService.getCurrentLocationForReports();
+    } catch (e) {
+      if (!mounted) return;
+      CompactLoadingModal.hide(context);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to get location: $e'),
+          backgroundColor: statusDanger,
+          duration: const Duration(seconds: 3),
+        ),
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    CompactLoadingModal.hide(context);
 
     // Use the ORIGINAL image for the report — the YOLO annotated image
     // includes bounding boxes for ALL classes (including excluded/filtered ones),
     // so it must NOT be sent to the finalized report.
     final String processedImagePath = _selectedImage!.path;
-
-    if (!mounted) return;
-    CompactLoadingModal.hide(context);
 
     // Build detection summary
     final Map<String, int> detectionCounts = {};
@@ -181,10 +207,11 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       context,
       MaterialPageRoute(
         builder: (context) => SendReportScreen(
-          imagePath: processedImagePath!,
+          imagePath: processedImagePath,
           reportType: widget.category?.label ?? 'Road Hazard',
           detections: detectionTags,
           autoDescription: autoDescription,
+          locationData: locationData,
         ),
       ),
     );

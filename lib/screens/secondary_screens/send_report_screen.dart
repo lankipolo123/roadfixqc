@@ -7,7 +7,6 @@ import 'package:roadfix/services/report_service.dart';
 import 'package:roadfix/widgets/common_widgets/toast_widget.dart';
 import 'package:roadfix/widgets/detection_widgets/location_textfield.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
-import 'package:roadfix/widgets/dialog_widgets/location_required_dialog.dart';
 import 'package:roadfix/widgets/reporting_widgets/detection_tags.dart';
 import 'package:roadfix/widgets/reporting_widgets/report_form.dart';
 import 'package:roadfix/services/user_service.dart';
@@ -22,6 +21,7 @@ class SendReportScreen extends StatefulWidget {
   final String? reportType;
   final List<String>? detections;
   final String? autoDescription;
+  final LocationData? locationData;
 
   const SendReportScreen({
     super.key,
@@ -29,6 +29,7 @@ class SendReportScreen extends StatefulWidget {
     this.reportType,
     this.detections,
     this.autoDescription,
+    this.locationData,
   });
 
   @override
@@ -57,6 +58,12 @@ class _SendReportScreenState extends State<SendReportScreen> {
 
     if (widget.autoDescription != null) {
       _descriptionController.text = widget.autoDescription!;
+    }
+
+    // Pre-populate location if passed from detection screen
+    if (widget.locationData != null) {
+      _locationData = widget.locationData;
+      _locationController.text = widget.locationData!.formattedAddress;
     }
   }
 
@@ -166,17 +173,15 @@ class _SendReportScreenState extends State<SendReportScreen> {
       }
     }
 
-    // Check if location has coordinates — show dialog to prompt GPS fetch
+    // Check if location has coordinates
     if (_locationData == null) {
-      final shouldGetLocation = await LocationRequiredDialog.show(context);
-      if (!mounted) return;
-      if (shouldGetLocation) {
-        await _getCurrentLocation();
-        // If location still not obtained after attempt, stop
-        if (_locationData == null) return;
-      } else {
-        return;
-      }
+      AppToast.showError(
+        context,
+        message: 'Please get your current location first',
+        title: 'Location Required',
+        duration: const Duration(seconds: 3),
+      );
+      return;
     }
 
     final securityResult = await _securityService.validateReport(
