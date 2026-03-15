@@ -1113,10 +1113,10 @@ packages:
     dependency: "direct main"
     description:
       name: ultralytics_yolo
-      sha256: "434ed91994f6ddbb6d787a452e5c7a3ca5270d647a7ca66ddba7275a0f08cd02"
+      sha256: "0fc5a8385c3c7fcd5266da6a62184935dbc3619b8ad0813fd30d588ffeec85ee"
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.36"
+    version: "0.2.0"
   uuid:
     dependency: transitive
     description:

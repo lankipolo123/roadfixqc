@@ -58,37 +58,37 @@ class ReportTypeScreen extends StatelessWidget {
                         child: Container(
                           width: 250.r,
                           height: 250.r,
-                          decoration: BoxDecoration(
+                          decoration: const BoxDecoration(
                             shape: BoxShape.circle,
                             color: inputFill,
                           ),
                           child: Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              // Question mark
-                              Icon(
-                                Icons.question_mark_rounded,
-                                size: 100.r,
-                                color: secondary,
-                              ),
-
-                              SizedBox(height: 16.h),
-
-                              // Text inside circle
-                              Text(
-                                'Detect Road Issues',
-                                style: TextStyle(
-                                  fontSize: 20.sp,
-                                  fontWeight: FontWeight.bold,
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                // Question mark
+                                Icon(
+                                  Icons.question_mark_rounded,
+                                  size: 100.r,
                                   color: secondary,
                                 ),
-                                textAlign: TextAlign.center,
-                              ),
-                            ],
+
+                                SizedBox(height: 16.h),
+
+                                // Text inside circle
+                                Text(
+                                  'Detect Road Issues',
+                                  style: TextStyle(
+                                    fontSize: 20.sp,
+                                    fontWeight: FontWeight.bold,
+                                    color: secondary,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                       ),
 
                       SizedBox(height: 32.h),
@@ -98,7 +98,10 @@ class ReportTypeScreen extends StatelessWidget {
                         padding: EdgeInsets.symmetric(horizontal: 40.w),
                         child: Text(
                           'Tap to detect potholes, cracks, poles, and roadblocks',
-                          style: TextStyle(fontSize: 14.sp, color: altSecondary),
+                          style: TextStyle(
+                            fontSize: 14.sp,
+                            color: altSecondary,
+                          ),
                           textAlign: TextAlign.center,
                         ),
                       ),
@@ -121,11 +124,7 @@ class ReportTypeScreen extends StatelessWidget {
       if (source != null && context.mounted) {
         // Use first category as default (doesn't matter since unified detection)
         final category = reportCategories.first;
-        await NavigationHelper.navigateToDetection(
-          context,
-          category,
-          source,
-        );
+        await NavigationHelper.navigateToDetection(context, category, source);
       }
     } catch (e) {
       if (context.mounted) {
