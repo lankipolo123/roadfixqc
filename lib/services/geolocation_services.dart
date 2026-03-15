@@ -77,6 +77,7 @@ class GeolocationService {
         longitude: longitude,
         formattedAddress: AddressFormatter.createDetailedAddress(components),
         shortAddress: AddressFormatter.createShortAddress(components),
+        badgeAddress: AddressFormatter.createBadgeAddress(components),
         fullAddress: AddressFormatter.createFullAddress(components),
         city: components.locality,
         province: components.adminArea,

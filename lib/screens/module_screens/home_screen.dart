@@ -148,7 +148,9 @@ class _HomeScreenState extends State<HomeScreen> {
       final locationData = await _geoService.getCurrentLocation();
       if (mounted) {
         setState(() {
-          _locationText = locationData.shortAddress;
+          _locationText = locationData.badgeAddress.isNotEmpty
+                ? locationData.badgeAddress
+                : locationData.shortAddress;
           _locationStatus = LocationStatus.loaded;
           _isLoadingLocation = false;
         });
@@ -203,7 +205,9 @@ class _HomeScreenState extends State<HomeScreen> {
           final locationData = await _geoService.getCurrentLocationForced();
           if (mounted) {
             setState(() {
-              _locationText = locationData.shortAddress;
+              _locationText = locationData.badgeAddress.isNotEmpty
+                ? locationData.badgeAddress
+                : locationData.shortAddress;
               _locationStatus = LocationStatus.loaded;
               _isLoadingLocation = false;
             });

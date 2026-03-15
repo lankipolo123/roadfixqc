@@ -3,6 +3,7 @@ class LocationData {
   final double longitude;
   final String formattedAddress;
   final String shortAddress;
+  final String badgeAddress;
   final String fullAddress;
   final String city;
   final String province;
@@ -13,6 +14,7 @@ class LocationData {
     required this.longitude,
     required this.formattedAddress,
     required this.shortAddress,
+    this.badgeAddress = '',
     required this.fullAddress,
     required this.city,
     required this.province,

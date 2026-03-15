@@ -129,6 +129,23 @@ class AddressFormatter {
     return addressParts.join(', ');
   }
 
+  /// City + province level address for the home screen badge (e.g. "Taytay, Rizal")
+  static String createBadgeAddress(AddressComponents components) {
+    final city = _abbreviateCity(components.locality);
+    final province = components.adminArea;
+
+    if (city.isNotEmpty && province.isNotEmpty && city != province) {
+      return '$city, $province';
+    }
+    if (city.isNotEmpty) return city;
+    if (province.isNotEmpty) return province;
+
+    // Fallback to suburb if no city/province
+    if (components.suburb.isNotEmpty) return components.suburb;
+
+    return 'Unknown Location';
+  }
+
   static String _abbreviateCity(String city) {
     return _cityAbbreviations[city] ?? city;
   }
