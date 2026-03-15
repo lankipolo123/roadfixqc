@@ -260,32 +260,38 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
             Builder(
               builder: (context) {
                 final positions = _getGesturePositions(screenSize);
+                final maxWidth = screenSize.width - (positions['left'] ?? 0) - 8;
                 return Positioned(
                   left: positions['left'],
                   top: positions['top'],
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: primary,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: [
-                        BoxShadow(
-                          color: primary.withValues(alpha: 0.3),
-                          blurRadius: 6,
-                          spreadRadius: 1,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth > 0 ? maxWidth : 120),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 10,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: primary,
+                        borderRadius: BorderRadius.circular(16),
+                        boxShadow: [
+                          BoxShadow(
+                            color: primary.withValues(alpha: 0.3),
+                            blurRadius: 6,
+                            spreadRadius: 1,
+                          ),
+                        ],
+                      ),
+                      child: Text(
+                        widget.actionText,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                          decoration: TextDecoration.none,
                         ),
-                      ],
-                    ),
-                    child: Text(
-                      widget.actionText,
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                        fontSize: 11,
-                        decoration: TextDecoration.none,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
                     ),
                   ),

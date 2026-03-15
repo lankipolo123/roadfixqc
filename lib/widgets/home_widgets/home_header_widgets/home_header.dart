@@ -65,38 +65,44 @@ class HomeHeader extends StatelessWidget {
           SizedBox(width: 6.w),
 
           // Location Badge
-          GestureDetector(
-            onTap: onLocationTap,
-            child: Container(
-              padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
-              decoration: BoxDecoration(
-                color: primary,
-                borderRadius: BorderRadius.circular(12.r),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  if (isLoadingLocation)
-                    SizedBox(
-                      width: 10.r,
-                      height: 10.r,
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 1.5,
-                        valueColor: AlwaysStoppedAnimation<Color>(secondary),
+          Flexible(
+            child: GestureDetector(
+              onTap: onLocationTap,
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 8.w, vertical: 2.h),
+                decoration: BoxDecoration(
+                  color: primary,
+                  borderRadius: BorderRadius.circular(12.r),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (isLoadingLocation)
+                      SizedBox(
+                        width: 10.r,
+                        height: 10.r,
+                        child: const CircularProgressIndicator(
+                          strokeWidth: 1.5,
+                          valueColor: AlwaysStoppedAnimation<Color>(secondary),
+                        ),
+                      )
+                    else
+                      Icon(Icons.location_on, size: 12.r, color: secondary),
+                    SizedBox(width: 4.w),
+                    Flexible(
+                      child: Text(
+                        locationText,
+                        style: TextStyle(
+                          fontSize: 10.sp,
+                          color: secondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 1,
                       ),
-                    )
-                  else
-                    Icon(Icons.location_on, size: 12.r, color: secondary),
-                  SizedBox(width: 4.w),
-                  Text(
-                    locationText,
-                    style: TextStyle(
-                      fontSize: 10.sp,
-                      color: secondary,
-                      fontWeight: FontWeight.w600,
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
