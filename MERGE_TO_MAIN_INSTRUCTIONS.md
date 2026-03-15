@@ -1,248 +1,84 @@
-# How to Merge Email System Fix to Your Local Main Branch
+# How to Merge Claude Branches into Main
 
-## What Was Changed
+## Current Branch
 
-This branch (`claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E`) contains:
+**Branch:** `claude/review-detection-mechanism-O35UP`
 
-1. **CRITICAL FIX** - Updated `lib/services/email_service.dart`:
-   - Changed API endpoint from `roadfix-web.vercel.app` to `roadfix-dashboard.vercel.app`
-   - This fixes email verification and password reset
-
-2. **DOCUMENTATION** - Added `MOBILE_EMAIL_SETUP.md`:
-   - Complete explanation of how email system works
-   - Flow diagrams and technical details
-   - Testing instructions
-   - Troubleshooting guide
+**Changes:**
+- Removed unused `_annotatedImageBytes` field and `dart:typed_data` import in `unified_detection_screen.dart`
+- Removed unused `screenHeight` variable in `step_three_screen.dart`
 
 ---
 
-## Quick Merge (If You're Currently on This Branch)
-
-If you're already on `claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E`:
+## Merge Steps
 
 ```bash
-# Switch to main branch
+# 1. Fetch the latest main branch from remote
+git fetch origin main
+
+# 2. Fetch the Claude feature branch from remote
+git fetch origin claude/review-detection-mechanism-O35UP
+
+# 3. Switch to your local main branch
 git checkout main
 
-# Merge the email system fix
-git merge claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E
-
-# Push to remote main (if you want to update remote)
-git push origin main
-```
-
----
-
-## Standard Merge (From Any Branch)
-
-If you're on a different branch or want to be extra careful:
-
-### Step 1: Make sure you have the latest changes
-
-```bash
-# Fetch all branches from remote
-git fetch origin
-
-# Check what branch you're on
-git branch
-```
-
-### Step 2: Switch to your main branch
-
-```bash
-git checkout main
-```
-
-### Step 3: Pull latest main (if needed)
-
-```bash
+# 4. Pull the latest main so you're up to date
 git pull origin main
-```
 
-### Step 4: Merge the email system fix
+# 5. Merge the Claude branch into main
+git merge origin/claude/review-detection-mechanism-O35UP
 
-```bash
-git merge claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E
-```
-
-This should merge cleanly with no conflicts since we only changed:
-- `lib/services/email_service.dart` (line 9)
-- Created new file `MOBILE_EMAIL_SETUP.md`
-
-### Step 5: Verify the merge
-
-```bash
-# Check that the changes are there
-git log --oneline -5
-
-# You should see the commit: "Fix email system: Update dashboard domain..."
-```
-
-### Step 6: Push to remote main (optional)
-
-```bash
+# 6. Push the updated main to remote
 git push origin main
 ```
 
 ---
 
-## Verify The Changes After Merge
+## What Each Command Does
 
-### 1. Check email_service.dart
-
-```bash
-cat lib/services/email_service.dart | grep -A2 "baseUrl"
-```
-
-Should show:
-```dart
-// Vercel API endpoint
-static const String _baseUrl = 'https://roadfix-dashboard.vercel.app/api';
-```
-
-### 2. Check documentation exists
-
-```bash
-ls -la MOBILE_EMAIL_SETUP.md
-```
-
-Should show the file exists (345+ lines).
-
-### 3. Read the documentation
-
-```bash
-cat MOBILE_EMAIL_SETUP.md
-# or
-less MOBILE_EMAIL_SETUP.md
-```
+| Command | What It Does |
+|---------|-------------|
+| `git fetch origin main` | Downloads the latest `main` from GitHub without changing your local files |
+| `git fetch origin claude/...` | Downloads the latest Claude feature branch from GitHub |
+| `git checkout main` | Switches your working directory to the `main` branch |
+| `git pull origin main` | Updates your local `main` with any new commits from remote |
+| `git merge origin/claude/...` | Merges the Claude branch commits into your current branch (`main`) |
+| `git push origin main` | Uploads your updated `main` branch to GitHub |
 
 ---
 
-## If There Are Merge Conflicts (Unlikely)
-
-If you see merge conflicts (shouldn't happen, but just in case):
+## If There Are Merge Conflicts
 
 ```bash
 # See which files have conflicts
 git status
 
-# If it's email_service.dart:
-# 1. Open the file in your editor
-# 2. Look for <<<<<<< HEAD markers
-# 3. Keep the version that has: https://roadfix-dashboard.vercel.app/api
-# 4. Remove the conflict markers
-
-# After resolving conflicts:
-git add lib/services/email_service.dart
-git commit -m "Merge email system fix with conflict resolution"
+# Open conflicting files, resolve the <<<< ==== >>>> markers
+# Then:
+git add <resolved-files>
+git commit -m "Merge claude branch with conflict resolution"
+git push origin main
 ```
 
 ---
 
-## After Merging - Test The App
+## Cleanup (Optional)
 
-### Test Email Verification
-
-1. Run the app on emulator/device
-2. Sign up with a new test email
-3. Check your email
-4. Verify the link contains: `roadfix-dashboard.vercel.app`
-5. Click the link
-6. Should successfully verify
-
-### Test Password Reset
-
-1. On login screen, tap "Forgot Password"
-2. Enter email
-3. Check your email
-4. Verify the link contains: `roadfix-dashboard.vercel.app`
-5. Click link and reset password
-6. Login with new password
-
----
-
-## Alternative: Cherry-Pick Just The Fix
-
-If you only want the email service fix without the documentation:
-
-```bash
-# Switch to main
-git checkout main
-
-# Cherry-pick just the email service change
-git show claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E
-
-# Find the commit hash (it's in the first line)
-# Then cherry-pick it
-git cherry-pick 59fb7ee
-
-# Or manually apply just the one-line change:
-# Edit lib/services/email_service.dart line 9 to:
-# static const String _baseUrl = 'https://roadfix-dashboard.vercel.app/api';
-```
-
----
-
-## Cleanup After Merge (Optional)
-
-Once merged to main, you can delete the feature branch:
+After merging, delete the feature branch if you no longer need it:
 
 ```bash
 # Delete local branch
-git branch -d claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E
+git branch -d claude/review-detection-mechanism-O35UP
 
-# Delete remote branch (only if you want to clean up remote)
-git push origin --delete claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E
+# Delete remote branch
+git push origin --delete claude/review-detection-mechanism-O35UP
 ```
 
 ---
 
-## What This Fix Does
+## Previous Branches
 
-### Before:
-❌ Email verification emails sent via old domain
-❌ Links in emails pointed to `roadfix-web.vercel.app`
-❌ Users couldn't verify accounts
-❌ Password reset didn't work
-
-### After:
-✅ Email verification emails sent via correct domain
-✅ Links in emails point to `roadfix-dashboard.vercel.app`
-✅ Users can verify accounts successfully
-✅ Password reset works correctly
-
----
-
-## Summary of Changes
-
-```
-Files changed: 2
-
-Modified:
-  lib/services/email_service.dart
-    - Line 9: Updated _baseUrl to roadfix-dashboard.vercel.app
-
-Added:
-  MOBILE_EMAIL_SETUP.md
-    - Complete email system documentation
-    - 345+ lines of explanation and guides
-```
-
----
-
-## Need Help?
-
-If you encounter issues:
-
-1. Check current branch: `git branch`
-2. Check git status: `git status`
-3. Check recent commits: `git log --oneline -5`
-4. Read the full documentation: `cat MOBILE_EMAIL_SETUP.md`
-
----
-
-**Branch Name:** `claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E`
-
-**Commit:** `59fb7ee - Fix email system: Update dashboard domain and add comprehensive documentation`
-
-**Files:** `lib/services/email_service.dart`, `MOBILE_EMAIL_SETUP.md`
+| Branch | Description |
+|--------|-------------|
+| `claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E` | Email system fix - updated API endpoint domain |
+| `claude/review-detection-mechanism-O35UP` | Lint fixes - removed unused fields and variables |
