@@ -2,11 +2,18 @@
 
 ## Current Branch
 
-**Branch:** `claude/review-detection-mechanism-O35UP`
+**Branch:** `claude/fix-location-badge-cRWHm`
 
 **Changes:**
-- Removed unused `_annotatedImageBytes` field and `dart:typed_data` import in `unified_detection_screen.dart`
-- Removed unused `screenHeight` variable in `step_three_screen.dart`
+- Fixed location badge not fetching by running user data and location loading in parallel (`Future.wait`)
+- Added `getLastKnownPosition()` as instant fallback before active GPS in `getCurrentLocation()`
+- Added `openSettings` parameter to `checkLocationPermission()` so the header badge doesn't auto-redirect to app settings on startup
+- Changed `LocationAccuracy.best` to `LocationAccuracy.high` for faster GPS locks
+
+**Files Changed:**
+- `lib/screens/module_screens/home_screen.dart`
+- `lib/services/geolocation_services.dart`
+- `lib/utils/location_permission_manager.dart`
 
 ---
 
@@ -17,7 +24,7 @@
 git fetch origin main
 
 # 2. Fetch the Claude feature branch from remote
-git fetch origin claude/review-detection-mechanism-O35UP
+git fetch origin claude/fix-location-badge-cRWHm
 
 # 3. Switch to your local main branch
 git checkout main
@@ -26,7 +33,7 @@ git checkout main
 git pull origin main
 
 # 5. Merge the Claude branch into main
-git merge origin/claude/review-detection-mechanism-O35UP
+git merge origin/claude/fix-location-badge-cRWHm
 
 # 6. Push the updated main to remote
 git push origin main
@@ -68,10 +75,10 @@ After merging, delete the feature branch if you no longer need it:
 
 ```bash
 # Delete local branch
-git branch -d claude/review-detection-mechanism-O35UP
+git branch -d claude/fix-location-badge-cRWHm
 
 # Delete remote branch
-git push origin --delete claude/review-detection-mechanism-O35UP
+git push origin --delete claude/fix-location-badge-cRWHm
 ```
 
 ---
@@ -82,3 +89,4 @@ git push origin --delete claude/review-detection-mechanism-O35UP
 |--------|-------------|
 | `claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E` | Email system fix - updated API endpoint domain |
 | `claude/review-detection-mechanism-O35UP` | Lint fixes - removed unused fields and variables |
+| `claude/fix-location-badge-cRWHm` | Fix location badge not fetching on home screen |
