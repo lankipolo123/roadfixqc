@@ -203,6 +203,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     final autoDescription = descriptionParts.join('\n');
 
+    if (!mounted) return;
     Navigator.push(
       context,
       MaterialPageRoute(
