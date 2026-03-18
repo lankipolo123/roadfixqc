@@ -2,6 +2,7 @@ import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
@@ -93,7 +94,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     try {
       final output = await _detectionService.detectObjects(
         imageFile,
-        confidenceThreshold: 0.3,
+        confidenceThreshold: 0.35,
       );
 
       if (!mounted) return;
@@ -161,10 +162,13 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     if (!mounted) return;
     CompactLoadingModal.hide(context);
 
-    // Use the ORIGINAL image for the report — the YOLO annotated image
-    // includes bounding boxes for ALL classes (including excluded/filtered ones),
-    // so it must NOT be sent to the finalized report.
-    final String processedImagePath = _selectedImage!.path;
+    // Render our own annotations onto the image so they appear in the report.
+    // We draw only the filtered detections (not the raw YOLO annotated image
+    // which includes ALL classes including excluded ones).
+    final annotatedFile =
+        await _renderAnnotatedImage(_selectedImage!, _detections);
+    final String processedImagePath =
+        annotatedFile?.path ?? _selectedImage!.path;
 
     // Build detection summary
     final Map<String, int> detectionCounts = {};
@@ -236,6 +240,86 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
         return 'Tire';
       default:
         return className.replaceAll('_', ' ');
+    }
+  }
+
+  /// Renders bounding-box annotations directly onto the image pixels
+  /// so they show up in the final report on any device.
+  Future<File?> _renderAnnotatedImage(
+    File imageFile,
+    List<DetectionResult> detections,
+  ) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final image = frame.image;
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder);
+      final size = Size(image.width.toDouble(), image.height.toDouble());
+
+      // Draw the original image
+      canvas.drawImage(image, Offset.zero, Paint());
+
+      // Draw bounding boxes
+      for (final det in detections) {
+        final left = (det.centerX - det.width / 2) * size.width;
+        final top = (det.centerY - det.height / 2) * size.height;
+        final right = (det.centerX + det.width / 2) * size.width;
+        final bottom = (det.centerY + det.height / 2) * size.height;
+
+        final rect = Rect.fromLTRB(left, top, right, bottom);
+
+        // Box outline
+        final boxPaint = Paint()
+          ..color = Colors.redAccent
+          ..style = PaintingStyle.stroke
+          ..strokeWidth = 4.0;
+        canvas.drawRect(rect, boxPaint);
+
+        // Label
+        final label =
+            '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(0)}%';
+        final textPainter = TextPainter(
+          text: TextSpan(
+            text: label,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 28,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          textDirection: TextDirection.ltr,
+        )..layout();
+
+        final bgRect = Rect.fromLTWH(
+          left,
+          top - textPainter.height - 8,
+          textPainter.width + 16,
+          textPainter.height + 8,
+        );
+        canvas.drawRect(bgRect, Paint()..color = Colors.redAccent);
+        textPainter.paint(
+            canvas, Offset(left + 8, top - textPainter.height - 4));
+      }
+
+      final picture = recorder.endRecording();
+      final rendered = await picture.toImage(image.width, image.height);
+      final pngBytes =
+          await rendered.toByteData(format: ui.ImageByteFormat.png);
+
+      if (pngBytes == null) return null;
+
+      final dir = await getTemporaryDirectory();
+      final file = File(
+        '${dir.path}/report_annotated_${DateTime.now().millisecondsSinceEpoch}.png',
+      );
+      await file.writeAsBytes(pngBytes.buffer.asUint8List());
+      return file;
+    } catch (e) {
+      debugPrint('Failed to render annotated image: $e');
+      return null;
     }
   }
 

@@ -58,7 +58,7 @@ class UnifiedDetectionService {
   /// Run detection on image — returns detections and annotated image bytes
   Future<DetectionOutput> detectObjects(
     File imageFile, {
-    double confidenceThreshold = 0.3,
+    double confidenceThreshold = 0.35,
     double iouThreshold = 0.45,
   }) async {
     if (!_isModelLoaded || _yolo == null) {
