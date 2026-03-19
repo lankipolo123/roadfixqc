@@ -9,7 +9,7 @@ final List<ReportCategory> reportCategories = [
   ),
   ReportCategory(
     label: 'Utility Poles',
-    description: 'Compromised or Broken Poles',
+    description: 'Broken Utility Poles',
     imagePath: 'assets/images/utility_pole_report.webp',
     type: ReportCategoryType.utilityPole,
   ),

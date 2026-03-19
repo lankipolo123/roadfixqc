@@ -226,7 +226,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       case 'Road_Crack':
         return 'Road Crack';
       case 'Broken_Pole':
-      case 'Compromised-Pole':
         return 'Broken Utility Pole';
       case 'Pothole':
         return 'Pothole';
