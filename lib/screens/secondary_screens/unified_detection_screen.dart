@@ -9,6 +9,7 @@ import 'package:roadfix/services/unified_detection_service.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
 import 'package:roadfix/widgets/dialog_widgets/location_required_dialog.dart';
+import 'package:roadfix/utils/location_permission_manager.dart';
 import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/models/location_models.dart';
 import 'package:roadfix/widgets/themes.dart';
@@ -133,12 +134,20 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       return;
     }
 
-    // Show location dialog before proceeding to report
-    final shouldGetLocation = await LocationRequiredDialog.show(context);
-    if (!mounted) return;
-    if (!shouldGetLocation) return;
+    // Check if location permission is already granted
+    final hasPermission =
+        await LocationPermissionManager.hasLocationPermission();
+
+    if (!hasPermission) {
+      // Show mandatory location modal
+      if (!mounted) return;
+      final granted = await LocationRequiredDialog.show(context);
+      if (!mounted) return;
+      if (!granted) return; // User chose "Go Back"
+    }
 
     // Fetch GPS location with enhanced accuracy
+    if (!mounted) return;
     CompactLoadingModal.show(context, message: "Getting your location...");
 
     LocationData? locationData;
