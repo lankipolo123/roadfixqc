@@ -2,40 +2,12 @@
 
 ## Current Branch
 
-**Branch:** `claude/fix-location-badge-cRWHm`
+**Branch:** `claude/review-detection-mechanism-O35UP`
 
 **Changes:**
-- Fixed location badge not fetching by running user data and location loading in parallel (`Future.wait`)
-- Added `getLastKnownPosition()` as instant fallback before active GPS in `getCurrentLocation()`
-- Added `openSettings` parameter to `checkLocationPermission()` so the header badge doesn't auto-redirect to app settings on startup
-- Changed `LocationAccuracy.best` to `LocationAccuracy.high` for faster GPS locks
-- Added `LocationStatus` enum and `getLocationStatus()` for granular state tracking
-- Smart location badge: shows "Enable GPS" / "Allow location" / "Location blocked" with context-aware tap actions
-- GPS service status listener: auto-retries location when GPS is toggled on, updates badge when toggled off
-- Created `LocationGuidanceDialog` for guiding users to enable GPS or grant permissions
-- Created `LocationPermissionScreen` shown once on first launch to request location permission
-- Updated login and email verification to route through permission screen on first launch
-- Added `NSLocationWhenInUseUsageDescription` to iOS Info.plist (was missing — would crash on iOS)
-- City-level badge address (e.g., "Taytay, Rizal") instead of street-level
-- Updated tutorial Step 2 to match actual report screen (single detect circle instead of 3 category buttons)
-- Changed detect circle styling: white background with black question mark
-- Added login attempt lockout: after 5 failed attempts, shows non-dismissible dialog forcing app close (in-memory counter, resets on restart)
-
-**Files Changed:**
-- `lib/screens/module_screens/home_screen.dart`
-- `lib/services/geolocation_services.dart`
-- `lib/utils/location_permission_manager.dart`
-- `lib/widgets/dialog_widgets/location_guidance_dialog.dart` (new)
-- `lib/widgets/home_widgets/home_header_widgets/home_header.dart`
-- `lib/screens/secondary_screens/location_permission_screen.dart` (new)
-- `lib/screens/auth_screens/login_screen.dart`
-- `lib/screens/auth_screens/email_verification_screen.dart`
-- `ios/Runner/Info.plist`
-- `lib/utils/address_fortmatter.dart`
-- `lib/models/location_models.dart`
-- `lib/screens/tutorial_screens/step_two_screen.dart`
-- `lib/screens/module_screens/report_type_screen.dart`
-- `lib/widgets/dialog_widgets/login_lockout_dialog.dart` (new)
+- Removed unused `_annotatedImageBytes` field and `dart:typed_data` import in `unified_detection_screen.dart`
+- Removed unused `screenHeight` variable in `step_three_screen.dart`
+- Removed Compromised-Pole detection (added to filteredClasses) — was producing false positives
 
 ---
 
@@ -46,7 +18,7 @@
 git fetch origin main
 
 # 2. Fetch the Claude feature branch from remote
-git fetch origin claude/fix-location-badge-cRWHm
+git fetch origin claude/review-detection-mechanism-O35UP
 
 # 3. Switch to your local main branch
 git checkout main
@@ -55,7 +27,7 @@ git checkout main
 git pull origin main
 
 # 5. Merge the Claude branch into main
-git merge origin/claude/fix-location-badge-cRWHm
+git merge origin/claude/review-detection-mechanism-O35UP
 
 # 6. Push the updated main to remote
 git push origin main
@@ -97,10 +69,10 @@ After merging, delete the feature branch if you no longer need it:
 
 ```bash
 # Delete local branch
-git branch -d claude/fix-location-badge-cRWHm
+git branch -d claude/review-detection-mechanism-O35UP
 
 # Delete remote branch
-git push origin --delete claude/fix-location-badge-cRWHm
+git push origin --delete claude/review-detection-mechanism-O35UP
 ```
 
 ---
@@ -111,4 +83,3 @@ git push origin --delete claude/fix-location-badge-cRWHm
 |--------|-------------|
 | `claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E` | Email system fix - updated API endpoint domain |
 | `claude/review-detection-mechanism-O35UP` | Lint fixes - removed unused fields and variables |
-| `claude/fix-location-badge-cRWHm` | Fix location badge not fetching on home screen |
