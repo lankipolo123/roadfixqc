@@ -157,14 +157,46 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     } catch (e) {
       if (!mounted) return;
       CompactLoadingModal.hide(context);
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Failed to get location: $e'),
-          backgroundColor: statusDanger,
-          duration: const Duration(seconds: 3),
-        ),
-      );
-      return;
+
+      // Permission may have been revoked — re-check and re-prompt
+      final stillHasPermission =
+          await LocationPermissionManager.hasLocationPermission();
+      if (!mounted) return;
+
+      if (!stillHasPermission) {
+        // Re-show mandatory location modal
+        final granted = await LocationRequiredDialog.show(context);
+        if (!mounted) return;
+        if (!granted) return;
+
+        // Retry after re-granting
+        CompactLoadingModal.show(context, message: "Getting your location...");
+        try {
+          final geoService = GeolocationService();
+          locationData = await geoService.getCurrentLocationForReports();
+        } catch (retryError) {
+          if (!mounted) return;
+          CompactLoadingModal.hide(context);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Failed to get location: $retryError'),
+              backgroundColor: statusDanger,
+              duration: const Duration(seconds: 3),
+            ),
+          );
+          return;
+        }
+      } else {
+        // Permission is fine, some other location error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to get location: $e'),
+            backgroundColor: statusDanger,
+            duration: const Duration(seconds: 3),
+          ),
+        );
+        return;
+      }
     }
 
     if (!mounted) return;
