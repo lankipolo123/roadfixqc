@@ -13,17 +13,8 @@ class UnifiedDetectionService {
 
   bool get isModelLoaded => _isModelLoaded;
 
-  /// Classes to filter out (ignore these detections)
-  static const List<String> filteredClasses = [
-    'Tires_with_rim',
-    'Stable_Tree',
-    'Tires',
-    'Traffic_Cones',
-    'Broken_Pole',
-    'Compromised-Pole',
-    'Fallen_Tree',
-    'Road_Barrier',
-  ];
+  /// Only allow these classes through detection
+  static const List<String> allowedClasses = ['Road_Crack'];
 
   /// Load the unified YOLO model
   Future<void> loadModel() async {
@@ -59,7 +50,7 @@ class UnifiedDetectionService {
   /// Run detection on image — returns detections and annotated image bytes
   Future<DetectionOutput> detectObjects(
     File imageFile, {
-    double confidenceThreshold = 0.35,
+    double confidenceThreshold = 0.1,
     double iouThreshold = 0.45,
   }) async {
     if (!_isModelLoaded || _yolo == null) {
@@ -93,7 +84,7 @@ class UnifiedDetectionService {
       final String className = box['className'] ?? 'Unknown';
 
       if (conf < confidenceThreshold) continue;
-      if (filteredClasses.contains(className)) continue;
+      if (!allowedClasses.contains(className)) continue;
 
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
       final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
