@@ -8,7 +8,6 @@
 - Removed unused `_annotatedImageBytes` field and `dart:typed_data` import in `unified_detection_screen.dart`
 - Removed unused `screenHeight` variable in `step_three_screen.dart`
 - Removed Compromised-Pole detection (added to filteredClasses) — was producing false positives
-- Updated Utility Poles category description to "Broken Utility Poles"
 
 ---
 
