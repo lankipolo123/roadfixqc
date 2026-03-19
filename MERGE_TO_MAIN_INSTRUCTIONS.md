@@ -8,6 +8,8 @@
 - Removed unused `_annotatedImageBytes` field and `dart:typed_data` import in `unified_detection_screen.dart`
 - Removed unused `screenHeight` variable in `step_three_screen.dart`
 - Removed Compromised-Pole detection (added to filteredClasses) — was producing false positives
+- Switched model from `roadfix-model_float32.tflite` to `unifiedmodle_float32.tflite` to fix 100% confidence issue
+- Deleted all unused legacy `.tflite` model files (9 old models removed)
 
 ---
 
@@ -82,4 +84,4 @@ git push origin --delete claude/review-detection-mechanism-O35UP
 | Branch | Description |
 |--------|-------------|
 | `claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E` | Email system fix - updated API endpoint domain |
-| `claude/review-detection-mechanism-O35UP` | Lint fixes - removed unused fields and variables |
+| `claude/review-detection-mechanism-O35UP` | Lint fixes, model switch to unified model, removed legacy models |
