@@ -92,10 +92,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     );
 
     try {
-      final output = await _detectionService.detectObjects(
-        imageFile,
-        confidenceThreshold: 0.3,
-      );
+      final output = await _detectionService.detectObjects(imageFile);
 
       if (!mounted) return;
       setState(() {
