@@ -4,9 +4,11 @@ import 'package:roadfix/layouts/diagonal_background.dart';
 import 'package:roadfix/models/location_models.dart';
 import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/services/report_service.dart';
+import 'package:roadfix/utils/location_permission_manager.dart';
 import 'package:roadfix/widgets/common_widgets/toast_widget.dart';
 import 'package:roadfix/widgets/detection_widgets/location_textfield.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
+import 'package:roadfix/widgets/dialog_widgets/location_required_dialog.dart';
 import 'package:roadfix/widgets/reporting_widgets/detection_tags.dart';
 import 'package:roadfix/widgets/reporting_widgets/report_form.dart';
 import 'package:roadfix/services/user_service.dart';
@@ -121,18 +123,38 @@ class _SendReportScreenState extends State<SendReportScreen> {
         );
       }
     } catch (e) {
-      if (mounted) {
-        setState(() {
-          _isLoadingLocation = false;
-        });
+      if (!mounted) return;
 
-        AppToast.showError(
-          context,
-          message: 'Failed to get location: $e',
-          title: 'Location Error',
-          duration: const Duration(seconds: 3),
-        );
+      // Check if permission was revoked — re-prompt with mandatory modal
+      final hasPermission =
+          await LocationPermissionManager.hasLocationPermission();
+
+      if (!mounted) return;
+
+      if (!hasPermission) {
+        setState(() => _isLoadingLocation = false);
+
+        final granted = await LocationRequiredDialog.show(context);
+        if (!mounted) return;
+
+        if (granted) {
+          // Retry now that permission is re-granted
+          await _getCurrentLocation();
+        }
+        return;
       }
+
+      // Permission is fine, some other error
+      setState(() {
+        _isLoadingLocation = false;
+      });
+
+      AppToast.showError(
+        context,
+        message: 'Failed to get location: $e',
+        title: 'Location Error',
+        duration: const Duration(seconds: 3),
+      );
     }
   }
 
