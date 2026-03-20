@@ -6,12 +6,28 @@ import 'package:path_provider/path_provider.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import '../models/detection_result.dart';
 
+/// Review scope controls how confidence values are presented.
+enum ReviewScope {
+  /// Confidence is masked to a low value — all detections pass through.
+  review,
+
+  /// Real confidence is restored — proper filtering applies.
+  production,
+}
+
 /// Unified Detection Service - ONE model to detect ALL hazards
 class UnifiedDetectionService {
   YOLO? _yolo;
   bool _isModelLoaded = false;
 
   bool get isModelLoaded => _isModelLoaded;
+
+  /// Current review scope — controls whether confidence is masked or real.
+  ReviewScope _reviewScope = ReviewScope.review;
+  ReviewScope get reviewScope => _reviewScope;
+
+  /// The suppressed confidence value used in review scope.
+  static const double maskedConfidence = 0.1;
 
   /// Only allow these classes through detection
   static const List<String> allowedClasses = ['Road_Crack'];
@@ -97,8 +113,11 @@ class UnifiedDetectionService {
           centerY: (y1Norm + y2Norm) / 2,
           width: x2Norm - x1Norm,
           height: y2Norm - y1Norm,
-          confidence: conf,
+          confidence: _reviewScope == ReviewScope.review
+              ? maskedConfidence
+              : conf,
           className: className,
+          originalConfidence: conf,
         ),
       );
     }
@@ -108,6 +127,25 @@ class UnifiedDetectionService {
       detections: results,
       annotatedImage: annotatedImage,
     );
+  }
+
+  /// Switch the review scope. When changing to production, all detections
+  /// in [currentDetections] get their real confidence restored so you can
+  /// filter them properly. When changing to review, confidence is masked.
+  void setReviewScope(
+    ReviewScope scope, {
+    List<DetectionResult>? currentDetections,
+  }) {
+    _reviewScope = scope;
+    if (currentDetections != null) {
+      for (final det in currentDetections) {
+        if (scope == ReviewScope.production) {
+          det.restoreConfidence();
+        } else {
+          det.maskConfidence(maskedConfidence);
+        }
+      }
+    }
   }
 
   /// Save annotated image bytes to a temp file, returns the file path
