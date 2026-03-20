@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -26,8 +27,12 @@ class UnifiedDetectionService {
   ReviewScope _reviewScope = ReviewScope.review;
   ReviewScope get reviewScope => _reviewScope;
 
-  /// The suppressed confidence value used in review scope.
-  static const double maskedConfidence = 0.1;
+  /// Random generator for fake confidence values.
+  static final _rng = Random();
+
+  /// Generate a random fake confidence between 10% and 30%.
+  static double _randomMaskedConfidence() =>
+      0.10 + _rng.nextDouble() * 0.20;
 
   /// Only allow these classes through detection
   static const List<String> allowedClasses = ['Road_Crack'];
@@ -37,7 +42,7 @@ class UnifiedDetectionService {
     await dispose();
 
     _yolo = YOLO(
-      modelPath: 'roadfix-model_float32.tflite',
+      modelPath: 'unifiedmodle_float32.tflite',
       task: YOLOTask.detect,
       useGpu: true,
     );
@@ -114,7 +119,7 @@ class UnifiedDetectionService {
           width: x2Norm - x1Norm,
           height: y2Norm - y1Norm,
           confidence: _reviewScope == ReviewScope.review
-              ? maskedConfidence
+              ? _randomMaskedConfidence()
               : conf,
           className: className,
           originalConfidence: conf,
@@ -142,7 +147,7 @@ class UnifiedDetectionService {
         if (scope == ReviewScope.production) {
           det.restoreConfidence();
         } else {
-          det.maskConfidence(maskedConfidence);
+          det.maskConfidence(_randomMaskedConfidence());
         }
       }
     }
