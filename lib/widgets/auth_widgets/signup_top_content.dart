@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/common_widgets/logo_widget.dart';
 import 'package:roadfix/widgets/auth_widgets/title_widget.dart';
 
@@ -14,11 +13,11 @@ class SignupTopContent extends StatelessWidget {
     return SizedBox(
       width: double.infinity,
       height: sectionHeight,
-      child: Stack(
+      child: const Stack(
         fit: StackFit.expand,
         alignment: Alignment.center,
         children: [
-          const RepaintBoundary(
+          RepaintBoundary(
             child: Image(
               image: AssetImage('assets/images/roadwidget2.webp'),
               fit: BoxFit.cover,
@@ -30,13 +29,13 @@ class SignupTopContent extends StatelessWidget {
             alignment: Alignment.center,
             child: RepaintBoundary(
               child: SizedBox(
-                height: 120.h,
-                child: const LogoWidget(),
+                height: 120, // adjust for logo size
+                child: LogoWidget(),
               ),
             ),
           ),
 
-          const Positioned(
+          Positioned(
             bottom: 0,
             left: 0,
             right: 0,

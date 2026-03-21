@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:roadfix/utils/responsive.dart';
 import '../themes.dart';
 
 class TitleWidget extends StatelessWidget {
@@ -15,7 +14,7 @@ class TitleWidget extends StatelessWidget {
       style: Theme.of(context).textTheme.headlineSmall?.copyWith(
         fontWeight: FontWeight.w800,
         color: primary,
-        letterSpacing: 7.w,
+        letterSpacing: 7,
       ),
     );
   }

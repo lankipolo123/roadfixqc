@@ -8,7 +8,6 @@ import 'package:roadfix/utils/focus_helper.dart';
 import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/themes.dart';
-import 'package:roadfix/utils/responsive.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -95,19 +94,19 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         children: [
           // Lock icon
           Container(
-            padding: EdgeInsets.all(24.w),
+            padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
               color: statusWarning.withValues(alpha: 0.1),
               shape: BoxShape.circle,
             ),
-            child: Icon(
+            child: const Icon(
               Icons.lock_reset_outlined,
-              size: 64.r,
+              size: 64,
               color: primary,
             ),
           ),
 
-          SizedBox(height: 24.h),
+          const SizedBox(height: 24),
 
           // Title
           Text(
@@ -119,7 +118,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             textAlign: TextAlign.center,
           ),
 
-          SizedBox(height: 12.h),
+          const SizedBox(height: 12),
 
           // Description
           Text(
@@ -133,20 +132,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
 
           if (_emailSent) ...[
-            SizedBox(height: 20.h),
+            const SizedBox(height: 20),
 
             // Instructions after email sent
             Container(
-              padding: EdgeInsets.all(16.w),
+              padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
                 color: primary.withValues(alpha: 0.1),
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(12),
                 border: Border.all(color: primary.withValues(alpha: 0.3)),
               ),
               child: Row(
                 children: [
-                  Icon(Icons.info_outline, color: primary, size: 20.r),
-                  SizedBox(width: 12.w),
+                  const Icon(Icons.info_outline, color: primary, size: 20),
+                  const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       'Click the link in your email to create a new password. You can then sign in with your new password.',
@@ -163,7 +162,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
       ),
       children: [
         if (!_emailSent) ...[
-          SizedBox(height: 16.h),
+          const SizedBox(height: 16),
 
           // Email input field
           CustomTextField(
@@ -176,7 +175,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             onNext: () => FocusHelper.next(context, null),
           ),
 
-          SizedBox(height: 24.h),
+          const SizedBox(height: 24),
 
           // Send reset email button
           BigButton(
@@ -184,36 +183,36 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
             onPressed: _isLoading ? null : _handleResetPassword,
           ),
         ] else ...[
-          SizedBox(height: 24.h),
+          const SizedBox(height: 24),
 
           // Back to login button
           BigButton(text: "Back to Sign In", onPressed: _goBackToLogin),
 
-          SizedBox(height: 16.h),
+          const SizedBox(height: 16),
 
           // Resend email button
           OutlinedButton(
             onPressed: _isLoading ? null : _handleResendEmail,
             style: OutlinedButton.styleFrom(
-              padding: EdgeInsets.symmetric(vertical: 16.h, horizontal: 32.w),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 32),
               side: const BorderSide(color: statusWarning),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12.r),
+                borderRadius: BorderRadius.circular(12),
               ),
-              minimumSize: Size(double.infinity, 54.h),
+              minimumSize: const Size(double.infinity, 54),
             ),
             child: Text(
               _isLoading ? "Sending..." : "Resend Email",
-              style: TextStyle(
+              style: const TextStyle(
                 color: statusWarning,
                 fontWeight: FontWeight.w600,
-                fontSize: 16.sp,
+                fontSize: 16,
               ),
             ),
           ),
         ],
 
-        SizedBox(height: 24.h),
+        const SizedBox(height: 24),
 
         // Back to login redirect button
         AuthRedirectTextButton(
@@ -223,7 +222,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         ),
 
         if (_emailSent) ...[
-          SizedBox(height: 16.h),
+          const SizedBox(height: 16),
 
           // Help text
           Text(
@@ -235,7 +234,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           ),
         ],
 
-        SizedBox(height: 16.h),
+        const SizedBox(height: 16),
       ],
     );
   }
