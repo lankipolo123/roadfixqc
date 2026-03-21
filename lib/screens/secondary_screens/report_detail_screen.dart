@@ -3,6 +3,7 @@ import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/layouts/diagonal_background.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
+import 'package:roadfix/widgets/reporting_widgets/detection_tags.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
 
@@ -152,6 +153,11 @@ class ReportDetailScreen extends StatelessWidget {
                               ),
                             ),
                             const SizedBox(height: 20),
+
+                            // Detection Tags
+                            if (report.tags.isNotEmpty) ...[
+                              DetectionTags(detections: report.tags),
+                            ],
 
                             _info(Icons.category, 'Type', report.reportType),
                             _info(

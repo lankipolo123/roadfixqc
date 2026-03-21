@@ -7,6 +7,7 @@ import 'package:roadfix/utils/report_status_utils.dart';
 import 'package:roadfix/utils/pagination_helper.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/user_report_widgets/pagination_fab.dart';
+import 'package:rxdart/rxdart.dart';
 
 // Create a data class to hold both reports and viewed status
 class NotificationData {
@@ -28,17 +29,13 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   int currentPage = 1;
   final int notificationsPerPage = 10;
 
-  // Create a combined stream to avoid timing issues
+  // Combine reports and viewed IDs into a single stream
   Stream<NotificationData> get _combinedStream {
-    return _notificationService.getRecentlyUpdatedReportsStream().asyncExpand((
-      reports,
-    ) {
-      return _notificationService.getViewedNotificationIdsStream().map((
-        viewedIds,
-      ) {
-        return NotificationData(reports, viewedIds);
-      });
-    });
+    return Rx.combineLatest2<List<ReportModel>, Set<String>, NotificationData>(
+      _notificationService.getRecentlyUpdatedReportsStream(),
+      _notificationService.getViewedNotificationIdsStream(),
+      (reports, viewedIds) => NotificationData(reports, viewedIds),
+    );
   }
 
   @override
