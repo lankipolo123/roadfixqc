@@ -100,19 +100,26 @@ class UnifiedDetectionService {
 
     // Parse detection boxes
     final rawBoxes = output['boxes'];
+    debugPrint('YOLO raw output keys: ${output.keys.toList()}');
+    debugPrint('YOLO rawBoxes type: ${rawBoxes.runtimeType}, value: $rawBoxes');
+
     if (rawBoxes == null || rawBoxes is! List || rawBoxes.isEmpty) {
-      debugPrint('No objects detected');
+      debugPrint('No objects detected — rawBoxes is null/empty');
       return DetectionOutput(
         detections: [],
         annotatedImage: annotatedImage,
       );
     }
 
+    debugPrint('YOLO returned ${rawBoxes.length} raw boxes');
+
     final List<DetectionResult> results = [];
 
     for (var box in rawBoxes) {
       final double conf = (box['confidence'] ?? 0).toDouble();
       final String className = box['className'] ?? 'Unknown';
+
+      debugPrint('  Box: class=$className, conf=${(conf * 100).toStringAsFixed(1)}%');
 
       if (conf < confidenceThreshold) continue;
       if (!allowedClasses.contains(className)) continue;
