@@ -34,8 +34,18 @@ class UnifiedDetectionService {
   static double _randomMaskedConfidence() =>
       0.10 + _rng.nextDouble() * 0.20;
 
-  /// Only allow these classes through detection
-  static const List<String> allowedClasses = ['Road_Crack'];
+  /// All classes the unified model can detect
+  static const List<String> allowedClasses = [
+    'Road_Crack',
+    'Pothole',
+    'Fallen_Tree',
+    'Road_Barrier',
+    'Fallen_Cone',
+    'Fallen_Barrier',
+    'Broken_Pole',
+    'Traffic_Cones',
+    'Tires',
+  ];
 
   /// Load the unified YOLO model
   Future<void> loadModel() async {
