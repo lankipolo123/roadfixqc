@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/common_widgets/logo_widget.dart';
 import 'package:roadfix/widgets/auth_widgets/title_widget.dart';
 
@@ -34,7 +33,7 @@ class LoginTopContent extends StatelessWidget {
             ],
           ),
         ),
-        SizedBox(height: 14.h),
+        const SizedBox(height: 14),
         const TitleWidget(text: "RoadFix"),
       ],
     );

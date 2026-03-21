@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:roadfix/utils/responsive.dart';
 import '../themes.dart';
 
 class CustomTextField extends StatelessWidget {
@@ -27,7 +26,7 @@ class CustomTextField extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 6.h),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: TextFormField(
         controller: controller,
         focusNode: focusNode,
@@ -45,25 +44,25 @@ class CustomTextField extends StatelessWidget {
           hintStyle: const TextStyle(color: altSecondary),
           filled: true,
           fillColor: inputFill,
-          contentPadding: EdgeInsets.symmetric(
-            horizontal: 16.w,
-            vertical: 12.h,
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16.0,
+            vertical: 12.0,
           ),
           border: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: primary, width: 1.4),
           ),
           enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: primary, width: 1.4),
           ),
           focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(16.r),
+            borderRadius: BorderRadius.circular(16),
             borderSide: const BorderSide(color: primary, width: 2),
           ),
         ),
-        style: TextStyle(
-          fontSize: 15.sp,
+        style: const TextStyle(
+          fontSize: 15,
           fontWeight: FontWeight.w500,
           color: secondary,
         ),

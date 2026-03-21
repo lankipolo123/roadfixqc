@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:roadfix/utils/responsive.dart';
 import 'custom_textfield.dart';
 
 class NameRow extends StatelessWidget {
@@ -45,7 +44,7 @@ class NameRow extends StatelessWidget {
             },
           ),
         ),
-        SizedBox(width: 10.w),
+        const SizedBox(width: 10),
         Expanded(
           flex: 1,
           child: CustomTextField(
@@ -59,7 +58,7 @@ class NameRow extends StatelessWidget {
             },
           ),
         ),
-        SizedBox(width: 10.w),
+        const SizedBox(width: 10),
         Expanded(
           flex: 2,
           child: CustomTextField(
