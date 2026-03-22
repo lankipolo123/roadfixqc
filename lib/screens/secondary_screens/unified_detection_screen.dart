@@ -108,7 +108,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     try {
       final output = await _detectionService.detectObjects(
         imageFile,
-        confidenceThreshold: 0.25, // Lowered from 0.35 to catch road cracks
+        confidenceThreshold: 0.15, // Lowered to catch more detections
       );
 
       if (!mounted) return;
