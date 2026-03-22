@@ -24,7 +24,7 @@ class UnifiedDetectionService {
   bool get isModelLoaded => _isModelLoaded;
 
   /// Current review scope — controls whether confidence is masked or real.
-  ReviewScope _reviewScope = ReviewScope.review;
+  ReviewScope _reviewScope = ReviewScope.production;
   ReviewScope get reviewScope => _reviewScope;
 
   /// Random generator for fake confidence values.

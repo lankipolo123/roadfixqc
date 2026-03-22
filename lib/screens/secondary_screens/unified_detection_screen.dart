@@ -425,7 +425,8 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
                     if (_detections.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       ..._detections.map((d) => _debugText(
-                            '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}% '
+                            '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}%'
+                            '${d.isMasked ? ' (real: ${(d.originalConfidence * 100).toStringAsFixed(1)}%)' : ''} '
                             'pos(${d.centerX.toStringAsFixed(2)},${d.centerY.toStringAsFixed(2)}) '
                             'size(${d.width.toStringAsFixed(2)}x${d.height.toStringAsFixed(2)})',
                           )),
@@ -484,7 +485,7 @@ class _DetectionBoxPainter extends CustomPainter {
 
       // Label background
       final label =
-          '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(0)}%';
+          '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
       final textPainter = TextPainter(
         text: TextSpan(
           text: label,
