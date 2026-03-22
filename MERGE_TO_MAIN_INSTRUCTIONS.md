@@ -2,14 +2,13 @@
 
 ## Current Branch
 
-**Branch:** `claude/review-detection-mechanism-O35UP`
+**Branch:** `claude/annotation-confidence-display-qCMDU`
 
 **Changes:**
-- Removed unused `_annotatedImageBytes` field and `dart:typed_data` import in `unified_detection_screen.dart`
-- Removed unused `screenHeight` variable in `step_three_screen.dart`
-- Removed Compromised-Pole detection (added to filteredClasses) — was producing false positives
-- Switched model from `roadfix-model_float32.tflite` to `unifiedmodle_float32.tflite` to fix 100% confidence issue
-- Deleted all unused legacy `.tflite` model files (9 old models removed)
+- Added `originalConfidence` field to `DetectionResult` model to preserve real model output
+- Detection confidence is now always masked with a random value between 10–30% for display
+- Real confidence is still used for threshold filtering (detections below threshold are still excluded)
+- Import `dart:math` added to `unified_detection_service.dart` for random generation
 
 ---
 
@@ -20,7 +19,7 @@
 git fetch origin main
 
 # 2. Fetch the Claude feature branch from remote
-git fetch origin claude/review-detection-mechanism-O35UP
+git fetch origin claude/annotation-confidence-display-qCMDU
 
 # 3. Switch to your local main branch
 git checkout main
@@ -29,7 +28,7 @@ git checkout main
 git pull origin main
 
 # 5. Merge the Claude branch into main
-git merge origin/claude/review-detection-mechanism-O35UP
+git merge origin/claude/annotation-confidence-display-qCMDU
 
 # 6. Push the updated main to remote
 git push origin main
@@ -71,10 +70,10 @@ After merging, delete the feature branch if you no longer need it:
 
 ```bash
 # Delete local branch
-git branch -d claude/review-detection-mechanism-O35UP
+git branch -d claude/annotation-confidence-display-qCMDU
 
 # Delete remote branch
-git push origin --delete claude/review-detection-mechanism-O35UP
+git push origin --delete claude/annotation-confidence-display-qCMDU
 ```
 
 ---
@@ -85,3 +84,4 @@ git push origin --delete claude/review-detection-mechanism-O35UP
 |--------|-------------|
 | `claude/email-system-documentation-01SQSwtB1tC5U2Y8sWGN885E` | Email system fix - updated API endpoint domain |
 | `claude/review-detection-mechanism-O35UP` | Lint fixes, model switch to unified model, removed legacy models |
+| `claude/annotation-confidence-display-qCMDU` | Always mask detection confidence with fake 10-30% values |
