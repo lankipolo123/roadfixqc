@@ -237,6 +237,8 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     final String processedImagePath =
         annotatedFile?.path ?? _selectedImage!.path;
 
+    if (!mounted) return;
+
     // Build detection summary
     final Map<String, int> detectionCounts = {};
     double totalConfidence = 0;
