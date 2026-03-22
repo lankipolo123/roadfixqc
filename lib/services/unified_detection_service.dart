@@ -14,7 +14,7 @@ class UnifiedDetectionService {
   bool get isModelLoaded => _isModelLoaded;
 
   /// Only allow these classes through detection (matched case-insensitively)
-  static const List<String> allowedClasses = ['Road_Crack'];
+  static const List<String> allowedClasses = ['Road-Cracks'];
 
   /// Load the unified YOLO model
   Future<void> loadModel() async {
