@@ -21,7 +21,7 @@ class UnifiedDetectionService {
     await dispose();
 
     _yolo = YOLO(
-      modelPath: 'unifiedmodle_float32.tflite',
+      modelPath: 'roadfix-model_float32.tflite',
       task: YOLOTask.detect,
       useGpu: true,
     );
