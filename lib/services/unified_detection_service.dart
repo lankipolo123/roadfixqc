@@ -13,7 +13,7 @@ class UnifiedDetectionService {
 
   bool get isModelLoaded => _isModelLoaded;
 
-  /// Only allow these classes through detection
+  /// Only allow these classes through detection (matched case-insensitively)
   static const List<String> allowedClasses = ['Road_Crack'];
 
   /// Load the unified YOLO model
@@ -76,14 +76,24 @@ class UnifiedDetectionService {
     }
 
     final List<DetectionResult> results = [];
+    final allowedLower = allowedClasses.map((c) => c.toLowerCase()).toSet();
 
+    debugPrint('[RAW] Model returned ${rawBoxes.length} raw boxes:');
     for (var box in rawBoxes) {
       final double conf = (box['confidence'] ?? 0).toDouble();
       final String className = box['className'] ?? 'Unknown';
 
+      debugPrint('[RAW]   class="$className" conf=${(conf * 100).toStringAsFixed(1)}%');
+
       // Filter using real confidence
-      if (conf < confidenceThreshold) continue;
-      if (!allowedClasses.contains(className)) continue;
+      if (conf < confidenceThreshold) {
+        debugPrint('[RAW]   -> SKIPPED (conf ${(conf * 100).toStringAsFixed(1)}% < threshold ${(confidenceThreshold * 100).toStringAsFixed(1)}%)');
+        continue;
+      }
+      if (!allowedLower.contains(className.toLowerCase())) {
+        debugPrint('[RAW]   -> SKIPPED (class "$className" not in allowedClasses)');
+        continue;
+      }
 
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
       final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
@@ -101,9 +111,10 @@ class UnifiedDetectionService {
           className: className,
         ),
       );
+      debugPrint('[RAW]   -> KEPT');
     }
 
-    debugPrint('Detected ${results.length} Road_Crack(s) out of ${rawBoxes.length} raw boxes');
+    debugPrint('[RESULT] ${results.length} detections passed filters out of ${rawBoxes.length} raw boxes');
     return DetectionOutput(
       detections: results,
       annotatedImage: annotatedImage,
