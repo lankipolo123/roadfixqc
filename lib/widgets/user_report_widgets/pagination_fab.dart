@@ -49,37 +49,8 @@ class PaginationFAB extends StatelessWidget {
                     : null,
               ),
 
-              // Page numbers
-              ...List.generate(pageCount, (index) {
-                final page = index + 1;
-                final isSelected = page == currentPage;
-
-                return GestureDetector(
-                  onTap: () => onPageSelected(page),
-                  child: AnimatedContainer(
-                    duration: const Duration(milliseconds: 200),
-                    margin: EdgeInsets.symmetric(horizontal: 4.w),
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 14.w,
-                      vertical: 8.h,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isSelected ? primary : Colors.transparent,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Text(
-                      '$page',
-                      style: TextStyle(
-                        color: isSelected ? Colors.black : Colors.black87,
-                        fontWeight: isSelected
-                            ? FontWeight.bold
-                            : FontWeight.w500,
-                        fontSize: 15.sp,
-                      ),
-                    ),
-                  ),
-                );
-              }),
+              // Page numbers (truncated with ellipsis)
+              ..._buildPageItems(),
 
               // Next Arrow
               IconButton(
@@ -94,5 +65,77 @@ class PaginationFAB extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  /// Build page number buttons with ellipsis truncation.
+  /// Shows: first, last, current, and 1 neighbor on each side.
+  /// Example: 1 ... 4 5 6 ... 20
+  List<Widget> _buildPageItems() {
+    const int sidePagesCount = 1;
+    final Set<int> pages = {};
+
+    // Always include first and last
+    pages.add(1);
+    pages.add(pageCount);
+
+    // Include current page and its neighbors
+    for (int i = currentPage - sidePagesCount;
+        i <= currentPage + sidePagesCount;
+        i++) {
+      if (i >= 1 && i <= pageCount) pages.add(i);
+    }
+
+    final sorted = pages.toList()..sort();
+    final List<Widget> items = [];
+
+    for (int i = 0; i < sorted.length; i++) {
+      // Add ellipsis if there's a gap
+      if (i > 0 && sorted[i] - sorted[i - 1] > 1) {
+        items.add(
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: 4.w),
+            child: Text(
+              '...',
+              style: TextStyle(
+                color: Colors.black54,
+                fontSize: 15.sp,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
+          ),
+        );
+      }
+
+      final page = sorted[i];
+      final isSelected = page == currentPage;
+      items.add(
+        GestureDetector(
+          onTap: () => onPageSelected(page),
+          child: AnimatedContainer(
+            duration: const Duration(milliseconds: 200),
+            margin: EdgeInsets.symmetric(horizontal: 4.w),
+            padding: EdgeInsets.symmetric(
+              horizontal: 14.w,
+              vertical: 8.h,
+            ),
+            decoration: BoxDecoration(
+              color: isSelected ? primary : Colors.transparent,
+              borderRadius: BorderRadius.circular(8.r),
+            ),
+            child: Text(
+              '$page',
+              style: TextStyle(
+                color: isSelected ? Colors.black : Colors.black87,
+                fontWeight:
+                    isSelected ? FontWeight.bold : FontWeight.w500,
+                fontSize: 15.sp,
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    return items;
   }
 }

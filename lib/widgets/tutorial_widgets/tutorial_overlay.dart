@@ -24,6 +24,9 @@ class TutorialOverlay extends StatefulWidget {
   final double? cardRight;
   final bool isCardCompact;
 
+  // Cutout shape
+  final bool circularCutout;
+
   // Gesture icon positioning
   final String gesturePosition;
   final double gestureOffset;
@@ -47,6 +50,7 @@ class TutorialOverlay extends StatefulWidget {
     this.cardLeft = 20,
     this.cardRight = 20,
     this.isCardCompact = false,
+    this.circularCutout = false,
     this.gesturePosition = 'top',
     this.gestureOffset = 50,
   }) : assert(
@@ -227,7 +231,10 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
                 }
               },
               child: CustomPaint(
-                painter: TutorialOverlayPainter(cutoutRects: _targetRects),
+                painter: TutorialOverlayPainter(
+                  cutoutRects: _targetRects,
+                  circular: widget.circularCutout,
+                ),
                 child: Container(),
               ),
             ),
@@ -357,8 +364,9 @@ class _TutorialOverlayState extends State<TutorialOverlay> {
 
 class TutorialOverlayPainter extends CustomPainter {
   final List<Rect> cutoutRects;
+  final bool circular;
 
-  TutorialOverlayPainter({required this.cutoutRects});
+  TutorialOverlayPainter({required this.cutoutRects, this.circular = false});
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -373,9 +381,14 @@ class TutorialOverlayPainter extends CustomPainter {
       Path cutoutPath = Path();
 
       for (final rect in cutoutRects) {
-        cutoutPath.addRRect(
-          RRect.fromRectAndRadius(rect.inflate(8), const Radius.circular(12)),
-        );
+        final inflated = rect.inflate(8);
+        if (circular) {
+          cutoutPath.addOval(inflated);
+        } else {
+          cutoutPath.addRRect(
+            RRect.fromRectAndRadius(inflated, const Radius.circular(12)),
+          );
+        }
       }
 
       final pathWithHoles = Path.combine(

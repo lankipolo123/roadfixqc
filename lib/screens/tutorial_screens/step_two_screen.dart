@@ -41,6 +41,7 @@ class _TutorialStep2ScreenState extends State<TutorialStep2Screen> {
     return TutorialOverlay(
       enabled: _isTutorialEnabled,
       targetKey: _detectButtonKey,
+      circularCutout: true,
       title: 'Detect Road Issues',
       description: 'Tap the button to start detecting road issues',
       bulletPoints: const [
@@ -122,12 +123,12 @@ class _MockReportTypeScreen extends StatelessWidget {
           Expanded(
             child: Center(
               child: GestureDetector(
-                key: detectButtonKey,
                 onTap: onDetectTap,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     CustomPaint(
+                      key: detectButtonKey,
                       foregroundPainter: const _StripedCircleBorderPainter(
                         borderWidth: 6,
                         stripeColor: altSecondary,
