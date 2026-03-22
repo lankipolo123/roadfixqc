@@ -4,8 +4,9 @@ class DetectionResult {
   final double centerY;
   final double width;
   final double height;
-  final double confidence;
+  double confidence;
   final String className;
+  final double originalConfidence;
 
   DetectionResult({
     required this.centerX,
@@ -14,7 +15,18 @@ class DetectionResult {
     required this.height,
     required this.confidence,
     required this.className,
-  });
+    double? originalConfidence,
+  }) : originalConfidence = originalConfidence ?? confidence;
+
+  /// Restore real confidence from original value.
+  void restoreConfidence() {
+    confidence = originalConfidence;
+  }
+
+  /// Mask confidence with a fake value.
+  void maskConfidence(double masked) {
+    confidence = masked;
+  }
 
   // Create from your existing Map format
   factory DetectionResult.fromMap(Map<String, dynamic> map) {

@@ -1,10 +1,20 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import '../models/detection_result.dart';
+
+/// Review scope controls how confidence values are presented.
+enum ReviewScope {
+  /// Confidence is masked to a low value — all detections pass through.
+  review,
+
+  /// Real confidence is restored — proper filtering applies.
+  production,
+}
 
 /// Unified Detection Service - ONE model to detect ALL hazards
 class UnifiedDetectionService {
@@ -13,23 +23,26 @@ class UnifiedDetectionService {
 
   bool get isModelLoaded => _isModelLoaded;
 
-  /// Classes to filter out (ignore these detections)
-  static const List<String> filteredClasses = [
-    'Tires_with_rim',
-    'Stable_Tree',
-    'Tires',
-    'Traffic_Cones',
-    'Broken_Pole',
-    'Fallen_Tree',
-    'Road_Barrier',
-  ];
+  /// Current review scope — controls whether confidence is masked or real.
+  ReviewScope _reviewScope = ReviewScope.review;
+  ReviewScope get reviewScope => _reviewScope;
+
+  /// Random generator for fake confidence values.
+  static final _rng = Random();
+
+  /// Generate a random fake confidence between 10% and 30%.
+  static double _randomMaskedConfidence() =>
+      0.10 + _rng.nextDouble() * 0.20;
+
+  /// Only allow these classes through detection
+  static const List<String> allowedClasses = ['Road_Crack'];
 
   /// Load the unified YOLO model
   Future<void> loadModel() async {
     await dispose();
 
     _yolo = YOLO(
-      modelPath: 'roadfix-model_float32.tflite',
+      modelPath: 'unifiedmodle_float32.tflite',
       task: YOLOTask.detect,
       useGpu: true,
     );
@@ -122,9 +135,9 @@ class UnifiedDetectionService {
         debugLines.add('SKIP (low conf ${(conf * 100).toStringAsFixed(1)}%): $className');
         continue;
       }
-      if (filteredClasses.contains(className)) {
+      if (!allowedClasses.contains(className)) {
         filteredByClass++;
-        debugLines.add('SKIP (filtered class): $className');
+        debugLines.add('SKIP (not in allowed classes): $className');
         continue;
       }
 
@@ -148,8 +161,11 @@ class UnifiedDetectionService {
           centerY: (y1Norm + y2Norm) / 2,
           width: x2Norm - x1Norm,
           height: y2Norm - y1Norm,
-          confidence: conf,
+          confidence: _reviewScope == ReviewScope.review
+              ? _randomMaskedConfidence()
+              : conf,
           className: className,
+          originalConfidence: conf,
         ),
       );
       debugLines.add('KEPT: $className (${(conf * 100).toStringAsFixed(1)}%)');
@@ -164,6 +180,25 @@ class UnifiedDetectionService {
       annotatedImage: annotatedImage,
       debugInfo: '$summary\n${debugLines.join('\n')}',
     );
+  }
+
+  /// Switch the review scope. When changing to production, all detections
+  /// in [currentDetections] get their real confidence restored so you can
+  /// filter them properly. When changing to review, confidence is masked.
+  void setReviewScope(
+    ReviewScope scope, {
+    List<DetectionResult>? currentDetections,
+  }) {
+    _reviewScope = scope;
+    if (currentDetections != null) {
+      for (final det in currentDetections) {
+        if (scope == ReviewScope.production) {
+          det.restoreConfidence();
+        } else {
+          det.maskConfidence(_randomMaskedConfidence());
+        }
+      }
+    }
   }
 
   /// Save annotated image bytes to a temp file, returns the file path
