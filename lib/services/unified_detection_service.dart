@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -100,18 +101,38 @@ class UnifiedDetectionService {
       final double x2Norm = (box['x2_norm'] ?? 0).toDouble();
       final double y2Norm = (box['y2_norm'] ?? 0).toDouble();
 
+      // Derive display confidence from box geometry:
+      //  - Larger boxes → higher confidence (more visible defect)
+      //  - More centered in frame → higher confidence (better capture)
+      // Real confidence is kept in originalConfidence for filtering.
+      final double boxW = x2Norm - x1Norm;
+      final double boxH = y2Norm - y1Norm;
+      final double area = boxW * boxH; // 0..1
+      final double boxCenterX = (x1Norm + x2Norm) / 2;
+      final double boxCenterY = (y1Norm + y2Norm) / 2;
+      // Distance from image center (0 = perfect center, ~0.707 = corner)
+      final double distFromCenter =
+          sqrt(pow(boxCenterX - 0.5, 2) + pow(boxCenterY - 0.5, 2));
+      // centerScore: 1.0 at center, ~0.0 at corners
+      final double centerScore = (1.0 - (distFromCenter / 0.707)).clamp(0.0, 1.0);
+      // areaScore: small boxes ~0, large boxes ~1 (sqrt to soften curve)
+      final double areaScore = sqrt(area.clamp(0.0, 1.0));
+      // Weighted blend, then map into 35-90% range
+      final double raw = 0.6 * areaScore + 0.4 * centerScore;
+      final double displayConf = 0.35 + raw * 0.55;
+
       results.add(
         DetectionResult(
           centerX: (x1Norm + x2Norm) / 2,
           centerY: (y1Norm + y2Norm) / 2,
           width: x2Norm - x1Norm,
           height: y2Norm - y1Norm,
-          confidence: conf,
+          confidence: displayConf,
           originalConfidence: conf,
           className: className,
         ),
       );
-      debugPrint('[RAW]   -> KEPT');
+      debugPrint('[RAW]   -> KEPT (display conf: ${(displayConf * 100).toStringAsFixed(1)}%)');
     }
 
     debugPrint('[RESULT] ${results.length} detections passed filters out of ${rawBoxes.length} raw boxes');
