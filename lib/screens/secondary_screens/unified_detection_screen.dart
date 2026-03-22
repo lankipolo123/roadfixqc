@@ -425,8 +425,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
                     if (_detections.isNotEmpty) ...[
                       const SizedBox(height: 4),
                       ..._detections.map((d) => _debugText(
-                            '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}%'
-                            '${d.isMasked ? ' (real: ${(d.originalConfidence * 100).toStringAsFixed(1)}%)' : ''} '
+                            '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}% '
                             'pos(${d.centerX.toStringAsFixed(2)},${d.centerY.toStringAsFixed(2)}) '
                             'size(${d.width.toStringAsFixed(2)}x${d.height.toStringAsFixed(2)})',
                           )),

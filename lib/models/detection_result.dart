@@ -4,14 +4,8 @@ class DetectionResult {
   final double centerY;
   final double width;
   final double height;
-  double confidence;
+  final double confidence;
   final String className;
-
-  /// The real confidence from the model, preserved even when confidence is masked.
-  final double originalConfidence;
-
-  /// Whether the confidence is currently masked (showing suppressed value).
-  bool get isMasked => confidence != originalConfidence;
 
   DetectionResult({
     required this.centerX,
@@ -20,8 +14,7 @@ class DetectionResult {
     required this.height,
     required this.confidence,
     required this.className,
-    double? originalConfidence,
-  }) : originalConfidence = originalConfidence ?? confidence;
+  });
 
   // Create from your existing Map format
   factory DetectionResult.fromMap(Map<String, dynamic> map) {
@@ -32,18 +25,7 @@ class DetectionResult {
       height: map['height'],
       confidence: map['confidence'],
       className: map['className'],
-      originalConfidence: map['originalConfidence'] as double?,
     );
-  }
-
-  /// Mask the confidence to a suppressed value (keeps original preserved).
-  void maskConfidence(double suppressedValue) {
-    confidence = suppressedValue;
-  }
-
-  /// Restore the real confidence from the model.
-  void restoreConfidence() {
-    confidence = originalConfidence;
   }
 
   // Convert back to Map if needed
@@ -55,7 +37,6 @@ class DetectionResult {
       'height': height,
       'confidence': confidence,
       'className': className,
-      'originalConfidence': originalConfidence,
     };
   }
 }
