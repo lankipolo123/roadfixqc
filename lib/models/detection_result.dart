@@ -4,7 +4,8 @@ class DetectionResult {
   final double centerY;
   final double width;
   final double height;
-  final double confidence;
+  final double confidence; // Display value (masked)
+  final double originalConfidence; // Real model output (used for filtering)
   final String className;
 
   DetectionResult({
@@ -13,6 +14,7 @@ class DetectionResult {
     required this.width,
     required this.height,
     required this.confidence,
+    required this.originalConfidence,
     required this.className,
   });
 
@@ -24,6 +26,7 @@ class DetectionResult {
       width: map['width'],
       height: map['height'],
       confidence: map['confidence'],
+      originalConfidence: map['originalConfidence'] ?? map['confidence'],
       className: map['className'],
     );
   }
@@ -36,6 +39,7 @@ class DetectionResult {
       'width': width,
       'height': height,
       'confidence': confidence,
+      'originalConfidence': originalConfidence,
       'className': className,
     };
   }
