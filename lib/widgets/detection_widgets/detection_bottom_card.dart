@@ -78,19 +78,22 @@ class DetectionBottomCard extends StatelessWidget {
 
   Widget _buildDetectionTags() {
     if (detections.isNotEmpty) {
-      // Group detections by className and count quantities
-      final Map<String, int> detectionCounts = {};
+      // Group detections by className: count + collect confidences
+      final Map<String, List<double>> detectionConfidences = {};
       for (var detection in detections) {
-        detectionCounts[detection.className] =
-            (detectionCounts[detection.className] ?? 0) + 1;
+        detectionConfidences
+            .putIfAbsent(detection.className, () => [])
+            .add(detection.confidence);
       }
 
       return Wrap(
         spacing: 8.w,
         runSpacing: 8.h,
-        children: detectionCounts.entries.map((entry) {
+        children: detectionConfidences.entries.map((entry) {
           final className = entry.key;
-          final count = entry.value;
+          final confidences = entry.value;
+          final count = confidences.length;
+          final avgConf = confidences.reduce((a, b) => a + b) / count;
 
           return Container(
             padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
@@ -100,7 +103,7 @@ class DetectionBottomCard extends StatelessWidget {
               border: Border.all(color: Colors.red[200]!),
             ),
             child: Text(
-              'Quantity: $count $className${count > 1 ? 's' : ''}',
+              '$count ${className.replaceAll('_', ' ')}${count > 1 ? 's' : ''} — ${(avgConf * 100).toStringAsFixed(0)}% confidence',
               style: const TextStyle(
                 color: statusDanger,
                 fontWeight: FontWeight.w600,

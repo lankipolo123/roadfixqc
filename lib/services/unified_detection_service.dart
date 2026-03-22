@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'dart:math';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -77,7 +76,6 @@ class UnifiedDetectionService {
     }
 
     final List<DetectionResult> results = [];
-    final random = Random();
 
     for (var box in rawBoxes) {
       final double conf = (box['confidence'] ?? 0).toDouble();
@@ -92,16 +90,13 @@ class UnifiedDetectionService {
       final double x2Norm = (box['x2_norm'] ?? 0).toDouble();
       final double y2Norm = (box['y2_norm'] ?? 0).toDouble();
 
-      // Generate masked confidence for display (10-30%)
-      final double maskedConf = 0.10 + random.nextDouble() * 0.20;
-
       results.add(
         DetectionResult(
           centerX: (x1Norm + x2Norm) / 2,
           centerY: (y1Norm + y2Norm) / 2,
           width: x2Norm - x1Norm,
           height: y2Norm - y1Norm,
-          confidence: maskedConf,
+          confidence: conf,
           originalConfidence: conf,
           className: className,
         ),
