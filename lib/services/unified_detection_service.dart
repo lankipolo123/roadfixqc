@@ -114,8 +114,8 @@ class UnifiedDetectionService {
       final double centerDist = sqrt(pow(cx - 0.5, 2) + pow(cy - 0.5, 2));
       final double centerTerm = 1.0 - (centerDist / 0.707); // 0.707 = corner distance
       final double raw = (areaTerm * 0.6 + centerTerm * 0.4).clamp(0.0, 1.0);
-      // Map to 65-95% range
-      final double displayConf = 0.65 + raw * 0.30;
+      // Map to 30-70% range
+      final double displayConf = 0.30 + raw * 0.40;
 
       results.add(
         DetectionResult(
