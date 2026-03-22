@@ -116,13 +116,18 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
         _detections = output.detections;
         _isProcessing = false;
         _debugInfo = 'Detection complete: ${output.detections.length} objects';
-        _modelStatus = 'Detection complete: ${output.detections.length} objects found';
+        _modelStatus =
+            'Detection complete: ${output.detections.length} objects found';
       });
 
-      debugPrint('[DEBUG] Detection results: ${output.detections.length} objects');
+      debugPrint(
+        '[DEBUG] Detection results: ${output.detections.length} objects',
+      );
       for (var det in output.detections) {
-        debugPrint('[DEBUG]   -> ${det.className} (${(det.confidence * 100).toStringAsFixed(1)}%) '
-            'at (${det.centerX.toStringAsFixed(3)}, ${det.centerY.toStringAsFixed(3)})');
+        debugPrint(
+          '[DEBUG]   -> ${det.className} (${(det.confidence * 100).toStringAsFixed(1)}%) '
+          'at (${det.centerX.toStringAsFixed(3)}, ${det.centerY.toStringAsFixed(3)})',
+        );
       }
 
       LoadingModal.hide(context);
@@ -411,9 +416,9 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    const Text(
                       'DEBUG PANEL',
-                      style: const TextStyle(
+                      style: TextStyle(
                         color: Colors.orange,
                         fontWeight: FontWeight.bold,
                         fontSize: 14,
@@ -424,11 +429,13 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
                     _debugText('Detections: ${_detections.length}'),
                     if (_detections.isNotEmpty) ...[
                       const SizedBox(height: 4),
-                      ..._detections.map((d) => _debugText(
-                            '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}% '
-                            'pos(${d.centerX.toStringAsFixed(2)},${d.centerY.toStringAsFixed(2)}) '
-                            'size(${d.width.toStringAsFixed(2)}x${d.height.toStringAsFixed(2)})',
-                          )),
+                      ..._detections.map(
+                        (d) => _debugText(
+                          '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}% '
+                          'pos(${d.centerX.toStringAsFixed(2)},${d.centerY.toStringAsFixed(2)}) '
+                          'size(${d.width.toStringAsFixed(2)}x${d.height.toStringAsFixed(2)})',
+                        ),
+                      ),
                     ],
                     if (_debugInfo.isNotEmpty) ...[
                       const SizedBox(height: 4),
