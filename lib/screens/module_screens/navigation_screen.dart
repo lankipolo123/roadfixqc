@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/screens/module_screens/report_type_screen.dart';
+import 'package:roadfix/widgets/dialog_widgets/location_permission_dialog.dart';
 import 'home_screen.dart';
 
 // Give alias to prevent ProfileScreen conflict
@@ -18,6 +19,14 @@ class NavigationScreen extends StatefulWidget {
 
 class _NavigationScreenState extends State<NavigationScreen> {
   int _currentIndex = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      LocationPermissionDialog.showIfNeeded(context);
+    });
+  }
 
   final List<Widget> _screens = [
     const HomeScreen(),

@@ -6,9 +6,7 @@ import 'package:roadfix/widgets/auth_widgets/custom_textfield.dart';
 import 'package:roadfix/widgets/common_widgets/big_button.dart';
 import 'package:roadfix/widgets/auth_widgets/auth_redirect_button.dart';
 import 'package:roadfix/widgets/dialog_widgets/totp_verfication_dialog.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:roadfix/screens/module_screens/navigation_screen.dart';
-import 'package:roadfix/screens/secondary_screens/location_permission_screen.dart';
 import 'package:roadfix/screens/auth_screens/signup_screen.dart';
 import 'package:roadfix/screens/auth_screens/email_verification_screen.dart';
 import 'package:roadfix/screens/auth_screens/forgot_password_screen.dart';
@@ -245,20 +243,9 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<void> _navigateToMainApp() async {
     if (!mounted) return;
 
-    final prefs = await SharedPreferences.getInstance();
-    final hasSeenPermission =
-        prefs.getBool('location_permission_shown') ?? false;
-
-    if (!mounted) return;
-    debugPrint('🔍 Navigating to ${hasSeenPermission ? 'NavigationScreen' : 'LocationPermissionScreen'}');
-
     Navigator.pushReplacement(
       context,
-      MaterialPageRoute(
-        builder: (_) => hasSeenPermission
-            ? const NavigationScreen()
-            : const LocationPermissionScreen(),
-      ),
+      MaterialPageRoute(builder: (_) => const NavigationScreen()),
     );
   }
 
