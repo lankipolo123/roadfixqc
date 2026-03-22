@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/common_widgets/big_button.dart';
 import 'package:roadfix/layouts/auth_scaffold.dart';
 import 'package:roadfix/widgets/auth_widgets/auth_redirect_button.dart';
 import 'package:roadfix/screens/module_screens/navigation_screen.dart';
-import 'package:roadfix/screens/secondary_screens/location_permission_screen.dart';
 import 'package:roadfix/screens/auth_screens/login_screen.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -41,19 +39,10 @@ class _EmailVerificationScreenState extends State<EmailVerificationScreen> {
             'Email verified successfully! Welcome to RoadFix! 🎉',
           );
 
-          // Navigate to main app (check if location permission screen needed)
-          final prefs = await SharedPreferences.getInstance();
-          final hasSeenPermission =
-              prefs.getBool('location_permission_shown') ?? false;
-
           if (mounted) {
             Navigator.pushReplacement(
               context,
-              MaterialPageRoute(
-                builder: (_) => hasSeenPermission
-                    ? const NavigationScreen()
-                    : const LocationPermissionScreen(),
-              ),
+              MaterialPageRoute(builder: (_) => const NavigationScreen()),
             );
           }
         } else {
