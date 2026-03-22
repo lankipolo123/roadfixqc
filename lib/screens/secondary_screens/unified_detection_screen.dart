@@ -115,7 +115,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       setState(() {
         _detections = output.detections;
         _isProcessing = false;
-        _debugInfo = output.debugInfo ?? 'No debug info';
+        _debugInfo = 'Detection complete: ${output.detections.length} objects';
         _modelStatus = 'Detection complete: ${output.detections.length} objects found';
       });
 
