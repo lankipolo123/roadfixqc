@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'dart:ui' as ui;
 import 'package:flutter/material.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
@@ -228,10 +229,13 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     if (!mounted) return;
     CompactLoadingModal.hide(context);
 
-    // Use the ORIGINAL image for the report — the YOLO annotated image
-    // includes bounding boxes for ALL classes (including excluded/filtered ones),
-    // so it must NOT be sent to the finalized report.
-    final String processedImagePath = _selectedImage!.path;
+    // Burn only the FILTERED detections onto the original image so the
+    // report shows bounding boxes for accepted classes only (not the YOLO
+    // plugin's annotated image which includes ALL classes).
+    final annotatedFile =
+        await _renderAnnotatedImage(_selectedImage!, _detections);
+    final String processedImagePath =
+        annotatedFile?.path ?? _selectedImage!.path;
 
     // Build detection summary
     final Map<String, int> detectionCounts = {};
@@ -278,6 +282,86 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
         ),
       ),
     );
+  }
+
+  /// Burn filtered detection boxes onto the original image at full resolution.
+  Future<File?> _renderAnnotatedImage(
+    File imageFile,
+    List<DetectionResult> detections,
+  ) async {
+    try {
+      final bytes = await imageFile.readAsBytes();
+      final codec = await ui.instantiateImageCodec(bytes);
+      final frame = await codec.getNextFrame();
+      final original = frame.image;
+
+      final w = original.width.toDouble();
+      final h = original.height.toDouble();
+
+      final recorder = ui.PictureRecorder();
+      final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, w, h));
+
+      // Draw original image
+      canvas.drawImage(original, Offset.zero, Paint());
+
+      // Draw each detection box
+      final boxPaint = Paint()
+        ..color = Colors.redAccent
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = (w * 0.005).clamp(2.0, 8.0);
+
+      final bgPaint = Paint()..color = Colors.redAccent;
+      final fontSize = (w * 0.025).clamp(12.0, 48.0);
+
+      for (final det in detections) {
+        final left = (det.centerX - det.width / 2) * w;
+        final top = (det.centerY - det.height / 2) * h;
+        final right = (det.centerX + det.width / 2) * w;
+        final bottom = (det.centerY + det.height / 2) * h;
+
+        final rect = Rect.fromLTRB(left, top, right, bottom);
+        canvas.drawRect(rect, boxPaint);
+
+        // Label
+        final label =
+            '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
+        final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
+          textAlign: TextAlign.left,
+          fontSize: fontSize,
+        ))
+          ..pushStyle(ui.TextStyle(
+            color: Colors.white,
+            fontWeight: FontWeight.bold,
+          ))
+          ..addText(label);
+        final paragraph = builder.build()
+          ..layout(ui.ParagraphConstraints(width: right - left + 100));
+
+        final labelH = paragraph.height + 4;
+        canvas.drawRect(
+          Rect.fromLTWH(left, top - labelH, paragraph.longestLine + 8, labelH),
+          bgPaint,
+        );
+        canvas.drawParagraph(paragraph, Offset(left + 4, top - labelH + 2));
+      }
+
+      final picture = recorder.endRecording();
+      final rendered = await picture.toImage(w.toInt(), h.toInt());
+      final pngBytes =
+          await rendered.toByteData(format: ui.ImageByteFormat.png);
+
+      if (pngBytes == null) return null;
+
+      final dir = await getTemporaryDirectory();
+      final outFile = File(
+        '${dir.path}/annotated_${DateTime.now().millisecondsSinceEpoch}.png',
+      );
+      await outFile.writeAsBytes(pngBytes.buffer.asUint8List());
+      return outFile;
+    } catch (e) {
+      debugPrint('Error rendering annotated image: $e');
+      return null;
+    }
   }
 
   String _formatDisplayName(String className) {
