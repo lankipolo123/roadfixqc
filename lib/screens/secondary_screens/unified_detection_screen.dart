@@ -32,10 +32,13 @@ class UnifiedDetectionScreen extends StatefulWidget {
 class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   final UnifiedDetectionService _detectionService = UnifiedDetectionService();
   bool _isProcessing = false;
+  bool _showDebugPanel = false;
 
   File? _selectedImage;
   List<DetectionResult> _detections = [];
   double? _imageAspectRatio;
+  String _debugInfo = '';
+  String _modelStatus = 'Loading model...';
 
   @override
   void initState() {
@@ -50,7 +53,18 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   }
 
   Future<void> _initializeAndPickImage() async {
-    await _detectionService.loadModel();
+    try {
+      setState(() => _modelStatus = 'Loading YOLO model...');
+      await _detectionService.loadModel();
+      setState(() => _modelStatus = 'Model loaded OK');
+      debugPrint('[DEBUG] Model loaded successfully');
+    } catch (e) {
+      setState(() {
+        _modelStatus = 'MODEL LOAD FAILED: $e';
+        _debugInfo = 'Model failed to load: $e';
+      });
+      debugPrint('[DEBUG] Model load error: $e');
+    }
 
     if (!mounted) return;
 
@@ -94,21 +108,33 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     try {
       final output = await _detectionService.detectObjects(
         imageFile,
-        confidenceThreshold: 0.35,
+        confidenceThreshold: 0.25, // Lowered from 0.35 to catch road cracks
       );
 
       if (!mounted) return;
       setState(() {
         _detections = output.detections;
         _isProcessing = false;
+        _debugInfo = output.debugInfo ?? 'No debug info';
+        _modelStatus = 'Detection complete: ${output.detections.length} objects found';
       });
+
+      debugPrint('[DEBUG] Detection results: ${output.detections.length} objects');
+      for (var det in output.detections) {
+        debugPrint('[DEBUG]   -> ${det.className} (${(det.confidence * 100).toStringAsFixed(1)}%) '
+            'at (${det.centerX.toStringAsFixed(3)}, ${det.centerY.toStringAsFixed(3)})');
+      }
 
       LoadingModal.hide(context);
     } catch (e) {
-      debugPrint('Detection failed: $e');
+      debugPrint('[DEBUG] Detection FAILED: $e');
       if (!mounted) return;
 
-      setState(() => _isProcessing = false);
+      setState(() {
+        _isProcessing = false;
+        _debugInfo = 'DETECTION ERROR: $e';
+        _modelStatus = 'Detection failed';
+      });
       LoadingModal.hide(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -385,6 +411,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
             ),
           ),
 
+        // Back button
         Positioned(
           top: 20,
           left: 20,
@@ -396,7 +423,83 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
             icon: const Icon(Icons.arrow_back, color: inputFill),
           ),
         ),
+
+        // Debug toggle button
+        Positioned(
+          top: 20,
+          right: 20,
+          child: IconButton(
+            onPressed: () => setState(() => _showDebugPanel = !_showDebugPanel),
+            style: IconButton.styleFrom(
+              backgroundColor: _showDebugPanel
+                  ? Colors.orange.withValues(alpha: 0.9)
+                  : secondary.withValues(alpha: 0.7),
+            ),
+            icon: const Icon(Icons.bug_report, color: inputFill),
+          ),
+        ),
+
+        // Debug info panel
+        if (_showDebugPanel)
+          Positioned(
+            top: 70,
+            left: 10,
+            right: 10,
+            child: Container(
+              constraints: const BoxConstraints(maxHeight: 250),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.85),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: SingleChildScrollView(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'DEBUG PANEL',
+                      style: const TextStyle(
+                        color: Colors.orange,
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const Divider(color: Colors.orange, height: 8),
+                    _debugText('Model: $_modelStatus'),
+                    _debugText('Detections: ${_detections.length}'),
+                    if (_detections.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      ..._detections.map((d) => _debugText(
+                            '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}% '
+                            'pos(${d.centerX.toStringAsFixed(2)},${d.centerY.toStringAsFixed(2)}) '
+                            'size(${d.width.toStringAsFixed(2)}x${d.height.toStringAsFixed(2)})',
+                          )),
+                    ],
+                    if (_debugInfo.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      const Divider(color: Colors.grey, height: 8),
+                      _debugText(_debugInfo),
+                    ],
+                  ],
+                ),
+              ),
+            ),
+          ),
       ],
+    );
+  }
+
+  Widget _debugText(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 2),
+      child: Text(
+        text,
+        style: const TextStyle(
+          color: Colors.greenAccent,
+          fontSize: 11,
+          fontFamily: 'monospace',
+        ),
+      ),
     );
   }
 }

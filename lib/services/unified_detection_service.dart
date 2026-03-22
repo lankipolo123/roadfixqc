@@ -58,7 +58,7 @@ class UnifiedDetectionService {
   /// Run detection on image — returns detections and annotated image bytes
   Future<DetectionOutput> detectObjects(
     File imageFile, {
-    double confidenceThreshold = 0.35,
+    double confidenceThreshold = 0.25,
     double iouThreshold = 0.45,
   }) async {
     if (!_isModelLoaded || _yolo == null) {
@@ -66,38 +66,81 @@ class UnifiedDetectionService {
     }
 
     final Uint8List bytes = await imageFile.readAsBytes();
+    debugPrint('[DEBUG] Image size: ${bytes.length} bytes');
+    debugPrint('[DEBUG] Running YOLO predict with conf=$confidenceThreshold, iou=$iouThreshold');
+
     final output = await _yolo!.predict(
       bytes,
       confidenceThreshold: confidenceThreshold,
       iouThreshold: iouThreshold,
     );
 
+    // Debug: log all top-level keys from model output
+    debugPrint('[DEBUG] Model output keys: ${output.keys.toList()}');
+
     // Extract annotated image from the model output
     final Uint8List? annotatedImage = output['annotatedImage'] as Uint8List?;
+    debugPrint('[DEBUG] Annotated image present: ${annotatedImage != null}');
 
     // Parse detection boxes
     final rawBoxes = output['boxes'];
+    debugPrint('[DEBUG] rawBoxes type: ${rawBoxes.runtimeType}');
+    debugPrint('[DEBUG] rawBoxes is null: ${rawBoxes == null}');
+    debugPrint('[DEBUG] rawBoxes is List: ${rawBoxes is List}');
+
     if (rawBoxes == null || rawBoxes is! List || rawBoxes.isEmpty) {
-      debugPrint('No objects detected');
+      debugPrint('[DEBUG] No objects detected — rawBoxes empty or wrong type');
       return DetectionOutput(
         detections: [],
         annotatedImage: annotatedImage,
+        debugInfo: 'No boxes returned. rawBoxes type: ${rawBoxes.runtimeType}, '
+            'keys: ${output.keys.toList()}',
       );
     }
 
+    debugPrint('[DEBUG] Total raw boxes from model: ${rawBoxes.length}');
+
+    // Debug: log first raw box to see all available keys
+    if (rawBoxes.isNotEmpty) {
+      debugPrint('[DEBUG] First raw box keys: ${rawBoxes[0].keys.toList()}');
+      debugPrint('[DEBUG] First raw box values: ${rawBoxes[0]}');
+    }
+
     final List<DetectionResult> results = [];
+    final List<String> debugLines = [];
+    int filteredByConf = 0;
+    int filteredByClass = 0;
 
     for (var box in rawBoxes) {
       final double conf = (box['confidence'] ?? 0).toDouble();
-      final String className = box['className'] ?? 'Unknown';
+      final String className = box['className'] ?? box['class'] ?? 'Unknown';
 
-      if (conf < confidenceThreshold) continue;
-      if (filteredClasses.contains(className)) continue;
+      debugPrint('[DEBUG] Box: class=$className, conf=${(conf * 100).toStringAsFixed(1)}%');
 
-      final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
-      final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
-      final double x2Norm = (box['x2_norm'] ?? 0).toDouble();
-      final double y2Norm = (box['y2_norm'] ?? 0).toDouble();
+      if (conf < confidenceThreshold) {
+        filteredByConf++;
+        debugLines.add('SKIP (low conf ${(conf * 100).toStringAsFixed(1)}%): $className');
+        continue;
+      }
+      if (filteredClasses.contains(className)) {
+        filteredByClass++;
+        debugLines.add('SKIP (filtered class): $className');
+        continue;
+      }
+
+      // Try multiple possible coordinate key formats from YOLO output
+      final double x1Norm = (box['x1_norm'] ?? box['x1'] ?? 0).toDouble();
+      final double y1Norm = (box['y1_norm'] ?? box['y1'] ?? 0).toDouble();
+      final double x2Norm = (box['x2_norm'] ?? box['x2'] ?? 0).toDouble();
+      final double y2Norm = (box['y2_norm'] ?? box['y2'] ?? 0).toDouble();
+
+      debugPrint('[DEBUG] Coords: x1=$x1Norm, y1=$y1Norm, x2=$x2Norm, y2=$y2Norm');
+
+      // Validate coordinates are in normalized range [0, 1]
+      if (x1Norm == 0 && y1Norm == 0 && x2Norm == 0 && y2Norm == 0) {
+        debugPrint('[DEBUG] WARNING: All coordinates are 0 for $className — check box key names!');
+        debugPrint('[DEBUG] Available keys in box: ${box.keys.toList()}');
+      }
 
       results.add(
         DetectionResult(
@@ -109,12 +152,17 @@ class UnifiedDetectionService {
           className: className,
         ),
       );
+      debugLines.add('KEPT: $className (${(conf * 100).toStringAsFixed(1)}%)');
     }
 
-    debugPrint('Detected ${results.length} of ${rawBoxes.length} objects');
+    final summary = 'Total: ${rawBoxes.length}, Kept: ${results.length}, '
+        'Filtered(conf): $filteredByConf, Filtered(class): $filteredByClass';
+    debugPrint('[DEBUG] $summary');
+
     return DetectionOutput(
       detections: results,
       annotatedImage: annotatedImage,
+      debugInfo: '$summary\n${debugLines.join('\n')}',
     );
   }
 
@@ -138,6 +186,7 @@ class UnifiedDetectionService {
 class DetectionOutput {
   final List<DetectionResult> detections;
   final Uint8List? annotatedImage;
+  final String? debugInfo;
 
-  DetectionOutput({required this.detections, this.annotatedImage});
+  DetectionOutput({required this.detections, this.annotatedImage, this.debugInfo});
 }
