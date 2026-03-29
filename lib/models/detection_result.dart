@@ -1,11 +1,9 @@
-// Simple data model to replace the Map<String, dynamic>
 class DetectionResult {
   final double centerX;
   final double centerY;
   final double width;
   final double height;
-  final double confidence; // Display value (masked)
-  final double originalConfidence; // Real model output (used for filtering)
+  final double confidence;
   final String className;
 
   DetectionResult({
@@ -14,11 +12,9 @@ class DetectionResult {
     required this.width,
     required this.height,
     required this.confidence,
-    required this.originalConfidence,
     required this.className,
   });
 
-  // Create from your existing Map format
   factory DetectionResult.fromMap(Map<String, dynamic> map) {
     return DetectionResult(
       centerX: map['xc'],
@@ -26,12 +22,10 @@ class DetectionResult {
       width: map['width'],
       height: map['height'],
       confidence: map['confidence'],
-      originalConfidence: map['originalConfidence'] ?? map['confidence'],
       className: map['className'],
     );
   }
 
-  // Convert back to Map if needed
   Map<String, dynamic> toMap() {
     return {
       'xc': centerX,
@@ -39,7 +33,6 @@ class DetectionResult {
       'width': width,
       'height': height,
       'confidence': confidence,
-      'originalConfidence': originalConfidence,
       'className': className,
     };
   }

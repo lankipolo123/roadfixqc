@@ -103,13 +103,13 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description: "Detecting ALL road hazards with unified AI model...",
+      description: "Detecting Road Hazard with Roadfix model...",
     );
 
     try {
       final output = await _detectionService.detectObjects(
         imageFile,
-        confidenceThreshold: 0.15, // Lowered to catch more detections
+        confidenceThreshold: 0.35, // Lowered to catch more detections
       );
 
       if (!mounted) return;
@@ -237,8 +237,10 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     // Burn only the FILTERED detections onto the original image so the
     // report shows bounding boxes for accepted classes only (not the YOLO
     // plugin's annotated image which includes ALL classes).
-    final annotatedFile =
-        await _renderAnnotatedImage(_selectedImage!, _detections);
+    final annotatedFile = await _renderAnnotatedImage(
+      _selectedImage!,
+      _detections,
+    );
     final String processedImagePath =
         annotatedFile?.path ?? _selectedImage!.path;
 
@@ -332,15 +334,17 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
         // Label
         final label =
             '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
-        final builder = ui.ParagraphBuilder(ui.ParagraphStyle(
-          textAlign: TextAlign.left,
-          fontSize: fontSize,
-        ))
-          ..pushStyle(ui.TextStyle(
-            color: Colors.white,
-            fontWeight: FontWeight.bold,
-          ))
-          ..addText(label);
+        final builder =
+            ui.ParagraphBuilder(
+                ui.ParagraphStyle(
+                  textAlign: TextAlign.left,
+                  fontSize: fontSize,
+                ),
+              )
+              ..pushStyle(
+                ui.TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              )
+              ..addText(label);
         final paragraph = builder.build()
           ..layout(ui.ParagraphConstraints(width: right - left + 100));
 
@@ -354,8 +358,9 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
       final picture = recorder.endRecording();
       final rendered = await picture.toImage(w.toInt(), h.toInt());
-      final pngBytes =
-          await rendered.toByteData(format: ui.ImageByteFormat.png);
+      final pngBytes = await rendered.toByteData(
+        format: ui.ImageByteFormat.png,
+      );
 
       if (pngBytes == null) return null;
 
