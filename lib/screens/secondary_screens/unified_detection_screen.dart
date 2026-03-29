@@ -109,7 +109,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     try {
       final output = await _detectionService.detectObjects(
         imageFile,
-        confidenceThreshold: 0.35, // Lowered to catch more detections
+        confidenceThreshold: 0.35,
       );
 
       if (!mounted) return;
@@ -333,7 +333,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
         // Label
         final label =
-            '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
+            '${_formatDisplayName(det.className)} ${(det.confidence * 100).toStringAsFixed(1)}%';
         final builder =
             ui.ParagraphBuilder(
                 ui.ParagraphStyle(
@@ -378,26 +378,19 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
   String _formatDisplayName(String className) {
     switch (className) {
-      case 'Fallen_Tree':
-        return 'Fallen Tree';
-      case 'Road_Barrier':
-        return 'Road Barrier';
-      case 'Fallen_Cone':
-        return 'Fallen Cone';
+      case 'Fallen-Barrier':
       case 'Fallen_Barrier':
         return 'Fallen Barrier';
-      case 'Road_Crack':
-        return 'Road Crack';
-      case 'Broken_Pole':
-        return 'Broken Utility Pole';
+      case 'Fallen-Cone':
+      case 'Fallen_Cone':
+        return 'Fallen Cone';
+      case 'Fallen-Pole':
+      case 'Fallen_Pole':
+        return 'Fallen Utility Pole';
       case 'Pothole':
         return 'Pothole';
-      case 'Traffic_Cones':
-        return 'Traffic Cone';
-      case 'Tires':
-        return 'Tire';
       default:
-        return className.replaceAll('_', ' ');
+        return className.replaceAll('-', ' ').replaceAll('_', ' ');
     }
   }
 
@@ -582,7 +575,7 @@ class _DetectionBoxPainter extends CustomPainter {
 
       // Label background
       final label =
-          '${det.className.replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
+          '${det.className.replaceAll('-', ' ').replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
       final textPainter = TextPainter(
         text: TextSpan(
           text: label,

@@ -6,11 +6,11 @@ const List<DetectionItem> detectionItems = [
     imagePath: 'assets/images/pothole_report.webp',
   ),
   DetectionItem(
-    label: 'Utility Pole',
+    label: 'Fallen Pole',
     imagePath: 'assets/images/utility_pole_report.webp',
   ),
   DetectionItem(
-    label: 'Road Concern',
+    label: 'Road Blocks',
     imagePath: 'assets/images/road_concerns.webp',
   ),
 ];
