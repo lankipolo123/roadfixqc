@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import '../themes.dart';
 
-class CustomTextField extends StatelessWidget {
+class CustomTextField extends StatefulWidget {
   final String? label;
   final bool obscureText;
   final TextInputType keyboardType;
@@ -24,19 +24,45 @@ class CustomTextField extends StatelessWidget {
   });
 
   @override
+  State<CustomTextField> createState() => _CustomTextFieldState();
+}
+
+class _CustomTextFieldState extends State<CustomTextField> {
+  late bool _isObscured;
+
+  @override
+  void initState() {
+    super.initState();
+    _isObscured = widget.obscureText;
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: TextFormField(
-        controller: controller,
-        focusNode: focusNode,
-        obscureText: obscureText,
-        keyboardType: keyboardType,
-        textInputAction: textInputAction,
-        onFieldSubmitted: (_) => onNext?.call(),
+        controller: widget.controller,
+        focusNode: widget.focusNode,
+        obscureText: _isObscured,
+        keyboardType: widget.keyboardType,
+        textInputAction: widget.textInputAction,
+        onFieldSubmitted: (_) => widget.onNext?.call(),
         decoration: InputDecoration(
-          prefixIcon: icon != null ? Icon(icon, color: primary) : null,
-          labelText: label,
+          prefixIcon: widget.icon != null
+              ? Icon(widget.icon, color: primary)
+              : null,
+          suffixIcon: widget.obscureText
+              ? IconButton(
+                  icon: Icon(
+                    _isObscured ? Icons.visibility_off : Icons.visibility,
+                    color: altSecondary,
+                  ),
+                  onPressed: () {
+                    setState(() => _isObscured = !_isObscured);
+                  },
+                )
+              : null,
+          labelText: widget.label,
           labelStyle: const TextStyle(
             fontWeight: FontWeight.w500,
             color: altSecondary,
