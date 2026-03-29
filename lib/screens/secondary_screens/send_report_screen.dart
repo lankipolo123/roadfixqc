@@ -299,14 +299,12 @@ class _SendReportScreenState extends State<SendReportScreen> {
     }
   }
 
-  // ✅ CHANGED: Cancel navigation
   void _onCancel() {
     if (!_isSubmittingReport) {
       Navigator.pop(context);
     }
   }
 
-  // ✅ ADDED: Show full screen image
   void _showFullImage() {
     showDialog(
       context: context,
@@ -373,7 +371,6 @@ class _SendReportScreenState extends State<SendReportScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // ✅ CHANGED: Made image clickable
                     Center(
                       child: GestureDetector(
                         onTap: _showFullImage,
@@ -402,7 +399,6 @@ class _SendReportScreenState extends State<SendReportScreen> {
                                   height: 180,
                                 ),
                               ),
-                              // ✅ ADDED: Zoom icon overlay
                               Positioned(
                                 bottom: 8,
                                 right: 8,
@@ -440,17 +436,12 @@ class _SendReportScreenState extends State<SendReportScreen> {
                         ),
                         const SizedBox(height: 16),
 
-                        // ✅ CHANGED: Blueish-grey disabled look
                         Container(
                           decoration: BoxDecoration(
-                            color: const Color(
-                              0xFFE8EFF5,
-                            ), // Blueish-grey background
+                            color: const Color(0xFFE8EFF5),
                             borderRadius: BorderRadius.circular(8),
                             border: Border.all(
-                              color: const Color(
-                                0xFFB0C4DE,
-                              ), // Light steel blue border
+                              color: const Color(0xFFB0C4DE),
                               width: 1,
                             ),
                           ),
@@ -460,17 +451,13 @@ class _SendReportScreenState extends State<SendReportScreen> {
                             enabled: false,
                             maxLines: 5,
                             style: const TextStyle(
-                              color: Color(
-                                0xFF5B6B7D,
-                              ), // Darker blueish-grey text
+                              color: Color(0xFF5B6B7D),
                               fontSize: 14,
                             ),
                             decoration: const InputDecoration(
-                              hintText: 'Auto-generated description',
+                              hintText: 'Detection summary',
                               hintStyle: TextStyle(
-                                color: Color(
-                                  0xFF8B99A8,
-                                ), // Medium blueish-grey hint
+                                color: Color(0xFF8B99A8),
                               ),
                               border: InputBorder.none,
                               contentPadding: EdgeInsets.all(16),
@@ -482,10 +469,8 @@ class _SendReportScreenState extends State<SendReportScreen> {
 
                     const SizedBox(height: 32),
 
-                    // ✅ CHANGED: New action buttons layout
                     Row(
                       children: [
-                        // Submit button
                         Expanded(
                           flex: 2,
                           child: ElevatedButton(
@@ -520,7 +505,6 @@ class _SendReportScreenState extends State<SendReportScreen> {
                           ),
                         ),
                         const SizedBox(width: 12),
-                        // Cancel button
                         Expanded(
                           flex: 1,
                           child: OutlinedButton(

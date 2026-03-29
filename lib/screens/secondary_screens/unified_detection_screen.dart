@@ -264,7 +264,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     }).toList();
 
     final descriptionParts = <String>[];
-    descriptionParts.add('AI Detection Results:');
+    descriptionParts.add('Detection Results:');
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
@@ -275,7 +275,7 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     }
 
     descriptionParts.add('');
-    descriptionParts.add('Average confidence: $avgConfidence%');
+    descriptionParts.add('Confidence: $avgConfidence%');
 
     final autoDescription = descriptionParts.join('\n');
 
