@@ -6,8 +6,7 @@ import 'package:path_provider/path_provider.dart';
 import 'package:ultralytics_yolo/ultralytics_yolo.dart';
 import '../models/detection_result.dart';
 
-/// Unified Detection Service - detects ALL hazards, no filtering, raw confidence
-class UnifiedDetectionService {
+class DetectionService {
   YOLO? _yolo;
   bool _isModelLoaded = false;
 
@@ -15,17 +14,23 @@ class UnifiedDetectionService {
 
   static const String _modelPath = 'roadfix-detector.tflite';
 
-  /// Load the unified YOLO model
   Future<void> loadModel() async {
     await dispose();
 
-    _yolo = YOLO(modelPath: _modelPath, task: YOLOTask.detect, useGpu: true);
-    await _yolo!.loadModel();
-    debugPrint('Unified RoadFix YOLO model loaded');
+    try {
+      _yolo = YOLO(modelPath: _modelPath, task: YOLOTask.detect, useGpu: true);
+      await _yolo!.loadModel();
+      debugPrint('DetectionService: model loaded (GPU)');
+    } catch (e) {
+      debugPrint('DetectionService: GPU failed, falling back to CPU: $e');
+      _yolo = YOLO(modelPath: _modelPath, task: YOLOTask.detect, useGpu: false);
+      await _yolo!.loadModel();
+      debugPrint('DetectionService: model loaded (CPU)');
+    }
+
     _isModelLoaded = true;
   }
 
-  /// Dispose the model
   Future<void> dispose() async {
     if (_yolo != null) {
       await _yolo!.dispose();
@@ -34,7 +39,6 @@ class UnifiedDetectionService {
     }
   }
 
-  /// Pick image from specific source
   Future<File?> pickImageFromSource(ImageSource source) async {
     final picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: source);
@@ -42,14 +46,13 @@ class UnifiedDetectionService {
     return File(image.path);
   }
 
-  /// Run detection on image — returns ALL detections with raw confidence
   Future<DetectionOutput> detectObjects(
     File imageFile, {
-    double confidenceThreshold = 0.15,
+    double confidenceThreshold = 0.25,
     double iouThreshold = 0.45,
   }) async {
     if (!_isModelLoaded || _yolo == null) {
-      throw Exception('Unified model not loaded');
+      throw Exception('Model not loaded');
     }
 
     final Uint8List bytes = await imageFile.readAsBytes();
@@ -63,11 +66,8 @@ class UnifiedDetectionService {
     final rawBoxes = output['boxes'];
 
     if (rawBoxes == null || rawBoxes is! List || rawBoxes.isEmpty) {
-      debugPrint('[RESULT] No detections returned by model');
       return DetectionOutput(detections: [], annotatedImage: annotatedImage);
     }
-
-    debugPrint('[RAW] Model returned ${rawBoxes.length} raw boxes:');
 
     final List<DetectionResult> results = [];
 
@@ -75,15 +75,7 @@ class UnifiedDetectionService {
       final double conf = (box['confidence'] ?? 0).toDouble();
       final String className = box['className'] ?? 'Unknown';
 
-      debugPrint(
-        '[RAW]   class="$className" conf=${(conf * 100).toStringAsFixed(1)}%',
-      );
-
-      // Only skip boxes below the confidence threshold — no class filtering
-      if (conf < confidenceThreshold) {
-        debugPrint('[RAW]   -> SKIPPED (conf too low)');
-        continue;
-      }
+      if (conf < confidenceThreshold) continue;
 
       final double x1Norm = (box['x1_norm'] ?? 0).toDouble();
       final double y1Norm = (box['y1_norm'] ?? 0).toDouble();
@@ -100,14 +92,11 @@ class UnifiedDetectionService {
           className: className,
         ),
       );
-      debugPrint('[RAW]   -> KEPT');
     }
 
-    debugPrint('[RESULT] ${results.length} detections passed threshold');
     return DetectionOutput(detections: results, annotatedImage: annotatedImage);
   }
 
-  /// Save annotated image bytes to a temp file, returns the file path
   static Future<String?> saveAnnotatedImage(Uint8List imageBytes) async {
     try {
       final directory = await getTemporaryDirectory();
@@ -123,7 +112,6 @@ class UnifiedDetectionService {
   }
 }
 
-/// Container for detection results + annotated image
 class DetectionOutput {
   final List<DetectionResult> detections;
   final Uint8List? annotatedImage;

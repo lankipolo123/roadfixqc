@@ -15,31 +15,27 @@ import 'package:roadfix/services/geolocation_services.dart';
 import 'package:roadfix/models/location_models.dart';
 import 'package:roadfix/widgets/themes.dart';
 
-/// Unified Detection Screen - Detects ALL hazards at once
-class UnifiedDetectionScreen extends StatefulWidget {
+class DetectionScreen extends StatefulWidget {
   final ImageSource? initialImageSource;
   final ReportCategory? category;
 
-  const UnifiedDetectionScreen({
+  const DetectionScreen({
     super.key,
     this.initialImageSource,
     this.category,
   });
 
   @override
-  State<UnifiedDetectionScreen> createState() => _UnifiedDetectionScreenState();
+  State<DetectionScreen> createState() => _DetectionScreenState();
 }
 
-class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
-  final UnifiedDetectionService _detectionService = UnifiedDetectionService();
+class _DetectionScreenState extends State<DetectionScreen> {
+  final DetectionService _detectionService = DetectionService();
   bool _isProcessing = false;
-  bool _showDebugPanel = false;
 
   File? _selectedImage;
   List<DetectionResult> _detections = [];
   double? _imageAspectRatio;
-  String _debugInfo = '';
-  String _modelStatus = 'Loading model...';
 
   @override
   void initState() {
@@ -55,16 +51,17 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
   Future<void> _initializeAndPickImage() async {
     try {
-      setState(() => _modelStatus = 'Loading YOLO model...');
       await _detectionService.loadModel();
-      setState(() => _modelStatus = 'Model loaded OK');
-      debugPrint('[DEBUG] Model loaded successfully');
     } catch (e) {
-      setState(() {
-        _modelStatus = 'MODEL LOAD FAILED: $e';
-        _debugInfo = 'Model failed to load: $e';
-      });
-      debugPrint('[DEBUG] Model load error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Failed to load model: $e'),
+            backgroundColor: statusDanger,
+          ),
+        );
+      }
+      return;
     }
 
     if (!mounted) return;
@@ -72,7 +69,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     if (widget.initialImageSource != null) {
       await _pickImageFromSource(widget.initialImageSource!);
     } else {
-      // No source provided — go back, dialog should happen before navigation
       Navigator.pop(context);
     }
   }
@@ -87,7 +83,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     if (!mounted) return;
 
-    // Decode image dimensions so CustomPaint aligns with BoxFit.contain
     final imageBytes = await imageFile.readAsBytes();
     final ui.Image decoded = await decodeImageFromList(imageBytes);
 
@@ -103,49 +98,29 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     LoadingModal.show(
       context,
       title: "Analyzing Image",
-      description: "Detecting Road Hazard with Roadfix model...",
+      description: "Detecting road hazards...",
     );
 
     try {
       final output = await _detectionService.detectObjects(
         imageFile,
-        confidenceThreshold: 0.35,
+        confidenceThreshold: 0.25,
       );
 
       if (!mounted) return;
       setState(() {
         _detections = output.detections;
         _isProcessing = false;
-        _debugInfo = 'Detection complete: ${output.detections.length} objects';
-        _modelStatus =
-            'Detection complete: ${output.detections.length} objects found';
       });
-
-      debugPrint(
-        '[DEBUG] Detection results: ${output.detections.length} objects',
-      );
-      for (var det in output.detections) {
-        debugPrint(
-          '[DEBUG]   -> ${det.className} (${(det.confidence * 100).toStringAsFixed(1)}%) '
-          'at (${det.centerX.toStringAsFixed(3)}, ${det.centerY.toStringAsFixed(3)})',
-        );
-      }
 
       LoadingModal.hide(context);
     } catch (e) {
-      debugPrint('[DEBUG] Detection FAILED: $e');
       if (!mounted) return;
-
-      setState(() {
-        _isProcessing = false;
-        _debugInfo = 'DETECTION ERROR: $e';
-        _modelStatus = 'Detection failed';
-      });
+      setState(() => _isProcessing = false);
       LoadingModal.hide(context);
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text("Detection error: $e"),
+          content: Text('Detection error: $e'),
           backgroundColor: statusDanger,
         ),
       );
@@ -166,19 +141,16 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       return;
     }
 
-    // Check if location permission is already granted
     final hasPermission =
         await LocationPermissionManager.hasLocationPermission();
 
     if (!hasPermission) {
-      // Show mandatory location modal
       if (!mounted) return;
       final granted = await LocationRequiredDialog.show(context);
       if (!mounted) return;
-      if (!granted) return; // User chose "Go Back"
+      if (!granted) return;
     }
 
-    // Fetch GPS location with enhanced accuracy
     if (!mounted) return;
     CompactLoadingModal.show(context, message: "Getting your location...");
 
@@ -190,18 +162,15 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       if (!mounted) return;
       CompactLoadingModal.hide(context);
 
-      // Permission may have been revoked — re-check and re-prompt
       final stillHasPermission =
           await LocationPermissionManager.hasLocationPermission();
       if (!mounted) return;
 
       if (!stillHasPermission) {
-        // Re-show mandatory location modal
         final granted = await LocationRequiredDialog.show(context);
         if (!mounted) return;
         if (!granted) return;
 
-        // Retry after re-granting
         CompactLoadingModal.show(context, message: "Getting your location...");
         try {
           final geoService = GeolocationService();
@@ -219,7 +188,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
           return;
         }
       } else {
-        // Permission is fine, some other location error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('Failed to get location: $e'),
@@ -234,9 +202,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     if (!mounted) return;
     CompactLoadingModal.hide(context);
 
-    // Burn only the FILTERED detections onto the original image so the
-    // report shows bounding boxes for accepted classes only (not the YOLO
-    // plugin's annotated image which includes ALL classes).
     final annotatedFile = await _renderAnnotatedImage(
       _selectedImage!,
       _detections,
@@ -246,7 +211,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
     if (!mounted) return;
 
-    // Build detection summary
     final Map<String, int> detectionCounts = {};
     double totalConfidence = 0;
 
@@ -256,12 +220,12 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       totalConfidence += detection.confidence;
     }
 
-    final avgConfidence = (totalConfidence / _detections.length * 100)
-        .toStringAsFixed(1);
+    final avgConfidence =
+        (totalConfidence / _detections.length * 100).toStringAsFixed(1);
 
-    final detectionTags = detectionCounts.keys.map((className) {
-      return _formatDisplayName(className);
-    }).toList();
+    final detectionTags = detectionCounts.keys
+        .map((className) => _formatDisplayName(className))
+        .toList();
 
     final descriptionParts = <String>[];
     descriptionParts.add('Detection Results:');
@@ -293,7 +257,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
     );
   }
 
-  /// Burn filtered detection boxes onto the original image at full resolution.
   Future<File?> _renderAnnotatedImage(
     File imageFile,
     List<DetectionResult> detections,
@@ -310,10 +273,8 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
       final recorder = ui.PictureRecorder();
       final canvas = Canvas(recorder, Rect.fromLTWH(0, 0, w, h));
 
-      // Draw original image
       canvas.drawImage(original, Offset.zero, Paint());
 
-      // Draw each detection box
       final boxPaint = Paint()
         ..color = Colors.redAccent
         ..style = PaintingStyle.stroke
@@ -331,20 +292,15 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
         final rect = Rect.fromLTRB(left, top, right, bottom);
         canvas.drawRect(rect, boxPaint);
 
-        // Label
         final label =
             '${_formatDisplayName(det.className)} ${(det.confidence * 100).toStringAsFixed(1)}%';
-        final builder =
-            ui.ParagraphBuilder(
-                ui.ParagraphStyle(
-                  textAlign: TextAlign.left,
-                  fontSize: fontSize,
-                ),
-              )
-              ..pushStyle(
-                ui.TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-              )
-              ..addText(label);
+        final builder = ui.ParagraphBuilder(
+          ui.ParagraphStyle(textAlign: TextAlign.left, fontSize: fontSize),
+        )
+          ..pushStyle(
+            ui.TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          )
+          ..addText(label);
         final paragraph = builder.build()
           ..layout(ui.ParagraphConstraints(width: right - left + 100));
 
@@ -358,9 +314,8 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
 
       final picture = recorder.endRecording();
       final rendered = await picture.toImage(w.toInt(), h.toInt());
-      final pngBytes = await rendered.toByteData(
-        format: ui.ImageByteFormat.png,
-      );
+      final pngBytes =
+          await rendered.toByteData(format: ui.ImageByteFormat.png);
 
       if (pngBytes == null) return null;
 
@@ -419,8 +374,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
   Widget _buildDetectionView() {
     return Stack(
       children: [
-        // Constrain the Stack to the image's aspect ratio so CustomPaint
-        // lines up exactly with the rendered image (no letterbox offset).
         Center(
           child: _imageAspectRatio != null
               ? AspectRatio(
@@ -455,7 +408,6 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
             ),
           ),
 
-        // Back button
         Positioned(
           top: 20,
           left: 20,
@@ -467,90 +419,11 @@ class _UnifiedDetectionScreenState extends State<UnifiedDetectionScreen> {
             icon: const Icon(Icons.arrow_back, color: inputFill),
           ),
         ),
-
-        // Debug toggle button
-        Positioned(
-          top: 20,
-          right: 20,
-          child: IconButton(
-            onPressed: () => setState(() => _showDebugPanel = !_showDebugPanel),
-            style: IconButton.styleFrom(
-              backgroundColor: _showDebugPanel
-                  ? Colors.orange.withValues(alpha: 0.9)
-                  : secondary.withValues(alpha: 0.7),
-            ),
-            icon: const Icon(Icons.bug_report, color: inputFill),
-          ),
-        ),
-
-        // Debug info panel
-        if (_showDebugPanel)
-          Positioned(
-            top: 70,
-            left: 10,
-            right: 10,
-            child: Container(
-              constraints: const BoxConstraints(maxHeight: 250),
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.85),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: SingleChildScrollView(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'DEBUG PANEL',
-                      style: TextStyle(
-                        color: Colors.orange,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const Divider(color: Colors.orange, height: 8),
-                    _debugText('Model: $_modelStatus'),
-                    _debugText('Detections: ${_detections.length}'),
-                    if (_detections.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      ..._detections.map(
-                        (d) => _debugText(
-                          '  ${d.className}: ${(d.confidence * 100).toStringAsFixed(1)}% '
-                          'pos(${d.centerX.toStringAsFixed(2)},${d.centerY.toStringAsFixed(2)}) '
-                          'size(${d.width.toStringAsFixed(2)}x${d.height.toStringAsFixed(2)})',
-                        ),
-                      ),
-                    ],
-                    if (_debugInfo.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      const Divider(color: Colors.grey, height: 8),
-                      _debugText(_debugInfo),
-                    ],
-                  ],
-                ),
-              ),
-            ),
-          ),
       ],
-    );
-  }
-
-  Widget _debugText(String text) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 2),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.greenAccent,
-          fontSize: 11,
-          fontFamily: 'monospace',
-        ),
-      ),
     );
   }
 }
 
-/// Paints bounding boxes over the original image using normalized coordinates.
 class _DetectionBoxPainter extends CustomPainter {
   final List<DetectionResult> detections;
 
@@ -566,14 +439,12 @@ class _DetectionBoxPainter extends CustomPainter {
 
       final rect = Rect.fromLTRB(left, top, right, bottom);
 
-      // Box outline
       final boxPaint = Paint()
         ..color = Colors.redAccent
         ..style = PaintingStyle.stroke
         ..strokeWidth = 2.5;
       canvas.drawRect(rect, boxPaint);
 
-      // Label background
       final label =
           '${det.className.replaceAll('-', ' ').replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
       final textPainter = TextPainter(
@@ -595,7 +466,8 @@ class _DetectionBoxPainter extends CustomPainter {
         textPainter.height + 4,
       );
       canvas.drawRect(bgRect, Paint()..color = Colors.redAccent);
-      textPainter.paint(canvas, Offset(left + 4, top - textPainter.height - 2));
+      textPainter.paint(
+          canvas, Offset(left + 4, top - textPainter.height - 2));
     }
   }
 
