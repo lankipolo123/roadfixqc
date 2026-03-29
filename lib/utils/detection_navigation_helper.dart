@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:roadfix/models/report_category_model.dart';
-import 'package:roadfix/screens/secondary_screens/unified_detection_screen.dart';
+import 'package:roadfix/screens/secondary_screens/detection_screen.dart';
 
 class NavigationHelper {
   static Future<void> navigateToDetection(
