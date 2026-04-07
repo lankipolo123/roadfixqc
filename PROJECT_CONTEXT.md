@@ -211,16 +211,14 @@ No dedicated state management package (no Provider, Bloc, Riverpod). Instead:
 
 1. **Detection scope is changing.** The YOLO model and detection filtering logic (currently filters to 'Road-Cracks' only with 0.15 confidence threshold) will be updated. Do not make major changes to detection code until the new scope is defined.
 
-2. **Confidence display is intentionally masked.** Display confidence shown to users is mapped to a 35–90% range regardless of actual model output. This is by design.
+2. **Emails go through Vercel, not Firebase.** The app uses a custom Vercel-hosted API for sending verification and password reset emails. This is important for deployment — the Vercel endpoints must be running.
 
-3. **Emails go through Vercel, not Firebase.** The app uses a custom Vercel-hosted API for sending verification and password reset emails. This is important for deployment — the Vercel endpoints must be running.
+3. **ImageKit, not Firebase Storage.** All images (reports + profiles) are stored on ImageKit. Credentials are in `ImageKitService`. Profile images use a consistent filename to overwrite on re-upload.
 
-4. **ImageKit, not Firebase Storage.** All images (reports + profiles) are stored on ImageKit. Credentials are in `ImageKitService`. Profile images use a consistent filename to overwrite on re-upload.
+4. **Firestore collections:** `users` (user profiles) and `reports` (all reports). No subcollections.
 
-5. **Firestore collections:** `users` (user profiles) and `reports` (all reports). No subcollections.
+5. **No dedicated admin panel in this app.** Report status changes (pending → in_progress → resolved) are handled externally (admin dashboard is a separate project or done via Firestore console).
 
-6. **No dedicated admin panel in this app.** Report status changes (pending → in_progress → resolved) are handled externally (admin dashboard is a separate project or done via Firestore console).
+6. **Quezon City restriction** can be toggled via `enableQuezonCityOnly` feature flag in the detection/report flow.
 
-7. **Quezon City restriction** can be toggled via `enableQuezonCityOnly` feature flag in the detection/report flow.
-
-8. **The `mounted` check** is required after any async operation before using BuildContext (Flutter lint rule `use_build_context_synchronously`). This has been an ongoing fix pattern.
+7. **The `mounted` check** is required after any async operation before using BuildContext (Flutter lint rule `use_build_context_synchronously`). This has been an ongoing fix pattern.
