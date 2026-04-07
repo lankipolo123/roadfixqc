@@ -2,13 +2,11 @@
 
 ## Current Branch
 
-**Branch:** `claude/annotation-confidence-display-qCMDU`
+**Branch:** `claude/complete-mobile-flutter-roadmap-Mtlsz`
 
 **Changes:**
-- Added `originalConfidence` field to `DetectionResult` model to preserve real model output
-- Detection confidence is now always masked with a random value between 10–30% for display
-- Real confidence is still used for threshold filtering (detections below threshold are still excluded)
-- Import `dart:math` added to `unified_detection_service.dart` for random generation
+- Fixed home screen "Recent Reports" — now orders accepted reports by `reviewedAt` (acceptance date) instead of `reportedAt` (submission date), so recently accepted reports always appear first
+- Removed the 7-day in-memory filter that was hiding reports accepted long after submission
 
 ---
 
@@ -19,7 +17,7 @@
 git fetch origin main
 
 # 2. Fetch the Claude feature branch from remote
-git fetch origin claude/annotation-confidence-display-qCMDU
+git fetch origin claude/complete-mobile-flutter-roadmap-Mtlsz
 
 # 3. Switch to your local main branch
 git checkout main
@@ -28,7 +26,7 @@ git checkout main
 git pull origin main
 
 # 5. Merge the Claude branch into main
-git merge origin/claude/annotation-confidence-display-qCMDU
+git merge origin/claude/complete-mobile-flutter-roadmap-Mtlsz
 
 # 6. Push the updated main to remote
 git push origin main
@@ -70,15 +68,15 @@ After merging, delete the feature branch if you no longer need it:
 
 ```bash
 # Delete local branch
-git branch -d claude/annotation-confidence-display-qCMDU
+git branch -d claude/complete-mobile-flutter-roadmap-Mtlsz
 
 # Delete remote branch
-git push origin --delete claude/annotation-confidence-display-qCMDU
+git push origin --delete claude/complete-mobile-flutter-roadmap-Mtlsz
 ```
 
 ---
 
-## Previous Branches
+## Previous Branches (already merged or pending)
 
 | Branch | Description |
 |--------|-------------|
