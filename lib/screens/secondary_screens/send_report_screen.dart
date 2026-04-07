@@ -159,7 +159,13 @@ class _SendReportScreenState extends State<SendReportScreen> {
   }
 
   Future<void> _submitReport() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (_isSubmittingReport) return;
+    setState(() => _isSubmittingReport = true);
+
+    if (!_formKey.currentState!.validate()) {
+      setState(() => _isSubmittingReport = false);
+      return;
+    }
 
     if (_locationController.text.trim().isEmpty) {
       AppToast.showWarning(
@@ -171,6 +177,7 @@ class _SendReportScreenState extends State<SendReportScreen> {
     }
 
     if (_descriptionController.text.trim().isEmpty) {
+      setState(() => _isSubmittingReport = false);
       AppToast.showWarning(
         context,
         message: 'Please describe the road issue',
@@ -184,6 +191,7 @@ class _SendReportScreenState extends State<SendReportScreen> {
       final locationText = _locationController.text.toLowerCase();
       if (!locationText.contains('quezon city') &&
           !locationText.contains('quezon')) {
+        setState(() => _isSubmittingReport = false);
         AppToast.showError(
           context,
           message:
@@ -197,6 +205,7 @@ class _SendReportScreenState extends State<SendReportScreen> {
 
     // Check if location has coordinates
     if (_locationData == null) {
+      setState(() => _isSubmittingReport = false);
       AppToast.showError(
         context,
         message: 'Please get your current location first',
@@ -215,6 +224,7 @@ class _SendReportScreenState extends State<SendReportScreen> {
     if (!mounted) return;
 
     if (!securityResult.isValid) {
+      setState(() => _isSubmittingReport = false);
       AppToast.showError(
         context,
         message: securityResult.message,
@@ -223,10 +233,6 @@ class _SendReportScreenState extends State<SendReportScreen> {
       );
       return;
     }
-
-    setState(() {
-      _isSubmittingReport = true;
-    });
 
     LoadingModal.show(
       context,
