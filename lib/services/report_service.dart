@@ -220,7 +220,7 @@ class ReportService {
     return _db
         .collection(_reportsCollection)
         .where('status', isEqualTo: ReportStatus.accepted)
-        .orderBy('reportedAt', descending: true)
+        .orderBy('reviewedAt', descending: true)
         .limit(limit)
         .snapshots()
         .map(

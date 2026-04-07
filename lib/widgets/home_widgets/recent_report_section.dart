@@ -55,16 +55,7 @@ class RecentReportsSection extends StatelessWidget {
               );
             }
 
-            final acceptedReports = snapshot.data ?? [];
-            final oneWeekAgo = DateTime.now().subtract(const Duration(days: 7));
-
-            // Filter by reviewedAt (acceptance date) instead of reportedAt
-            final recentReports = acceptedReports.where((report) {
-              final approvalDate = report.reviewedAt != null
-                  ? report.reviewedAt!.toDate()
-                  : report.reportedAt.toDate();
-              return approvalDate.isAfter(oneWeekAgo);
-            }).toList();
+            final recentReports = snapshot.data ?? [];
 
             if (recentReports.isEmpty) {
               return SizedBox(
