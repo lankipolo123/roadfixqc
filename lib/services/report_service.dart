@@ -220,14 +220,18 @@ class ReportService {
     return _db
         .collection(_reportsCollection)
         .where('status', isEqualTo: ReportStatus.accepted)
-        .orderBy('reviewedAt', descending: true)
-        .limit(limit)
         .snapshots()
-        .map(
-          (snapshot) => snapshot.docs
+        .map((snapshot) {
+          final reports = snapshot.docs
               .map((doc) => ReportModel.fromFirestore(doc))
-              .toList(),
-        );
+              .toList();
+          reports.sort((a, b) {
+            if (a.reviewedAt == null) return 1;
+            if (b.reviewedAt == null) return -1;
+            return b.reviewedAt!.compareTo(a.reviewedAt!);
+          });
+          return reports.take(limit).toList();
+        });
   }
 
   // GET SINGLE REPORT
