@@ -334,7 +334,20 @@ class _DetectionScreenState extends State<DetectionScreen> {
   }
 
   String _formatDisplayName(String className) {
-    return className;
+    switch (className) {
+      case 'Fallen-Cone':
+      case 'Fallen_Cone':
+      case 'Fallen-Barrier':
+      case 'Fallen_Barrier':
+        return 'Road Blocks';
+      case 'Fallen-Pole':
+      case 'Fallen_Pole':
+        return 'Fallen Utility Pole';
+      case 'Pothole':
+        return 'Pothole';
+      default:
+        return className.replaceAll('-', ' ').replaceAll('_', ' ');
+    }
   }
 
   void _retakePhoto() async {
