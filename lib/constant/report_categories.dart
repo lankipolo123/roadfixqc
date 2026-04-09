@@ -2,13 +2,13 @@ import 'package:roadfix/models/report_category_model.dart';
 
 final List<ReportCategory> reportCategories = [
   ReportCategory(
-    label: 'Road Damage',
+    label: 'Pothole',
     description: 'Potholes',
     imagePath: 'assets/images/pothole_report.webp',
     type: ReportCategoryType.pothole,
   ),
   ReportCategory(
-    label: 'Utility Poles',
+    label: 'Fallen Utility Pole',
     description: 'Fallen Poles',
     imagePath: 'assets/images/utility_pole_report.webp',
     type: ReportCategoryType.utilityPole,

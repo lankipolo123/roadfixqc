@@ -193,7 +193,7 @@ By using RoadFix, you acknowledge that you have read and understood this Privacy
 
   // Feature Descriptions
   static const List<String> keyFeatures = [
-    'Report potholes and road damage',
+    'Report potholes',
     'Document road debris and obstacles',
     'Alert about fallen utility poles',
     'GPS location tracking',
