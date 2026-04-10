@@ -12,7 +12,7 @@ class DetectionService {
 
   bool get isModelLoaded => _isModelLoaded;
 
-  static const String _modelPath = 'roadfix-detector.tflite';
+  static const String _modelPath = 'roadfix-model-v3.tflite';
 
   Future<void> loadModel() async {
     await dispose();
