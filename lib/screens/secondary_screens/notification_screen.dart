@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/screens/secondary_screens/report_detail_screen.dart';
+import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/services/notification_service.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
 import 'package:roadfix/utils/pagination_helper.dart';
@@ -40,10 +41,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: LanguageService(),
+      builder: (context, _) => _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
+    final lang = LanguageService();
     return Scaffold(
       backgroundColor: inputFill,
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(lang.notifications),
         backgroundColor: inputFill,
         elevation: 0,
         leading: IconButton(
@@ -93,6 +102,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           final viewedIds = data.viewedIds;
 
           if (allReports.isEmpty) {
+            final lang = LanguageService();
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -104,7 +114,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'No new notifications',
+                    lang.noNewNotifications,
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
@@ -112,13 +122,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     ),
                   ),
                   const SizedBox(height: 8),
-                  Text(
-                    'You\'ll see updates on your reports here when they are reviewed by admin.',
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: secondary.withValues(alpha: 0.6),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    child: Text(
+                      lang.notificationsEmptyHint,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: secondary.withValues(alpha: 0.6),
+                      ),
+                      textAlign: TextAlign.center,
                     ),
-                    textAlign: TextAlign.center,
                   ),
                 ],
               ),
@@ -139,7 +152,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   left: 16,
                   right: 16,
                   top: 16,
-                  bottom: 100, // Space for pagination FAB
+                  bottom: 100,
                 ),
                 itemCount: paginatedReports.length,
                 separatorBuilder: (context, index) =>
@@ -187,7 +200,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   ) {
     return Dismissible(
       key: Key('notification_${report.id}_$index'),
-      direction: DismissDirection.endToStart, // Swipe left to delete
+      direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
         padding: const EdgeInsets.only(right: 20),
@@ -212,11 +225,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         ),
       ),
       confirmDismiss: (direction) async {
-        // Show confirmation dialog
         return await _showDeleteConfirmation(context, report);
       },
       onDismissed: (direction) async {
-        // Delete the notification
         if (report.id != null) {
           await _notificationService.deleteNotification(report.id!);
 
@@ -229,7 +240,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   label: 'Undo',
                   textColor: primary,
                   onPressed: () async {
-                    // Restore the notification
                     await _notificationService.restoreNotification(report.id!);
                   },
                 ),
@@ -247,15 +257,17 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     ReportModel report,
     bool isViewed,
   ) {
-    // Use ReportStatusUtils to get status color
     final statusColor = ReportStatusUtils.getStatusColor(report.status);
     final relativeTime = report.reviewedAt != null
         ? _notificationService.getRelativeTime(report.reviewedAt!.toDate())
         : 'Unknown time';
 
+    final lang = LanguageService();
+    final title = lang.notificationTitle(report.status);
+    final message = lang.notificationMessage(report.status, report.reportType);
+
     return GestureDetector(
       onTap: () async {
-        // Mark as viewed when clicked
         if (report.id != null) {
           await _notificationService.markAsViewed(report.id!);
         }
@@ -289,6 +301,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           ],
         ),
         child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
               width: 40,
@@ -300,7 +313,9 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isViewed ? Icons.notifications : Icons.notifications_active,
+                isViewed
+                    ? Icons.notifications
+                    : Icons.notifications_active,
                 color: isViewed ? Colors.grey : statusColor,
                 size: 20,
               ),
@@ -311,10 +326,11 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Report Updated',
+                    title,
                     style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: isViewed ? FontWeight.w500 : FontWeight.w600,
+                      fontSize: 15,
+                      fontWeight:
+                          isViewed ? FontWeight.w500 : FontWeight.w700,
                       color: isViewed
                           ? secondary.withValues(alpha: 0.7)
                           : primary,
@@ -322,18 +338,44 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    'Your ${report.reportType.toLowerCase()} report has been ${ReportStatusUtils.getStatusText(report.status).toLowerCase()}.',
+                    message,
                     style: TextStyle(
-                      fontSize: 14,
-                      color: secondary.withValues(alpha: isViewed ? 0.6 : 0.8),
+                      fontSize: 13,
+                      color: secondary.withValues(
+                        alpha: isViewed ? 0.55 : 0.75,
+                      ),
+                      height: 1.4,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  // Status badge chip
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 8,
+                      vertical: 3,
+                    ),
+                    decoration: BoxDecoration(
+                      color: statusColor.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: statusColor.withValues(alpha: 0.3),
+                      ),
+                    ),
+                    child: Text(
+                      ReportStatusUtils.getStatusText(report.status),
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        color: statusColor,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 4),
                   Text(
                     relativeTime,
                     style: TextStyle(
-                      color: secondary.withValues(alpha: 0.6),
-                      fontSize: 12,
+                      color: secondary.withValues(alpha: 0.5),
+                      fontSize: 11,
                     ),
                   ),
                 ],
@@ -342,7 +384,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             Icon(
               Icons.arrow_forward_ios,
               color: secondary.withValues(alpha: isViewed ? 0.3 : 0.4),
-              size: 16,
+              size: 14,
             ),
           ],
         ),

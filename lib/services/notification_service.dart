@@ -171,6 +171,61 @@ class NotificationService {
     }
   }
 
+  // Get notification title per status
+  String getNotificationTitle(String status) {
+    switch (status.toLowerCase()) {
+      case 'accepted':
+        return 'Report Accepted';
+      case 'in_progress':
+      case 'inprogress':
+        return 'Work In Progress';
+      case 'resolved':
+        return 'Issue Resolved';
+      case 'invalid':
+        return 'Report Archived';
+      case 'pending':
+      default:
+        return 'Report Submitted';
+    }
+  }
+
+  // Get a human-readable notification message per status
+  String getNotificationMessage(String status, String reportType) {
+    final type = reportType.isNotEmpty ? reportType : 'road issue';
+    switch (status.toLowerCase()) {
+      case 'accepted':
+        return 'Your $type report has been accepted and is now being analyzed by the team.';
+      case 'in_progress':
+      case 'inprogress':
+        return 'Our team is currently working on the $type you reported. A fix is underway.';
+      case 'resolved':
+        return 'Great news! The $type you reported has been fixed and verified by our team.';
+      case 'invalid':
+        return 'Your $type report was reviewed but could not be verified. It has been archived.';
+      case 'pending':
+      default:
+        return 'Your $type report has been submitted and is awaiting admin review.';
+    }
+  }
+
+  // Get a status statement that describes what the status means for the user
+  String getStatusStatement(String status) {
+    switch (status.toLowerCase()) {
+      case 'accepted':
+        return 'This report has been accepted and is currently being analyzed by the road maintenance team.';
+      case 'in_progress':
+      case 'inprogress':
+        return 'Your report is currently being worked on. Our team is actively addressing the road issue you reported.';
+      case 'resolved':
+        return 'This report has been resolved. The reported road issue has been fixed and verified by our team.';
+      case 'invalid':
+        return 'This report has been reviewed and marked as invalid. It has been archived and is no longer active.';
+      case 'pending':
+      default:
+        return 'Your report is pending review. Our admin team will verify and process your submission soon.';
+    }
+  }
+
   // Get relative time
   String getRelativeTime(DateTime dateTime) {
     final now = DateTime.now();

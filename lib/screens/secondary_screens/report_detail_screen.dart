@@ -3,6 +3,7 @@ import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/layouts/diagonal_background.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
+import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/widgets/reporting_widgets/detection_tags.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:intl/intl.dart';
@@ -116,37 +117,77 @@ class ReportDetailScreen extends StatelessWidget {
                             ],
 
                             // Status badge
+                            Center(
+                              child: Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 12,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: statusColor.withValues(alpha: 0.1),
+                                  border: Border.all(color: statusColor),
+                                  borderRadius: BorderRadius.circular(20),
+                                ),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Icon(
+                                      ReportStatusUtils.getStatusIcon(
+                                        report.status,
+                                      ),
+                                      color: statusColor,
+                                      size: 16,
+                                    ),
+                                    const SizedBox(width: 6),
+                                    Text(
+                                      ReportStatusUtils.getDetailedStatusText(
+                                        report.status,
+                                      ),
+                                      textAlign: TextAlign.center,
+                                      style: TextStyle(
+                                        color: statusColor,
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 14,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            // Status statement banner
                             Container(
+                              width: double.infinity,
                               padding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 6,
+                                horizontal: 14,
+                                vertical: 10,
                               ),
                               decoration: BoxDecoration(
-                                color: statusColor.withValues(alpha: 0.1),
-                                border: Border.all(color: statusColor),
-                                borderRadius: BorderRadius.circular(20),
+                                color: statusColor.withValues(alpha: 0.07),
+                                borderRadius: BorderRadius.circular(10),
+                                border: Border.all(
+                                  color: statusColor.withValues(alpha: 0.2),
+                                ),
                               ),
                               child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                mainAxisSize: MainAxisSize.min,
+                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Icon(
-                                    ReportStatusUtils.getStatusIcon(
-                                      report.status,
-                                    ),
-                                    color: statusColor,
+                                    Icons.info_outline,
                                     size: 16,
+                                    color: statusColor.withValues(alpha: 0.8),
                                   ),
-                                  const SizedBox(width: 6),
-                                  Text(
-                                    ReportStatusUtils.getDetailedStatusText(
-                                      report.status,
-                                    ),
-                                    textAlign: TextAlign.center,
-                                    style: TextStyle(
-                                      color: statusColor,
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 14,
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      LanguageService()
+                                          .statusStatement(report.status),
+                                      style: TextStyle(
+                                        fontSize: 13,
+                                        color: secondary.withValues(alpha: 0.8),
+                                        height: 1.45,
+                                      ),
                                     ),
                                   ),
                                 ],
