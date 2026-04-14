@@ -296,19 +296,17 @@ class _SignUpScreenState extends State<SignUpScreen> {
             ),
           ),
         ),
-        if (_selectedDateOfBirth != null) ...[
-          SizedBox(height: 4.h),
-          Padding(
-            padding: EdgeInsets.only(left: 4.w),
-            child: Text(
-              'You must be at least 13 years old to register.',
-              style: TextStyle(
-                fontSize: 11.sp,
-                color: const Color(0xFF6B7A8D),
-              ),
+        SizedBox(height: 4.h),
+        Padding(
+          padding: EdgeInsets.only(left: 4.w),
+          child: Text(
+            'Must be at least 13 years old to register.',
+            style: TextStyle(
+              fontSize: 11.sp,
+              color: const Color(0xFF6B7A8D),
             ),
           ),
-        ],
+        ),
         SizedBox(height: 10.h),
         CustomTextField(
           label: 'Password',

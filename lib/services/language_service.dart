@@ -39,6 +39,25 @@ class LanguageService extends ChangeNotifier {
     await setLanguage(isEnglish ? langTagalog : langEnglish);
   }
 
+  // ─── Internal helper — mirrors detection_screen._formatDisplayName ──────────
+
+  String _friendlyClassName(String className) {
+    switch (className) {
+      case 'Fallen-Cone':
+      case 'Fallen_Cone':
+      case 'Fallen-Barrier':
+      case 'Fallen_Barrier':
+        return 'Road Block';
+      case 'Fallen-Pole':
+      case 'Fallen_Pole':
+        return 'Fallen Utility Pole';
+      case 'Pothole':
+        return 'Pothole';
+      default:
+        return className.replaceAll('-', ' ').replaceAll('_', ' ');
+    }
+  }
+
   // ─── Translation helper ───────────────────────────────────────────────────
 
   String t(String en, String tl) => isTagalog ? tl : en;
@@ -151,7 +170,7 @@ class LanguageService extends ChangeNotifier {
 
   // Detection
   String detectionStatement(String className, int count) {
-    final displayName = className.replaceAll('_', ' ').replaceAll('-', ' ');
+    final displayName = _friendlyClassName(className);
     if (count == 1) {
       return t(
         'A $displayName has been detected.',

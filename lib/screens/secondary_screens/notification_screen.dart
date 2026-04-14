@@ -41,10 +41,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: LanguageService(),
+      builder: (context, _) => _buildScaffold(context),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context) {
+    final lang = LanguageService();
     return Scaffold(
       backgroundColor: inputFill,
       appBar: AppBar(
-        title: const Text('Notifications'),
+        title: Text(lang.notifications),
         backgroundColor: inputFill,
         elevation: 0,
         leading: IconButton(

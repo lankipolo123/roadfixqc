@@ -24,35 +24,40 @@ class DetectionBottomCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return AnimatedBuilder(
       animation: LanguageService(),
-      builder: (context, _) => Container(
-      padding: EdgeInsets.all(20.w),
-      decoration: BoxDecoration(
-        color: inputFill,
-        borderRadius: BorderRadius.circular(15.r),
-        boxShadow: const [
-          BoxShadow(color: secondary, blurRadius: 10, offset: Offset(0, 5)),
-        ],
-      ),
-      child: detections.isEmpty ? _buildEmptyState() : Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _buildDetectionTags(),
-          SizedBox(height: 20.h),
-          _buildButtons(),
-        ],
-      ),
-      ),
+      builder: (context, _) {
+        final lang = LanguageService();
+        return Container(
+          padding: EdgeInsets.all(20.w),
+          decoration: BoxDecoration(
+            color: inputFill,
+            borderRadius: BorderRadius.circular(15.r),
+            boxShadow: const [
+              BoxShadow(color: secondary, blurRadius: 10, offset: Offset(0, 5)),
+            ],
+          ),
+          child: detections.isEmpty
+              ? _buildEmptyState(lang)
+              : Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildDetectionTags(lang),
+                    SizedBox(height: 20.h),
+                    _buildButtons(lang),
+                  ],
+                ),
+        );
+      },
     );
   }
 
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(LanguageService lang) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         Icon(Icons.search_off, size: 40.w, color: altSecondary),
         SizedBox(height: 12.h),
         Text(
-          'No issues detected',
+          lang.t('No road hazards detected', 'Walang natukoy na panganib sa kalsada'),
           style: TextStyle(
             fontSize: 16.sp,
             fontWeight: FontWeight.w600,
@@ -61,11 +66,11 @@ class DetectionBottomCard extends StatelessWidget {
         ),
         SizedBox(height: 8.h),
         Text(
-          'Try another photo to detect road hazards',
-          style: TextStyle(
-            fontSize: 13.sp,
-            color: altSecondary,
+          lang.t(
+            'Try taking another photo to detect road hazards.',
+            'Subukang kumuha ng ibang larawan upang matukoy ang mga panganib sa kalsada.',
           ),
+          style: TextStyle(fontSize: 13.sp, color: altSecondary),
           textAlign: TextAlign.center,
         ),
         SizedBox(height: 20.h),
@@ -74,88 +79,66 @@ class DetectionBottomCard extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
           ),
-          child: Text('Retry', style: TextStyle(fontSize: 16.sp)),
+          child: Text(lang.retry, style: TextStyle(fontSize: 16.sp)),
         ),
       ],
     );
   }
 
-  Widget _buildDetectionTags() {
-    final lang = LanguageService();
-
-    if (detections.isNotEmpty) {
-      // Group detections by className
-      final Map<String, int> detectionCounts = {};
-      for (var detection in detections) {
-        detectionCounts[detection.className] =
-            (detectionCounts[detection.className] ?? 0) + 1;
-      }
-
-      return Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            lang.detectionResult,
-            style: TextStyle(
-              fontSize: 13.sp,
-              fontWeight: FontWeight.w700,
-              color: secondary,
-              letterSpacing: 0.3,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Wrap(
-            spacing: 8.w,
-            runSpacing: 8.h,
-            children: detectionCounts.entries.map((entry) {
-              final className = entry.key;
-              final count = entry.value;
-              return Container(
-                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-                decoration: BoxDecoration(
-                  color: Colors.red[50],
-                  borderRadius: BorderRadius.circular(20.r),
-                  border: Border.all(color: Colors.red[200]!),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(Icons.check_circle, size: 14.w, color: statusDanger),
-                    SizedBox(width: 6.w),
-                    Text(
-                      lang.detectionStatement(className, count),
-                      style: const TextStyle(
-                        color: statusDanger,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              );
-            }).toList(),
-          ),
-        ],
-      );
-    } else {
-      return Container(
-        padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-        decoration: BoxDecoration(
-          color: inputFill,
-          borderRadius: BorderRadius.circular(20.r),
-          border: Border.all(color: altSecondary),
-        ),
-        child: Text(
-          lang.noHazardDetected(categoryLabel),
-          style: const TextStyle(
-            color: altSecondary,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-      );
+  Widget _buildDetectionTags(LanguageService lang) {
+    // Group detections by className
+    final Map<String, int> detectionCounts = {};
+    for (var detection in detections) {
+      detectionCounts[detection.className] =
+          (detectionCounts[detection.className] ?? 0) + 1;
     }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          lang.detectionResult,
+          style: TextStyle(
+            fontSize: 13.sp,
+            fontWeight: FontWeight.w700,
+            color: secondary,
+            letterSpacing: 0.3,
+          ),
+        ),
+        SizedBox(height: 8.h),
+        Wrap(
+          spacing: 8.w,
+          runSpacing: 8.h,
+          children: detectionCounts.entries.map((entry) {
+            return Container(
+              padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+              decoration: BoxDecoration(
+                color: Colors.red[50],
+                borderRadius: BorderRadius.circular(20.r),
+                border: Border.all(color: Colors.red[200]!),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(Icons.check_circle, size: 14.w, color: statusDanger),
+                  SizedBox(width: 6.w),
+                  Text(
+                    lang.detectionStatement(entry.key, entry.value),
+                    style: const TextStyle(
+                      color: statusDanger,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }).toList(),
+        ),
+      ],
+    );
   }
 
-  Widget _buildButtons() {
+  Widget _buildButtons(LanguageService lang) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -164,7 +147,7 @@ class DetectionBottomCard extends StatelessWidget {
           style: TextButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
           ),
-          child: Text('Cancel', style: TextStyle(fontSize: 16.sp)),
+          child: Text(lang.cancel, style: TextStyle(fontSize: 16.sp)),
         ),
         SizedBox(width: 20.w),
         ElevatedButton(
@@ -172,7 +155,7 @@ class DetectionBottomCard extends StatelessWidget {
           style: ElevatedButton.styleFrom(
             padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
           ),
-          child: Text('Confirm', style: TextStyle(fontSize: 16.sp)),
+          child: Text(lang.confirm, style: TextStyle(fontSize: 16.sp)),
         ),
       ],
     );
