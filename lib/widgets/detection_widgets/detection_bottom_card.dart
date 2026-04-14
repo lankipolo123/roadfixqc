@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import '../../models/detection_result.dart';
@@ -21,7 +22,9 @@ class DetectionBottomCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
+    return AnimatedBuilder(
+      animation: LanguageService(),
+      builder: (context, _) => Container(
       padding: EdgeInsets.all(20.w),
       decoration: BoxDecoration(
         color: inputFill,
@@ -37,6 +40,7 @@ class DetectionBottomCard extends StatelessWidget {
           SizedBox(height: 20.h),
           _buildButtons(),
         ],
+      ),
       ),
     );
   }
@@ -77,40 +81,60 @@ class DetectionBottomCard extends StatelessWidget {
   }
 
   Widget _buildDetectionTags() {
+    final lang = LanguageService();
+
     if (detections.isNotEmpty) {
-      // Group detections by className: count + collect confidences
-      final Map<String, List<double>> detectionConfidences = {};
+      // Group detections by className
+      final Map<String, int> detectionCounts = {};
       for (var detection in detections) {
-        detectionConfidences
-            .putIfAbsent(detection.className, () => [])
-            .add(detection.confidence);
+        detectionCounts[detection.className] =
+            (detectionCounts[detection.className] ?? 0) + 1;
       }
 
-      return Wrap(
-        spacing: 8.w,
-        runSpacing: 8.h,
-        children: detectionConfidences.entries.map((entry) {
-          final className = entry.key;
-          final confidences = entry.value;
-          final count = confidences.length;
-          final avgConf = confidences.reduce((a, b) => a + b) / count;
-
-          return Container(
-            padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
-            decoration: BoxDecoration(
-              color: Colors.red[50],
-              borderRadius: BorderRadius.circular(20.r),
-              border: Border.all(color: Colors.red[200]!),
+      return Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            lang.detectionResult,
+            style: TextStyle(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w700,
+              color: secondary,
+              letterSpacing: 0.3,
             ),
-            child: Text(
-              '$count ${className.replaceAll('_', ' ')}${count > 1 ? 's' : ''} — ${(avgConf * 100).toStringAsFixed(0)}% confidence',
-              style: const TextStyle(
-                color: statusDanger,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          );
-        }).toList(),
+          ),
+          SizedBox(height: 8.h),
+          Wrap(
+            spacing: 8.w,
+            runSpacing: 8.h,
+            children: detectionCounts.entries.map((entry) {
+              final className = entry.key;
+              final count = entry.value;
+              return Container(
+                padding: EdgeInsets.symmetric(horizontal: 12.w, vertical: 6.h),
+                decoration: BoxDecoration(
+                  color: Colors.red[50],
+                  borderRadius: BorderRadius.circular(20.r),
+                  border: Border.all(color: Colors.red[200]!),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.check_circle, size: 14.w, color: statusDanger),
+                    SizedBox(width: 6.w),
+                    Text(
+                      lang.detectionStatement(className, count),
+                      style: const TextStyle(
+                        color: statusDanger,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            }).toList(),
+          ),
+        ],
       );
     } else {
       return Container(
@@ -121,7 +145,7 @@ class DetectionBottomCard extends StatelessWidget {
           border: Border.all(color: altSecondary),
         ),
         child: Text(
-          'Tag: No ${categoryLabel?.toLowerCase() ?? 'pothole'} detected',
+          lang.noHazardDetected(categoryLabel),
           style: const TextStyle(
             color: altSecondary,
             fontWeight: FontWeight.w600,

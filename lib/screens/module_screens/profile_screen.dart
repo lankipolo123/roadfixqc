@@ -17,6 +17,7 @@ import 'package:roadfix/models/profile_option_model.dart';
 import 'package:roadfix/models/user_model.dart';
 import 'package:roadfix/services/user_service.dart';
 import 'package:roadfix/services/auth_service.dart';
+import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/utils/responsive.dart';
 
@@ -30,6 +31,7 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen> {
   final UserService _userService = UserService();
   final AuthService _authService = AuthService();
+  final LanguageService _languageService = LanguageService();
   bool _isLoggingOut = false;
 
   @override
@@ -91,6 +93,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _handleEditProfile,
         ),
         _buildTotpOptionTile(user), // This now has the switch!
+        _buildLanguageToggleTile(),
         _buildOptionTile(
           Icons.email_outlined,
           'Change Email',
@@ -104,6 +107,56 @@ class _ProfileScreenState extends State<ProfileScreen> {
           _handleChangePassword,
         ),
       ],
+    );
+  }
+
+  Widget _buildLanguageToggleTile() {
+    return AnimatedBuilder(
+      animation: _languageService,
+      builder: (context, _) {
+        return Column(
+          children: [
+            const Divider(height: 1),
+            ProfileOptionTile(
+              option: ProfileOption(
+                icon: Icons.language,
+                label: 'Language / Wika',
+                iconBackgroundColor: tealAccent,
+                mode: ProfileOptionMode.toggle,
+                toggleValue: _languageService.isTagalog,
+                onToggleChanged: (_) async {
+                  await _languageService.toggle();
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          _languageService.isTagalog
+                              ? 'Lumipat sa Filipino (Tagalog)'
+                              : 'Switched to English',
+                        ),
+                        backgroundColor: tealAccent,
+                        duration: const Duration(seconds: 2),
+                      ),
+                    );
+                  }
+                },
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.only(left: 68, right: 16, bottom: 6),
+              child: Text(
+                _languageService.isTagalog
+                    ? 'Kasalukuyang wika: Filipino (Tagalog)'
+                    : 'Current language: English',
+                style: TextStyle(
+                  fontSize: 11,
+                  color: secondary.withValues(alpha: 0.55),
+                ),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 

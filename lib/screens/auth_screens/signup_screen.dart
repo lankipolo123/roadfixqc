@@ -12,6 +12,7 @@ import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/dialog_widgets/dialog_utils.dart';
 import 'package:roadfix/utils/responsive.dart';
+import 'package:intl/intl.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({super.key});
@@ -37,6 +38,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
   final addressFocus = FocusNode();
   final passwordFocus = FocusNode();
 
+  DateTime? _selectedDateOfBirth;
   final _authService = AuthService();
   bool _isLoading = false;
 
@@ -109,6 +111,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return 'Password must contain both letters and numbers';
     }
 
+    if (_selectedDateOfBirth == null) {
+      return 'Date of birth is required';
+    }
+    final today = DateTime.now();
+    final age = today.year - _selectedDateOfBirth!.year -
+        ((today.month < _selectedDateOfBirth!.month ||
+                (today.month == _selectedDateOfBirth!.month &&
+                    today.day < _selectedDateOfBirth!.day))
+            ? 1
+            : 0);
+    if (age < 13) {
+      return 'You must be at least 13 years old to use this app';
+    }
+
     final contactDigits = contact.replaceAll(RegExp(r'\D'), '');
     final isValidMobile =
         contactDigits.length == 11 && contactDigits.startsWith('09');
@@ -119,6 +135,20 @@ class _SignUpScreenState extends State<SignUpScreen> {
       return 'Please enter a valid Philippine phone number';
     }
     return null;
+  }
+
+  Future<void> _pickDateOfBirth() async {
+    final picked = await showDatePicker(
+      context: context,
+      initialDate: DateTime(DateTime.now().year - 16),
+      firstDate: DateTime(1900),
+      lastDate: DateTime.now(),
+      helpText: 'Select your date of birth',
+      fieldLabelText: 'Date of Birth',
+    );
+    if (picked != null && mounted) {
+      setState(() => _selectedDateOfBirth = picked);
+    }
   }
 
   Future<void> _handleSignUp() async {
@@ -227,6 +257,58 @@ class _SignUpScreenState extends State<SignUpScreen> {
           focusNode: addressFocus,
           onNext: () => FocusHelper.next(context, passwordFocus),
         ),
+        SizedBox(height: 10.h),
+        // Date of Birth picker
+        GestureDetector(
+          onTap: _pickDateOfBirth,
+          child: Container(
+            padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 14.h),
+            decoration: BoxDecoration(
+              color: const Color(0xFFF5F7FA),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _selectedDateOfBirth == null
+                    ? const Color(0xFFDDE3EC)
+                    : const Color(0xFF1A73E8),
+                width: 1.5,
+              ),
+            ),
+            child: Row(
+              children: [
+                const Icon(Icons.cake_outlined, color: Color(0xFF6B7A8D), size: 22),
+                SizedBox(width: 12.w),
+                Expanded(
+                  child: Text(
+                    _selectedDateOfBirth == null
+                        ? 'Date of Birth'
+                        : DateFormat('MMMM dd, yyyy').format(_selectedDateOfBirth!),
+                    style: TextStyle(
+                      color: _selectedDateOfBirth == null
+                          ? const Color(0xFF9AA5B4)
+                          : const Color(0xFF1A2B3C),
+                      fontSize: 15.sp,
+                    ),
+                  ),
+                ),
+                const Icon(Icons.calendar_today_outlined,
+                    color: Color(0xFF6B7A8D), size: 18),
+              ],
+            ),
+          ),
+        ),
+        if (_selectedDateOfBirth != null) ...[
+          SizedBox(height: 4.h),
+          Padding(
+            padding: EdgeInsets.only(left: 4.w),
+            child: Text(
+              'You must be at least 13 years old to register.',
+              style: TextStyle(
+                fontSize: 11.sp,
+                color: const Color(0xFF6B7A8D),
+              ),
+            ),
+          ),
+        ],
         SizedBox(height: 10.h),
         CustomTextField(
           label: 'Password',

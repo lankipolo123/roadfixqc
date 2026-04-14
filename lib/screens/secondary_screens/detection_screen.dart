@@ -7,6 +7,7 @@ import 'package:roadfix/models/detection_result.dart';
 import 'package:roadfix/models/report_category_model.dart';
 import 'package:roadfix/screens/secondary_screens/send_report_screen.dart';
 import 'package:roadfix/services/detection_service.dart';
+import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/widgets/detection_widgets/detection_bottom_card.dart';
 import 'package:roadfix/widgets/dialog_widgets/loading_dialog.dart';
 import 'package:roadfix/widgets/dialog_widgets/location_required_dialog.dart';
@@ -212,34 +213,27 @@ class _DetectionScreenState extends State<DetectionScreen> {
     if (!mounted) return;
 
     final Map<String, int> detectionCounts = {};
-    double totalConfidence = 0;
 
     for (var detection in _detections) {
       detectionCounts[detection.className] =
           (detectionCounts[detection.className] ?? 0) + 1;
-      totalConfidence += detection.confidence;
     }
-
-    final avgConfidence =
-        (totalConfidence / _detections.length * 100).toStringAsFixed(1);
 
     final detectionTags = detectionCounts.keys
         .map((className) => _formatDisplayName(className))
         .toList();
 
+    final lang = LanguageService();
     final descriptionParts = <String>[];
-    descriptionParts.add('Detection Results:');
+    descriptionParts.add(lang.detectionResults);
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
-      final displayName = _formatDisplayName(entry.key);
-      descriptionParts.add(
-        '${entry.value}x $displayName${entry.value > 1 ? 's' : ''}',
-      );
+      descriptionParts.add('• ${lang.detectionStatement(entry.key, entry.value)}');
     }
 
     descriptionParts.add('');
-    descriptionParts.add('Confidence: $avgConfidence%');
+    descriptionParts.add(lang.detectedStatus);
 
     final autoDescription = descriptionParts.join('\n');
 
@@ -292,8 +286,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
         final rect = Rect.fromLTRB(left, top, right, bottom);
         canvas.drawRect(rect, boxPaint);
 
-        final label =
-            '${_formatDisplayName(det.className)} ${(det.confidence * 100).toStringAsFixed(1)}%';
+        final label = '${_formatDisplayName(det.className)} — Detected';
         final builder = ui.ParagraphBuilder(
           ui.ParagraphStyle(textAlign: TextAlign.left, fontSize: fontSize),
         )
@@ -445,7 +438,7 @@ class _DetectionBoxPainter extends CustomPainter {
       canvas.drawRect(rect, boxPaint);
 
       final label =
-          '${det.className.replaceAll('-', ' ').replaceAll('_', ' ')} ${(det.confidence * 100).toStringAsFixed(1)}%';
+          '${det.className.replaceAll('-', ' ').replaceAll('_', ' ')} — Detected';
       final textPainter = TextPainter(
         text: TextSpan(
           text: label,
