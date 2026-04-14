@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
+import 'package:roadfix/widgets/reporting_widgets/image_gallery_widget.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class PublicReportDetailScreen extends StatelessWidget {
@@ -28,9 +29,25 @@ class PublicReportDetailScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Report Image
-            _buildReportImage(),
-            const SizedBox(height: 16),
+            // BEFORE — original report images
+            if (report.imageUrl.isNotEmpty) ...[
+              ImageGalleryWidget(
+                images: report.imageUrl,
+                label: 'BEFORE - REPORTED ISSUE',
+                labelColor: altSecondary,
+              ),
+              const SizedBox(height: 16),
+            ],
+
+            // AFTER — admin resolved images (only when present)
+            if (report.hasResolvedImage) ...[
+              ImageGalleryWidget(
+                images: report.resolvedImages,
+                label: 'AFTER - RESOLVED',
+                labelColor: statusSuccess,
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Compact Info Grid
             Row(
@@ -155,56 +172,6 @@ class PublicReportDetailScreen extends StatelessWidget {
               const SizedBox(height: 16),
             ],
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildReportImage() {
-    if (report.imageUrl.isEmpty) {
-      return Container(
-        height: 180,
-        width: double.infinity,
-        decoration: BoxDecoration(
-          color: Colors.grey[100],
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Center(
-          child: Text(
-            'No image available',
-            style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-          ),
-        ),
-      );
-    }
-
-    return Container(
-      height: 200,
-      width: double.infinity,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(8)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(8),
-        child: Image.network(
-          report.primaryImageUrl,
-          fit: BoxFit.cover,
-          loadingBuilder: (context, child, loadingProgress) {
-            if (loadingProgress == null) return child;
-            return Container(
-              color: Colors.grey[100],
-              child: const Center(child: CircularProgressIndicator()),
-            );
-          },
-          errorBuilder: (context, error, stackTrace) {
-            return Container(
-              color: Colors.grey[100],
-              child: Center(
-                child: Text(
-                  'Failed to load image',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[500]),
-                ),
-              ),
-            );
-          },
         ),
       ),
     );

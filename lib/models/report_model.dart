@@ -21,8 +21,9 @@ class ReportModel {
   final String priority;
   final bool isRead;
 
-  // NEW: Resolved image fields
-  final String? resolvedImageUrl;
+  // Resolved image fields
+  final String? resolvedImageUrl;           // legacy single-image field (kept for backwards compat)
+  final List<String> resolvedImages;        // multi-image list uploaded by admin
   final String? completionNotes;
   final Timestamp? completionImageUploadedAt;
 
@@ -47,9 +48,25 @@ class ReportModel {
     this.priority = ReportPriority.medium,
     this.isRead = false,
     this.resolvedImageUrl,
+    this.resolvedImages = const [],
     this.completionNotes,
     this.completionImageUploadedAt,
   });
+
+  /// Parses resolved images from Firestore, supporting both:
+  /// - New format: `resolvedImages` (List<String>)
+  /// - Legacy format: `resolvedImageUrl` (String) — wrapped into a list
+  static List<String> _parseResolvedImages(Map<String, dynamic> data) {
+    final newField = data['resolvedImages'];
+    if (newField is List && newField.isNotEmpty) {
+      return List<String>.from(newField);
+    }
+    final legacy = data['resolvedImageUrl'];
+    if (legacy is String && legacy.isNotEmpty) {
+      return [legacy];
+    }
+    return [];
+  }
 
   factory ReportModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
@@ -103,6 +120,7 @@ class ReportModel {
       priority: data['priority'] ?? ReportPriority.medium,
       isRead: data['isRead'] ?? false,
       resolvedImageUrl: data['resolvedImageUrl'],
+      resolvedImages: _parseResolvedImages(data),
       completionNotes: data['completionNotes'],
       completionImageUploadedAt: data['completionImageUploadedAt'],
     );
@@ -129,6 +147,7 @@ class ReportModel {
       'priority': priority,
       'isRead': isRead,
       'resolvedImageUrl': resolvedImageUrl,
+      'resolvedImages': resolvedImages,
       'completionNotes': completionNotes,
       'completionImageUploadedAt': completionImageUploadedAt,
     };
@@ -155,6 +174,7 @@ class ReportModel {
     String? priority,
     bool? isRead,
     String? resolvedImageUrl,
+    List<String>? resolvedImages,
     String? completionNotes,
     Timestamp? completionImageUploadedAt,
   }) {
@@ -162,8 +182,8 @@ class ReportModel {
       id: id ?? this.id,
       description: description ?? this.description,
       location: location ?? this.location,
-      latitude: latitude ?? this.latitude, // NEW
-      longitude: longitude ?? this.longitude, // NEW
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
       imageUrl: imageUrl ?? this.imageUrl,
       reportType: reportType ?? this.reportType,
       tags: tags ?? this.tags,
@@ -179,6 +199,7 @@ class ReportModel {
       priority: priority ?? this.priority,
       isRead: isRead ?? this.isRead,
       resolvedImageUrl: resolvedImageUrl ?? this.resolvedImageUrl,
+      resolvedImages: resolvedImages ?? this.resolvedImages,
       completionNotes: completionNotes ?? this.completionNotes,
       completionImageUploadedAt:
           completionImageUploadedAt ?? this.completionImageUploadedAt,
@@ -192,8 +213,7 @@ class ReportModel {
   bool get isInProgress => status == ReportStatus.inProgress;
   bool get hasAdminReview => reviewedBy.isNotEmpty;
   bool get isUnreadNotification => !isRead && reviewedAt != null;
-  bool get hasResolvedImage =>
-      resolvedImageUrl != null && resolvedImageUrl!.isNotEmpty;
+  bool get hasResolvedImage => resolvedImages.isNotEmpty;
   bool get hasCoordinates => latitude != null && longitude != null; // NEW
 
   String get primaryImageUrl => imageUrl.isNotEmpty ? imageUrl.first : '';
