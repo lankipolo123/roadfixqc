@@ -126,7 +126,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 toggleValue: _languageService.isTagalog,
                 onToggleChanged: (_) async {
                   await _languageService.toggle();
-                  if (mounted) {
+                  if (context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(
