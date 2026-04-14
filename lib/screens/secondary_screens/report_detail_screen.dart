@@ -5,7 +5,7 @@ import 'package:roadfix/layouts/diagonal_background.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
 import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/widgets/reporting_widgets/detection_tags.dart';
-import 'package:cached_network_image/cached_network_image.dart';
+import 'package:roadfix/widgets/reporting_widgets/image_gallery_widget.dart';
 import 'package:intl/intl.dart';
 
 class ReportDetailScreen extends StatelessWidget {
@@ -48,70 +48,22 @@ class ReportDetailScreen extends StatelessWidget {
                             ),
                             const SizedBox(height: 16),
 
-                            // BEFORE IMAGE (Original Report Image)
+                            // BEFORE — original report images (gallery)
                             if (report.imageUrl.isNotEmpty) ...[
-                              const Text(
-                                'BEFORE - REPORTED ISSUE',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: altSecondary,
-                                  letterSpacing: 0.5,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () => _showFullImage(
-                                  context,
-                                  report.imageUrl.first,
-                                  'Before - Reported Issue',
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: CachedNetworkImage(
-                                    imageUrl: report.imageUrl.first,
-                                    height: 180,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    placeholder: (_, __) => _loader(),
-                                    errorWidget: (_, __, ___) => _error(),
-                                  ),
-                                ),
+                              ImageGalleryWidget(
+                                images: report.imageUrl,
+                                label: 'BEFORE - REPORTED ISSUE',
+                                labelColor: altSecondary,
                               ),
                               const SizedBox(height: 20),
                             ],
 
-                            // AFTER IMAGE (Resolved/Completion Image)
+                            // AFTER — admin resolved images (gallery)
                             if (report.hasResolvedImage) ...[
-                              const Text(
-                                'AFTER - RESOLVED',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: statusSuccess,
-                                  letterSpacing: 0.5,
-                                ),
-                                textAlign: TextAlign.center,
-                              ),
-                              const SizedBox(height: 8),
-                              GestureDetector(
-                                onTap: () => _showFullImage(
-                                  context,
-                                  report.resolvedImageUrl!,
-                                  'After - Resolved',
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(12),
-                                  child: CachedNetworkImage(
-                                    imageUrl: report.resolvedImageUrl!,
-                                    height: 180,
-                                    width: double.infinity,
-                                    fit: BoxFit.cover,
-                                    placeholder: (_, __) => _loader(),
-                                    errorWidget: (_, __, ___) => _error(),
-                                  ),
-                                ),
+                              ImageGalleryWidget(
+                                images: report.resolvedImages,
+                                label: 'AFTER - RESOLVED',
+                                labelColor: statusSuccess,
                               ),
                               const SizedBox(height: 20),
                             ],
@@ -368,61 +320,6 @@ class ReportDetailScreen extends StatelessWidget {
     );
   }
 
-  void _showFullImage(BuildContext context, String imageUrl, String title) {
-    showDialog(
-      context: context,
-      builder: (context) => Dialog(
-        backgroundColor: Colors.transparent,
-        insetPadding: const EdgeInsets.all(16),
-        child: Stack(
-          children: [
-            GestureDetector(
-              onTap: () => Navigator.pop(context),
-              child: Container(
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(12),
-                  color: Colors.black87,
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Text(
-                        title,
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
-                    InteractiveViewer(
-                      child: CachedNetworkImage(
-                        imageUrl: imageUrl,
-                        fit: BoxFit.contain,
-                        placeholder: (_, __) => _loader(),
-                        errorWidget: (_, __, ___) => _error(),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            Positioned(
-              top: 8,
-              right: 8,
-              child: IconButton(
-                icon: const Icon(Icons.close, color: Colors.white, size: 30),
-                onPressed: () => Navigator.pop(context),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   static Widget _info(IconData icon, String label, String value) => Padding(
     padding: const EdgeInsets.only(bottom: 12),
     child: Row(
@@ -457,17 +354,5 @@ class ReportDetailScreen extends StatelessWidget {
     ),
   );
 
-  static Widget _loader() => Container(
-    height: 180,
-    color: altSecondary.withValues(alpha: 0.1),
-    child: const Center(child: CircularProgressIndicator(color: primary)),
-  );
-
-  static Widget _error() => Container(
-    height: 180,
-    color: altSecondary.withValues(alpha: 0.1),
-    child: const Center(
-      child: Icon(Icons.error, color: statusDanger, size: 48),
-    ),
-  );
 }
+
