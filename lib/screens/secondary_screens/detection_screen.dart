@@ -233,7 +233,6 @@ class _DetectionScreenState extends State<DetectionScreen> {
     }
 
     descriptionParts.add('');
-    descriptionParts.add(lang.detectedStatus);
 
     final autoDescription = descriptionParts.join('\n');
 
