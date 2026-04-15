@@ -119,82 +119,54 @@ class _ProfileScreenState extends State<ProfileScreen> {
           children: [
             const Divider(height: 1),
             Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              padding: EdgeInsets.symmetric(vertical: 6.h, horizontal: 8.w),
               child: Row(
                 children: [
-                  // Icon badge
-                  Container(
-                    width: 36.w,
-                    height: 36.w,
-                    decoration: BoxDecoration(
-                      color: tealAccent,
-                      borderRadius: BorderRadius.circular(8.r),
-                    ),
-                    child: Icon(Icons.language, color: Colors.white, size: 20.w),
+                  CircleAvatar(
+                    radius: 14.r,
+                    backgroundColor: tealAccent,
+                    child: Icon(Icons.language, color: inputFill, size: 12.r),
                   ),
-                  SizedBox(width: 12.w),
+                  SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
                       'Language / Wika',
+                      style: TextStyle(fontSize: 14.sp, color: secondary),
+                    ),
+                  ),
+                  Text(
+                    'English',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: !isTagalog ? tealAccent : altSecondary,
+                    ),
+                  ),
+                  Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 4.w),
+                    child: Text(
+                      '/',
                       style: TextStyle(
-                        fontSize: 14.sp,
-                        fontWeight: FontWeight.w500,
-                        color: secondary,
-                      ),
+                          fontSize: 12.sp, color: altSecondary),
                     ),
                   ),
-                  // EN / TL segmented pill
-                  GestureDetector(
-                    onTap: isTagalog
-                        ? () async { await _languageService.toggle(); }
-                        : null,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 12.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: !isTagalog
-                            ? tealAccent
-                            : Colors.grey.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.only(
-                          topLeft: Radius.circular(20.r),
-                          bottomLeft: Radius.circular(20.r),
-                        ),
-                      ),
-                      child: Text(
-                        'EN',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w700,
-                          color: !isTagalog ? Colors.white : Colors.grey,
-                        ),
-                      ),
+                  Text(
+                    'Tagalog',
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      fontWeight: FontWeight.w600,
+                      color: isTagalog ? tealAccent : altSecondary,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: !isTagalog
-                        ? () async { await _languageService.toggle(); }
-                        : null,
-                    child: Container(
-                      padding: EdgeInsets.symmetric(
-                          horizontal: 12.w, vertical: 6.h),
-                      decoration: BoxDecoration(
-                        color: isTagalog
-                            ? tealAccent
-                            : Colors.grey.withValues(alpha: 0.15),
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(20.r),
-                          bottomRight: Radius.circular(20.r),
-                        ),
-                      ),
-                      child: Text(
-                        'TL',
-                        style: TextStyle(
-                          fontSize: 12.sp,
-                          fontWeight: FontWeight.w700,
-                          color: isTagalog ? Colors.white : Colors.grey,
-                        ),
-                      ),
-                    ),
+                  Switch(
+                    value: isTagalog,
+                    onChanged: (_) async => await _languageService.toggle(),
+                    activeColor: inputFill,
+                    activeTrackColor: statusSuccess,
+                    inactiveThumbColor: inputFill,
+                    inactiveTrackColor: secondary,
+                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                    splashRadius: 10.r,
                   ),
                 ],
               ),
