@@ -4,6 +4,7 @@ import 'package:flutter/services.dart';
 import 'package:roadfix/services/totp_service.dart';
 import 'package:roadfix/services/firestore_service.dart';
 import 'package:roadfix/services/user_service.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class TotpDisableDialog extends StatefulWidget {
@@ -37,9 +38,7 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
 
   Future<void> _verifyAndDisable() async {
     if (_codeController.text.length != 6) {
-      setState(() {
-        _errorMessage = 'Please enter a 6-digit code';
-      });
+      setState(() => _errorMessage = 'Please enter a 6-digit code');
       return;
     }
 
@@ -82,15 +81,15 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: inputFill,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             _buildContent(),
           ],
         ),
@@ -102,19 +101,19 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
             color: statusDanger,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          child: const Icon(Icons.security, color: inputFill, size: 24),
+          child: Icon(Icons.security, color: inputFill, size: 24.w),
         ),
-        const SizedBox(width: 12),
-        const Expanded(
+        SizedBox(width: 12.w),
+        Expanded(
           child: Text(
             'Disable Two-Factor Authentication',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: secondary,
             ),
@@ -122,7 +121,7 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
         ),
         IconButton(
           onPressed: () => Navigator.of(context).pop(false),
-          icon: const Icon(Icons.close, color: altSecondary),
+          icon: Icon(Icons.close, color: altSecondary, size: 22.w),
         ),
       ],
     );
@@ -132,21 +131,21 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
     return Column(
       children: [
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: statusWarning,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
-          child: const Row(
+          child: Row(
             children: [
-              Icon(Icons.warning_amber_rounded, color: inputFill, size: 24),
-              SizedBox(width: 12),
+              Icon(Icons.warning_amber_rounded, color: inputFill, size: 24.w),
+              SizedBox(width: 12.w),
               Expanded(
                 child: Text(
                   'Disabling 2FA will make your account less secure. You can re-enable it anytime.',
                   style: TextStyle(
                     color: inputFill,
-                    fontSize: 14,
+                    fontSize: 13.sp,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -154,13 +153,13 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
             ],
           ),
         ),
-        const SizedBox(height: 24),
-        const Text(
+        SizedBox(height: 24.h),
+        Text(
           'Enter your current 6-digit authentication code to confirm:',
-          style: TextStyle(color: altSecondary, fontSize: 14),
+          style: TextStyle(color: altSecondary, fontSize: 13.sp),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 16),
+        SizedBox(height: 16.h),
         TextField(
           controller: _codeController,
           decoration: InputDecoration(
@@ -169,47 +168,43 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
             filled: true,
             fillColor: inputFill,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: primary, width: 2),
             ),
             errorText: _errorMessage,
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
           ),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             letterSpacing: 4,
             color: secondary,
           ),
           maxLength: 6,
-          buildCounter:
-              (
-                context, {
-                required currentLength,
-                required isFocused,
-                maxLength,
-              }) => null,
+          buildCounter: (context,
+                  {required currentLength,
+                  required isFocused,
+                  maxLength}) =>
+              null,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: (value) {
-            if (_errorMessage != null) {
-              setState(() => _errorMessage = null);
-            }
+            if (_errorMessage != null) setState(() => _errorMessage = null);
           },
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         Row(
           children: [
             Expanded(
@@ -217,37 +212,38 @@ class _TotpDisableDialogState extends State<TotpDisableDialog> {
                 onPressed: _isVerifying
                     ? null
                     : () => Navigator.of(context).pop(false),
-                child: const Text(
+                child: Text(
                   'Cancel',
-                  style: TextStyle(color: altSecondary),
+                  style: TextStyle(color: altSecondary, fontSize: 14.sp),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: ElevatedButton(
                 onPressed: _isVerifying ? null : _verifyAndDisable,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: statusDanger,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
                 child: _isVerifying
-                    ? const SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(
+                    ? SizedBox(
+                        height: 16.w,
+                        width: 16.w,
+                        child: const CircularProgressIndicator(
                           strokeWidth: 2,
                           color: inputFill,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'Disable 2FA',
                         style: TextStyle(
                           color: inputFill,
                           fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
                         ),
                       ),
               ),

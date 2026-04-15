@@ -5,6 +5,7 @@ import 'package:qr_flutter/qr_flutter.dart';
 import 'package:roadfix/services/totp_service.dart';
 import 'package:roadfix/services/firestore_service.dart';
 import 'package:roadfix/services/user_service.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class TotpSetupDialog extends StatefulWidget {
@@ -58,9 +59,7 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
         issuer: 'RoadFix',
       );
 
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     } catch (e) {
       setState(() {
         _isLoading = false;
@@ -71,9 +70,7 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
 
   Future<void> _verifyAndEnable() async {
     if (_codeController.text.length != 6) {
-      setState(() {
-        _errorMessage = 'Please enter a 6-digit code';
-      });
+      setState(() => _errorMessage = 'Please enter a 6-digit code');
       return;
     }
 
@@ -125,15 +122,15 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: inputFill,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             if (_isLoading)
               const Center(child: CircularProgressIndicator(color: primary))
             else if (_errorMessage != null)
@@ -150,19 +147,19 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
             color: primary,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          child: const Icon(Icons.security, color: secondary, size: 24),
+          child: Icon(Icons.security, color: secondary, size: 24.w),
         ),
-        const SizedBox(width: 12),
-        const Expanded(
+        SizedBox(width: 12.w),
+        Expanded(
           child: Text(
             'Enable Two-Factor Authentication',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: secondary,
             ),
@@ -170,7 +167,7 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
         ),
         IconButton(
           onPressed: () => Navigator.of(context).pop(false),
-          icon: const Icon(Icons.close, color: altSecondary),
+          icon: Icon(Icons.close, color: altSecondary, size: 22.w),
         ),
       ],
     );
@@ -179,31 +176,32 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
   Widget _buildErrorState() {
     return Column(
       children: [
-        const Icon(Icons.error_outline, size: 48, color: statusDanger),
-        const SizedBox(height: 16),
+        Icon(Icons.error_outline, size: 48.w, color: statusDanger),
+        SizedBox(height: 16.h),
         Text(
           _errorMessage!,
-          style: const TextStyle(color: statusDanger, fontSize: 14),
+          style: TextStyle(color: statusDanger, fontSize: 14.sp),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         Row(
           children: [
             Expanded(
               child: TextButton(
                 onPressed: () => Navigator.of(context).pop(false),
-                child: const Text(
+                child: Text(
                   'Cancel',
-                  style: TextStyle(color: altSecondary),
+                  style: TextStyle(color: altSecondary, fontSize: 14.sp),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: ElevatedButton(
                 onPressed: _generateTotpSetup,
                 style: ElevatedButton.styleFrom(backgroundColor: primary),
-                child: const Text('Retry', style: TextStyle(color: secondary)),
+                child: Text('Retry',
+                    style: TextStyle(color: secondary, fontSize: 14.sp)),
               ),
             ),
           ],
@@ -216,7 +214,7 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
     return Column(
       children: [
         _buildStepIndicator(),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         if (_currentStep == 0) _buildQrCodeStep() else _buildVerificationStep(),
       ],
     );
@@ -242,8 +240,8 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
     return Column(
       children: [
         Container(
-          width: 32,
-          height: 32,
+          width: 32.w,
+          height: 32.w,
           decoration: BoxDecoration(
             color: isActive ? primary : altSecondary,
             shape: BoxShape.circle,
@@ -254,17 +252,17 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
               style: TextStyle(
                 color: isActive ? secondary : inputFill,
                 fontWeight: FontWeight.w600,
-                fontSize: 14,
+                fontSize: 14.sp,
               ),
             ),
           ),
         ),
-        const SizedBox(height: 4),
+        SizedBox(height: 4.h),
         Text(
           label,
           style: TextStyle(
             color: isActive ? secondary : altSecondary,
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -275,74 +273,77 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
   Widget _buildQrCodeStep() {
     return Column(
       children: [
-        const Text(
+        Text(
           'Scan this QR code with your authenticator app (Google Authenticator, Authy, etc.)',
-          style: TextStyle(color: altSecondary, fontSize: 14),
+          style: TextStyle(color: altSecondary, fontSize: 13.sp),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 20.h),
         Container(
-          padding: const EdgeInsets.all(16),
+          padding: EdgeInsets.all(16.w),
           decoration: BoxDecoration(
             color: inputFill,
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
             border: Border.all(color: altSecondary),
           ),
           child: QrImageView(
             data: _qrCodeUrl,
             version: QrVersions.auto,
-            size: 200,
+            size: 180.w,
             backgroundColor: inputFill,
           ),
         ),
-        const SizedBox(height: 16),
-        const Text(
+        SizedBox(height: 16.h),
+        Text(
           'Or manually enter this secret key:',
-          style: TextStyle(color: altSecondary, fontSize: 12),
+          style: TextStyle(color: altSecondary, fontSize: 12.sp),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Container(
-          padding: const EdgeInsets.all(12),
+          padding: EdgeInsets.all(12.w),
           decoration: BoxDecoration(
             color: altSecondary,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
           child: Row(
             children: [
               Expanded(
                 child: Text(
                   _secret,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontFamily: 'monospace',
-                    fontSize: 12,
+                    fontSize: 12.sp,
                     color: inputFill,
                   ),
                 ),
               ),
               IconButton(
                 onPressed: _copySecret,
-                icon: const Icon(Icons.copy, size: 16, color: primary),
+                icon: Icon(Icons.copy, size: 16.w, color: primary),
                 padding: EdgeInsets.zero,
                 constraints: const BoxConstraints(),
               ),
             ],
           ),
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
             onPressed: () => setState(() => _currentStep = 1),
             style: ElevatedButton.styleFrom(
               backgroundColor: primary,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: 12.h),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
             ),
-            child: const Text(
+            child: Text(
               'Next',
-              style: TextStyle(color: secondary, fontWeight: FontWeight.w600),
+              style: TextStyle(
+                  color: secondary,
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14.sp),
             ),
           ),
         ),
@@ -353,12 +354,12 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
   Widget _buildVerificationStep() {
     return Column(
       children: [
-        const Text(
+        Text(
           'Enter the 6-digit code from your authenticator app to complete setup:',
-          style: TextStyle(color: altSecondary, fontSize: 14),
+          style: TextStyle(color: altSecondary, fontSize: 13.sp),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         TextField(
           controller: _codeController,
           decoration: InputDecoration(
@@ -367,47 +368,43 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
             filled: true,
             fillColor: inputFill,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: primary, width: 2),
             ),
             errorText: _errorMessage,
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
           ),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             letterSpacing: 4,
             color: secondary,
           ),
           maxLength: 6,
-          buildCounter:
-              (
-                context, {
-                required currentLength,
-                required isFocused,
-                maxLength,
-              }) => null,
+          buildCounter: (context,
+                  {required currentLength,
+                  required isFocused,
+                  maxLength}) =>
+              null,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: (value) {
-            if (_errorMessage != null) {
-              setState(() => _errorMessage = null);
-            }
+            if (_errorMessage != null) setState(() => _errorMessage = null);
           },
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         Row(
           children: [
             Expanded(
@@ -415,37 +412,38 @@ class _TotpSetupDialogState extends State<TotpSetupDialog> {
                 onPressed: _isVerifying
                     ? null
                     : () => setState(() => _currentStep = 0),
-                child: const Text(
+                child: Text(
                   'Back',
-                  style: TextStyle(color: altSecondary),
+                  style: TextStyle(color: altSecondary, fontSize: 14.sp),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: ElevatedButton(
                 onPressed: _isVerifying ? null : _verifyAndEnable,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: primary,
-                  padding: const EdgeInsets.symmetric(vertical: 12),
+                  padding: EdgeInsets.symmetric(vertical: 12.h),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(8),
+                    borderRadius: BorderRadius.circular(8.r),
                   ),
                 ),
                 child: _isVerifying
-                    ? const SizedBox(
-                        height: 16,
-                        width: 16,
-                        child: CircularProgressIndicator(
+                    ? SizedBox(
+                        height: 16.w,
+                        width: 16.w,
+                        child: const CircularProgressIndicator(
                           strokeWidth: 2,
                           color: secondary,
                         ),
                       )
-                    : const Text(
+                    : Text(
                         'Enable 2FA',
                         style: TextStyle(
                           color: secondary,
                           fontWeight: FontWeight.w600,
+                          fontSize: 14.sp,
                         ),
                       ),
               ),
