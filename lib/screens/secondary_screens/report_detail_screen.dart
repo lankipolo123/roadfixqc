@@ -3,6 +3,7 @@ import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/layouts/diagonal_background.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/widgets/reporting_widgets/detection_tags.dart';
 import 'package:roadfix/widgets/reporting_widgets/image_gallery_widget.dart';
@@ -15,6 +16,14 @@ class ReportDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: LanguageService(),
+      builder: (context, _) => _buildScreen(context),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
+    final lang = LanguageService();
     final statusColor = ReportStatusUtils.getStatusColor(report.status);
 
     return DiagonalBackgroundLayout(
@@ -22,63 +31,69 @@ class ReportDetailScreen extends StatelessWidget {
         backgroundColor: transparent,
         body: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(16),
+            padding: EdgeInsets.all(16.w),
             child: Column(
               children: [
                 Expanded(
                   child: SingleChildScrollView(
                     child: Card(
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
+                        borderRadius: BorderRadius.circular(12.r),
                       ),
                       color: inputFill,
                       child: Padding(
-                        padding: const EdgeInsets.all(20),
+                        padding: EdgeInsets.all(20.w),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.stretch,
                           children: [
-                            const Text(
-                              'Report Details',
+                            Text(
+                              lang.reportDetails,
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                fontSize: 18,
+                                fontSize: 18.sp,
                                 fontWeight: FontWeight.bold,
                                 color: secondary,
                               ),
                             ),
-                            const SizedBox(height: 16),
+                            SizedBox(height: 16.h),
 
                             // BEFORE — original report images (gallery)
                             if (report.imageUrl.isNotEmpty) ...[
                               ImageGalleryWidget(
                                 images: report.imageUrl,
-                                label: 'BEFORE - REPORTED ISSUE',
+                                label: lang.t(
+                                  'BEFORE - REPORTED ISSUE',
+                                  'BAGO - INIULAT NA ISYU',
+                                ),
                                 labelColor: altSecondary,
                               ),
-                              const SizedBox(height: 20),
+                              SizedBox(height: 20.h),
                             ],
 
                             // AFTER — admin resolved images (gallery)
                             if (report.hasResolvedImage) ...[
                               ImageGalleryWidget(
                                 images: report.resolvedImages,
-                                label: 'AFTER - RESOLVED',
+                                label: lang.t(
+                                  'AFTER - RESOLVED',
+                                  'PAGKATAPOS - NAAYOS NA',
+                                ),
                                 labelColor: statusSuccess,
                               ),
-                              const SizedBox(height: 20),
+                              SizedBox(height: 20.h),
                             ],
 
                             // Status badge
                             Center(
                               child: Container(
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 12,
-                                  vertical: 6,
+                                padding: EdgeInsets.symmetric(
+                                  horizontal: 12.w,
+                                  vertical: 6.h,
                                 ),
                                 decoration: BoxDecoration(
                                   color: statusColor.withValues(alpha: 0.1),
                                   border: Border.all(color: statusColor),
-                                  borderRadius: BorderRadius.circular(20),
+                                  borderRadius: BorderRadius.circular(20.r),
                                 ),
                                 child: Row(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -89,9 +104,9 @@ class ReportDetailScreen extends StatelessWidget {
                                         report.status,
                                       ),
                                       color: statusColor,
-                                      size: 16,
+                                      size: 16.w,
                                     ),
-                                    const SizedBox(width: 6),
+                                    SizedBox(width: 6.w),
                                     Text(
                                       ReportStatusUtils.getDetailedStatusText(
                                         report.status,
@@ -100,24 +115,25 @@ class ReportDetailScreen extends StatelessWidget {
                                       style: TextStyle(
                                         color: statusColor,
                                         fontWeight: FontWeight.bold,
-                                        fontSize: 14,
+                                        fontSize: 14.sp,
                                       ),
                                     ),
                                   ],
                                 ),
                               ),
                             ),
-                            const SizedBox(height: 12),
+                            SizedBox(height: 12.h),
+
                             // Status statement banner
                             Container(
                               width: double.infinity,
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 14,
-                                vertical: 10,
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 14.w,
+                                vertical: 10.h,
                               ),
                               decoration: BoxDecoration(
                                 color: statusColor.withValues(alpha: 0.07),
-                                borderRadius: BorderRadius.circular(10),
+                                borderRadius: BorderRadius.circular(10.r),
                                 border: Border.all(
                                   color: statusColor.withValues(alpha: 0.2),
                                 ),
@@ -127,16 +143,15 @@ class ReportDetailScreen extends StatelessWidget {
                                 children: [
                                   Icon(
                                     Icons.info_outline,
-                                    size: 16,
+                                    size: 16.w,
                                     color: statusColor.withValues(alpha: 0.8),
                                   ),
-                                  const SizedBox(width: 8),
+                                  SizedBox(width: 8.w),
                                   Expanded(
                                     child: Text(
-                                      LanguageService()
-                                          .statusStatement(report.status),
+                                      lang.statusStatement(report.status),
                                       style: TextStyle(
-                                        fontSize: 13,
+                                        fontSize: 13.sp,
                                         color: secondary.withValues(alpha: 0.8),
                                         height: 1.45,
                                       ),
@@ -145,30 +160,24 @@ class ReportDetailScreen extends StatelessWidget {
                                 ],
                               ),
                             ),
-                            const SizedBox(height: 20),
+                            SizedBox(height: 20.h),
 
                             // Detection Tags
                             if (report.tags.isNotEmpty) ...[
                               DetectionTags(detections: report.tags),
                             ],
 
-                            _info(Icons.category, 'Type', report.reportType),
-                            _info(
-                              Icons.location_on,
-                              'Location',
-                              report.location,
-                            ),
-                            _info(
-                              Icons.description,
-                              'Description',
-                              report.description,
-                            ),
+                            _info(Icons.category, lang.typeLabel,
+                                report.reportType),
+                            _info(Icons.location_on, lang.locationLabel,
+                                report.location),
+                            _info(Icons.description, lang.descriptionLabel,
+                                report.description),
                             _info(
                               Icons.schedule,
-                              'Submitted',
-                              DateFormat(
-                                'MMM dd, yyyy - hh:mm a',
-                              ).format(report.reportedAt.toDate()),
+                              lang.submittedLabel,
+                              DateFormat('MMM dd, yyyy - hh:mm a')
+                                  .format(report.reportedAt.toDate()),
                             ),
 
                             // Completion Notes
@@ -177,46 +186,39 @@ class ReportDetailScreen extends StatelessWidget {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Divider(
-                                    height: 30,
-                                    color: altSecondary,
-                                  ),
-                                  const Row(
+                                  Divider(height: 30.h, color: altSecondary),
+                                  Row(
                                     children: [
-                                      Icon(
-                                        Icons.task_alt,
-                                        color: statusSuccess,
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 8),
+                                      Icon(Icons.task_alt,
+                                          color: statusSuccess, size: 16.w),
+                                      SizedBox(width: 8.w),
                                       Text(
-                                        'Completion Notes',
+                                        lang.completionNotesLabel,
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.bold,
                                           color: statusSuccess,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: 8.h),
                                   Container(
-                                    padding: const EdgeInsets.all(12),
+                                    padding: EdgeInsets.all(12.w),
                                     decoration: BoxDecoration(
                                       color: statusSuccess.withValues(
-                                        alpha: 0.05,
-                                      ),
+                                          alpha: 0.05),
                                       border: Border.all(
                                         color: statusSuccess.withValues(
-                                          alpha: 0.2,
-                                        ),
+                                            alpha: 0.2),
                                       ),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius:
+                                          BorderRadius.circular(8.r),
                                     ),
                                     child: Text(
                                       report.completionNotes!,
-                                      style: const TextStyle(
-                                        fontSize: 14,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
                                         color: secondary,
                                         height: 1.4,
                                       ),
@@ -232,49 +234,42 @@ class ReportDetailScreen extends StatelessWidget {
                               Column(
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
-                                  const Divider(
-                                    height: 30,
-                                    color: altSecondary,
-                                  ),
-                                  const Row(
+                                  Divider(height: 30.h, color: altSecondary),
+                                  Row(
                                     children: [
-                                      Icon(
-                                        Icons.admin_panel_settings,
-                                        color: indigoAccent,
-                                        size: 16,
-                                      ),
-                                      SizedBox(width: 8),
+                                      Icon(Icons.admin_panel_settings,
+                                          color: indigoAccent, size: 16.w),
+                                      SizedBox(width: 8.w),
                                       Text(
-                                        'Admin Notes',
+                                        lang.adminNotesLabel,
                                         style: TextStyle(
-                                          fontSize: 14,
+                                          fontSize: 14.sp,
                                           fontWeight: FontWeight.bold,
                                           color: indigoAccent,
                                         ),
                                       ),
                                     ],
                                   ),
-                                  const SizedBox(height: 8),
+                                  SizedBox(height: 8.h),
                                   Container(
-                                    padding: const EdgeInsets.all(12),
+                                    padding: EdgeInsets.all(12.w),
                                     decoration: BoxDecoration(
                                       color: indigoAccent.withValues(
-                                        alpha: 0.05,
-                                      ),
+                                          alpha: 0.05),
                                       border: Border.all(
                                         color: indigoAccent.withValues(
-                                          alpha: 0.2,
-                                        ),
+                                            alpha: 0.2),
                                       ),
-                                      borderRadius: BorderRadius.circular(8),
+                                      borderRadius:
+                                          BorderRadius.circular(8.r),
                                     ),
                                     child: Text(
                                       ReportStatusUtils.formatAdminNotes(
                                         report.adminNotes,
                                         report.reviewedBy,
                                       ),
-                                      style: const TextStyle(
-                                        fontSize: 14,
+                                      style: TextStyle(
+                                        fontSize: 14.sp,
                                         color: secondary,
                                         height: 1.4,
                                       ),
@@ -288,25 +283,25 @@ class ReportDetailScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16),
+                SizedBox(height: 16.h),
 
                 // Back button
                 SizedBox(
                   width: double.infinity,
-                  height: 48,
+                  height: 48.h,
                   child: ElevatedButton(
                     onPressed: () => Navigator.pop(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: secondary,
                       foregroundColor: inputFill,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(25),
+                        borderRadius: BorderRadius.circular(25.r),
                       ),
                     ),
-                    child: const Text(
-                      'Back to Reports',
+                    child: Text(
+                      lang.backToReports,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 16.sp,
                         fontWeight: FontWeight.w600,
                       ),
                     ),
@@ -321,38 +316,36 @@ class ReportDetailScreen extends StatelessWidget {
   }
 
   static Widget _info(IconData icon, String label, String value) => Padding(
-    padding: const EdgeInsets.only(bottom: 12),
-    child: Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: primary, size: 18),
-        const SizedBox(width: 10),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: const TextStyle(
-                  fontSize: 12,
-                  color: altSecondary,
-                  fontWeight: FontWeight.w600,
-                ),
+        padding: EdgeInsets.only(bottom: 12.h),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: primary, size: 18.w),
+            SizedBox(width: 10.w),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontSize: 12.sp,
+                      color: altSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  Text(
+                    value,
+                    style: TextStyle(
+                      fontSize: 14.sp,
+                      color: secondary,
+                      height: 1.4,
+                    ),
+                  ),
+                ],
               ),
-              Text(
-                value,
-                style: const TextStyle(
-                  fontSize: 14,
-                  color: secondary,
-                  height: 1.4,
-                ),
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
-
+      );
 }
-
