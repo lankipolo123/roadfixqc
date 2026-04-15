@@ -1,7 +1,9 @@
-// lib/screens/secondary_screens/public_report_detail_screen.dart (SIMPLIFIED)
+// lib/screens/secondary_screens/public_report_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:roadfix/models/report_model.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
+import 'package:roadfix/utils/responsive.dart';
+import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/widgets/reporting_widgets/image_gallery_widget.dart';
 import 'package:roadfix/widgets/themes.dart';
 
@@ -12,10 +14,18 @@ class PublicReportDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: LanguageService(),
+      builder: (context, _) => _buildScreen(context),
+    );
+  }
+
+  Widget _buildScreen(BuildContext context) {
+    final lang = LanguageService();
     return Scaffold(
       backgroundColor: inputFill,
       appBar: AppBar(
-        title: const Text('Report Details'),
+        title: Text(lang.reportDetails),
         backgroundColor: primary,
         foregroundColor: inputFill,
         elevation: 0,
@@ -25,7 +35,7 @@ class PublicReportDetailScreen extends StatelessWidget {
         ),
       ),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -33,20 +43,20 @@ class PublicReportDetailScreen extends StatelessWidget {
             if (report.imageUrl.isNotEmpty) ...[
               ImageGalleryWidget(
                 images: report.imageUrl,
-                label: 'BEFORE - REPORTED ISSUE',
+                label: lang.t('BEFORE - REPORTED ISSUE', 'BAGO - INIULAT NA ISYU'),
                 labelColor: altSecondary,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
             ],
 
-            // AFTER — admin resolved images (only when present)
+            // AFTER — admin resolved images
             if (report.hasResolvedImage) ...[
               ImageGalleryWidget(
                 images: report.resolvedImages,
-                label: 'AFTER - RESOLVED',
+                label: lang.t('AFTER - RESOLVED', 'PAGKATAPOS - NAAYOS NA'),
                 labelColor: statusSuccess,
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
             ],
 
             // Compact Info Grid
@@ -57,17 +67,17 @@ class PublicReportDetailScreen extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Type',
+                        lang.typeLabel,
                         style: TextStyle(
-                          fontSize: 12,
+                          fontSize: 12.sp,
                           color: Colors.grey[600],
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       Text(
                         report.reportType,
-                        style: const TextStyle(
-                          fontSize: 14,
+                        style: TextStyle(
+                          fontSize: 14.sp,
                           color: Colors.black87,
                           fontWeight: FontWeight.w600,
                         ),
@@ -81,17 +91,17 @@ class PublicReportDetailScreen extends StatelessWidget {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
-                          'Tags',
+                          lang.tagsLabel,
                           style: TextStyle(
-                            fontSize: 12,
+                            fontSize: 12.sp,
                             color: Colors.grey[600],
                             fontWeight: FontWeight.w500,
                           ),
                         ),
                         Text(
                           report.tags.join(', '),
-                          style: const TextStyle(
-                            fontSize: 14,
+                          style: TextStyle(
+                            fontSize: 14.sp,
                             color: Colors.black87,
                           ),
                         ),
@@ -100,68 +110,68 @@ class PublicReportDetailScreen extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Location
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.location_on, color: Colors.grey[600], size: 16),
-                const SizedBox(width: 6),
+                Icon(Icons.location_on, color: Colors.grey[600], size: 16.w),
+                SizedBox(width: 6.w),
                 Expanded(
                   child: Text(
                     report.location,
-                    style: const TextStyle(fontSize: 14, color: Colors.black87),
+                    style: TextStyle(fontSize: 14.sp, color: Colors.black87),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 16),
+            SizedBox(height: 16.h),
 
             // Description
             Text(
               report.description,
-              style: const TextStyle(
-                fontSize: 15,
+              style: TextStyle(
+                fontSize: 15.sp,
                 color: Colors.black87,
                 height: 1.4,
               ),
             ),
-            const SizedBox(height: 20),
+            SizedBox(height: 20.h),
 
             // Timeline Graph
-            _buildTimelineGraph(),
-            const SizedBox(height: 16),
+            _buildTimelineGraph(lang),
+            SizedBox(height: 16.h),
 
-            // Admin Notes - using ReportStatusUtils helper
+            // Admin Notes
             if (ReportStatusUtils.hasAdminNotes(report.adminNotes)) ...[
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(12),
+                padding: EdgeInsets.all(12.w),
                 decoration: BoxDecoration(
                   color: Colors.blue[50],
-                  borderRadius: BorderRadius.circular(6),
+                  borderRadius: BorderRadius.circular(6.r),
                   border: Border.all(color: Colors.blue[200]!),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Admin Notes',
+                      lang.adminNotesLabel,
                       style: TextStyle(
-                        fontSize: 12,
+                        fontSize: 12.sp,
                         color: Colors.blue[700],
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-                    const SizedBox(height: 4),
+                    SizedBox(height: 4.h),
                     Text(
                       ReportStatusUtils.formatAdminNotes(
                         report.adminNotes,
                         null,
                       ),
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         color: Colors.blue[800],
                         height: 1.3,
                       ),
@@ -169,7 +179,7 @@ class PublicReportDetailScreen extends StatelessWidget {
                   ],
                 ),
               ),
-              const SizedBox(height: 16),
+              SizedBox(height: 16.h),
             ],
           ],
         ),
@@ -177,54 +187,49 @@ class PublicReportDetailScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildTimelineGraph() {
+  Widget _buildTimelineGraph(LanguageService lang) {
     return Container(
-      padding: const EdgeInsets.all(16),
+      padding: EdgeInsets.all(16.w),
       decoration: BoxDecoration(
         color: Colors.grey[50],
-        borderRadius: BorderRadius.circular(8),
+        borderRadius: BorderRadius.circular(8.r),
         border: Border.all(color: Colors.grey[200]!),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Timeline',
+            lang.timeline,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               fontWeight: FontWeight.w600,
               color: Colors.grey[700],
             ),
           ),
-          const SizedBox(height: 12),
+          SizedBox(height: 12.h),
           Row(
             children: [
-              // Reported milestone
               Expanded(
                 child: _buildTimelineMilestone(
-                  'Reported',
+                  lang.reported,
                   report.formattedReportedAt,
                   Colors.blue,
                   true,
                 ),
               ),
-
-              // Connection line
               Container(
                 height: 2,
-                width: 40,
+                width: 40.w,
                 color: report.reviewedAt != null
                     ? ReportStatusUtils.getStatusColor(report.status)
                     : Colors.grey[300],
               ),
-
-              // Reviewed milestone - using ReportStatusUtils
               Expanded(
                 child: _buildTimelineMilestone(
                   ReportStatusUtils.getDetailedStatusText(report.status),
                   report.reviewedAt != null
                       ? _formatDateTime(report.reviewedAt!.toDate())
-                      : 'Pending',
+                      : lang.pendingLabel,
                   ReportStatusUtils.getStatusColor(report.status),
                   report.reviewedAt != null,
                 ),
@@ -245,8 +250,8 @@ class PublicReportDetailScreen extends StatelessWidget {
     return Column(
       children: [
         Container(
-          width: 12,
-          height: 12,
+          width: 12.w,
+          height: 12.w,
           decoration: BoxDecoration(
             color: isCompleted ? color : Colors.grey[300],
             shape: BoxShape.circle,
@@ -256,20 +261,20 @@ class PublicReportDetailScreen extends StatelessWidget {
             ),
           ),
         ),
-        const SizedBox(height: 8),
+        SizedBox(height: 8.h),
         Text(
           title,
           style: TextStyle(
-            fontSize: 12,
+            fontSize: 12.sp,
             fontWeight: FontWeight.w600,
             color: isCompleted ? color : Colors.grey[500],
           ),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 2),
+        SizedBox(height: 2.h),
         Text(
           date,
-          style: TextStyle(fontSize: 10, color: Colors.grey[600]),
+          style: TextStyle(fontSize: 10.sp, color: Colors.grey[600]),
           textAlign: TextAlign.center,
         ),
       ],

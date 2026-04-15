@@ -12,6 +12,7 @@ import 'package:roadfix/services/auth_service.dart';
 import 'package:roadfix/utils/snackbar_utils.dart';
 import 'package:roadfix/widgets/dialog_widgets/dialog_utils.dart';
 import 'package:roadfix/utils/responsive.dart';
+import 'package:roadfix/services/language_service.dart';
 import 'package:intl/intl.dart';
 
 class SignUpScreen extends StatefulWidget {
@@ -138,13 +139,14 @@ class _SignUpScreenState extends State<SignUpScreen> {
   }
 
   Future<void> _pickDateOfBirth() async {
+    final lang = LanguageService();
     final picked = await showDatePicker(
       context: context,
       initialDate: DateTime(DateTime.now().year - 16),
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
-      helpText: 'Select your date of birth',
-      fieldLabelText: 'Date of Birth',
+      helpText: lang.selectDateOfBirth,
+      fieldLabelText: lang.dateOfBirth,
     );
     if (picked != null && mounted) {
       setState(() => _selectedDateOfBirth = picked);
@@ -280,7 +282,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 Expanded(
                   child: Text(
                     _selectedDateOfBirth == null
-                        ? 'Date of Birth'
+                        ? LanguageService().dateOfBirth
                         : DateFormat('MMMM dd, yyyy').format(_selectedDateOfBirth!),
                     style: TextStyle(
                       color: _selectedDateOfBirth == null
@@ -300,7 +302,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
         Padding(
           padding: EdgeInsets.only(left: 4.w),
           child: Text(
-            'Must be at least 13 years old to register.',
+            LanguageService().dobHint,
             style: TextStyle(
               fontSize: 11.sp,
               color: const Color(0xFF6B7A8D),

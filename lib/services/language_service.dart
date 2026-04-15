@@ -205,4 +205,46 @@ class LanguageService extends ChangeNotifier {
       t('Language / Wika', 'Language / Wika');
   String get currentLanguageLabel =>
       isEnglish ? 'English' : 'Filipino (Tagalog)';
+
+  // Report detail labels
+  String get reportDetails => t('Report Details', 'Mga Detalye ng Ulat');
+  String get typeLabel => t('Type', 'Uri');
+  String get locationLabel => t('Location', 'Lokasyon');
+  String get descriptionLabel => t('Description', 'Paglalarawan');
+  String get submittedLabel => t('Submitted', 'Naisumite');
+  String get completionNotesLabel =>
+      t('Completion Notes', 'Mga Tala sa Pagkumpleto');
+  String get adminNotesLabel => t('Admin Notes', 'Mga Tala ng Admin');
+  String get backToReports => t('Back to Reports', 'Bumalik sa mga Ulat');
+  String get tagsLabel => t('Tags', 'Mga Tag');
+  String get timeline => t('Timeline', 'Kronolohiya');
+  String get reported => t('Reported', 'Iniulat');
+  String get pendingLabel => t('Pending', 'Nakabinbin');
+
+  // Notification actions
+  String get deleteNotificationTitle =>
+      t('Delete Notification', 'Burahin ang Abiso');
+  String get deleteConfirmMessage => t(
+        'Are you sure you want to delete this notification? This action cannot be undone.',
+        'Sigurado ka bang nais mong burahin ang abisong ito? Hindi na mababawi ang pagkilos na ito.',
+      );
+  String get notificationDeleted =>
+      t('Notification deleted', 'Nabura ang abiso');
+  String get undo => t('Undo', 'I-undo');
+  String get delete => t('Delete', 'Burahin');
+  String get errorLoadingNotifications =>
+      t('Error loading notifications', 'Error sa pag-load ng mga abiso');
+
+  // Signup / auth
+  String get dobHint => t(
+        'Must be at least 13 years old to register.',
+        'Dapat ay hindi bababa sa 13 taong gulang para magrehistro.',
+      );
+  String get selectDateOfBirth =>
+      t('Select your date of birth', 'Piliin ang iyong petsa ng kapanganakan');
+  String get creatingAccount =>
+      t('Creating Account...', 'Ginagawa ang Account...');
+  String get alreadyHaveAccount =>
+      t('Already have an account?', 'Mayroon na bang account?');
+  String get signInAction => t('Sign In', 'Mag-sign In');
 }

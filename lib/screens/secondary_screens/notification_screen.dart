@@ -6,11 +6,11 @@ import 'package:roadfix/services/language_service.dart';
 import 'package:roadfix/services/notification_service.dart';
 import 'package:roadfix/utils/report_status_utils.dart';
 import 'package:roadfix/utils/pagination_helper.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 import 'package:roadfix/widgets/user_report_widgets/pagination_fab.dart';
 import 'package:rxdart/rxdart.dart';
 
-// Create a data class to hold both reports and viewed status
 class NotificationData {
   final List<ReportModel> reports;
   final Set<String> viewedIds;
@@ -30,7 +30,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   int currentPage = 1;
   final int notificationsPerPage = 10;
 
-  // Combine reports and viewed IDs into a single stream
   Stream<NotificationData> get _combinedStream {
     return Rx.combineLatest2<List<ReportModel>, Set<String>, NotificationData>(
       _notificationService.getRecentlyUpdatedReportsStream(),
@@ -74,16 +73,16 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Icon(Icons.error_outline, size: 48, color: Colors.red),
-                  const SizedBox(height: 16),
+                  Icon(Icons.error_outline, size: 48.w, color: Colors.red),
+                  SizedBox(height: 16.h),
                   Text(
-                    'Error loading notifications',
-                    style: TextStyle(color: Colors.red[700], fontSize: 16),
+                    lang.errorLoadingNotifications,
+                    style: TextStyle(color: Colors.red[700], fontSize: 16.sp),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Text(
                     snapshot.error.toString(),
-                    style: const TextStyle(color: secondary, fontSize: 12),
+                    style: TextStyle(color: secondary, fontSize: 12.sp),
                     textAlign: TextAlign.center,
                   ),
                 ],
@@ -102,32 +101,31 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           final viewedIds = data.viewedIds;
 
           if (allReports.isEmpty) {
-            final lang = LanguageService();
             return Center(
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
                     Icons.notifications_none,
-                    size: 64,
+                    size: 64.w,
                     color: secondary.withValues(alpha: 0.5),
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16.h),
                   Text(
                     lang.noNewNotifications,
                     style: TextStyle(
-                      fontSize: 18,
+                      fontSize: 18.sp,
                       fontWeight: FontWeight.w600,
                       color: secondary.withValues(alpha: 0.8),
                     ),
                   ),
-                  const SizedBox(height: 8),
+                  SizedBox(height: 8.h),
                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 32),
+                    padding: EdgeInsets.symmetric(horizontal: 32.w),
                     child: Text(
                       lang.notificationsEmptyHint,
                       style: TextStyle(
-                        fontSize: 14,
+                        fontSize: 14.sp,
                         color: secondary.withValues(alpha: 0.6),
                       ),
                       textAlign: TextAlign.center,
@@ -138,7 +136,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             );
           }
 
-          // Apply pagination
           final paginatedReports = paginate(
             items: allReports,
             page: currentPage,
@@ -148,15 +145,14 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           return Stack(
             children: [
               ListView.separated(
-                padding: const EdgeInsets.only(
-                  left: 16,
-                  right: 16,
-                  top: 16,
-                  bottom: 100,
+                padding: EdgeInsets.only(
+                  left: 16.w,
+                  right: 16.w,
+                  top: 16.h,
+                  bottom: 100.h,
                 ),
                 itemCount: paginatedReports.length,
-                separatorBuilder: (context, index) =>
-                    const SizedBox(height: 12),
+                separatorBuilder: (context, index) => SizedBox(height: 12.h),
                 itemBuilder: (context, index) {
                   final report = paginatedReports[index];
                   final isViewed = viewedIds.contains(report.id);
@@ -168,7 +164,6 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   );
                 },
               ),
-              // Pagination FAB
               _buildPaginationFAB(allReports.length),
             ],
           );
@@ -198,26 +193,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     bool isViewed,
     int index,
   ) {
+    final lang = LanguageService();
     return Dismissible(
       key: Key('notification_${report.id}_$index'),
       direction: DismissDirection.endToStart,
       background: Container(
         alignment: Alignment.centerRight,
-        padding: const EdgeInsets.only(right: 20),
+        padding: EdgeInsets.only(right: 20.w),
         decoration: BoxDecoration(
           color: statusDanger,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
         ),
-        child: const Column(
+        child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.delete, color: Colors.white, size: 28),
-            SizedBox(height: 4),
+            Icon(Icons.delete, color: Colors.white, size: 28.w),
+            SizedBox(height: 4.h),
             Text(
-              'Delete',
+              lang.delete,
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 12,
+                fontSize: 12.sp,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -234,10 +230,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           if (context.mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: const Text('Notification deleted'),
+                content: Text(lang.notificationDeleted),
                 backgroundColor: secondary,
                 action: SnackBarAction(
-                  label: 'Undo',
+                  label: lang.undo,
                   textColor: primary,
                   onPressed: () async {
                     await _notificationService.restoreNotification(report.id!);
@@ -282,10 +278,10 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.all(16),
+        padding: EdgeInsets.all(16.w),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
+          borderRadius: BorderRadius.circular(12.r),
           border: Border.all(
             color: isViewed
                 ? Colors.grey.withValues(alpha: 0.3)
@@ -304,8 +300,8 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Container(
-              width: 40,
-              height: 40,
+              width: 40.w,
+              height: 40.w,
               decoration: BoxDecoration(
                 color: (isViewed ? Colors.grey : statusColor).withValues(
                   alpha: 0.1,
@@ -313,14 +309,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 shape: BoxShape.circle,
               ),
               child: Icon(
-                isViewed
-                    ? Icons.notifications
-                    : Icons.notifications_active,
+                isViewed ? Icons.notifications : Icons.notifications_active,
                 color: isViewed ? Colors.grey : statusColor,
-                size: 20,
+                size: 20.w,
               ),
             ),
-            const SizedBox(width: 12),
+            SizedBox(width: 12.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,7 +322,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                   Text(
                     title,
                     style: TextStyle(
-                      fontSize: 15,
+                      fontSize: 15.sp,
                       fontWeight:
                           isViewed ? FontWeight.w500 : FontWeight.w700,
                       color: isViewed
@@ -336,27 +330,26 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                           : primary,
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     message,
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 13.sp,
                       color: secondary.withValues(
                         alpha: isViewed ? 0.55 : 0.75,
                       ),
                       height: 1.4,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  // Status badge chip
+                  SizedBox(height: 6.h),
                   Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 8,
-                      vertical: 3,
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 8.w,
+                      vertical: 3.h,
                     ),
                     decoration: BoxDecoration(
                       color: statusColor.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(20),
+                      borderRadius: BorderRadius.circular(20.r),
                       border: Border.all(
                         color: statusColor.withValues(alpha: 0.3),
                       ),
@@ -364,18 +357,18 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                     child: Text(
                       ReportStatusUtils.getStatusText(report.status),
                       style: TextStyle(
-                        fontSize: 11,
+                        fontSize: 11.sp,
                         fontWeight: FontWeight.w600,
                         color: statusColor,
                       ),
                     ),
                   ),
-                  const SizedBox(height: 4),
+                  SizedBox(height: 4.h),
                   Text(
                     relativeTime,
                     style: TextStyle(
                       color: secondary.withValues(alpha: 0.5),
-                      fontSize: 11,
+                      fontSize: 11.sp,
                     ),
                   ),
                 ],
@@ -384,7 +377,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             Icon(
               Icons.arrow_forward_ios,
               color: secondary.withValues(alpha: isViewed ? 0.3 : 0.4),
-              size: 14,
+              size: 14.w,
             ),
           ],
         ),
@@ -396,26 +389,27 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
     BuildContext context,
     ReportModel report,
   ) async {
+    final lang = LanguageService();
     return showDialog<bool>(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           backgroundColor: inputFill,
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(12.r),
           ),
-          title: const Text(
-            'Delete Notification',
+          title: Text(
+            lang.deleteNotificationTitle,
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 18.sp,
               fontWeight: FontWeight.w600,
               color: secondary,
             ),
           ),
           content: Text(
-            'Are you sure you want to delete this notification? This action cannot be undone.',
+            lang.deleteConfirmMessage,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: 14.sp,
               color: secondary.withValues(alpha: 0.8),
               height: 1.4,
             ),
@@ -424,7 +418,7 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(false),
               child: Text(
-                'Cancel',
+                lang.cancel,
                 style: TextStyle(
                   color: secondary.withValues(alpha: 0.7),
                   fontWeight: FontWeight.w500,
@@ -438,12 +432,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
                 foregroundColor: Colors.white,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
+                  borderRadius: BorderRadius.circular(8.r),
                 ),
               ),
-              child: const Text(
-                'Delete',
-                style: TextStyle(fontWeight: FontWeight.w600),
+              child: Text(
+                lang.delete,
+                style: const TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
           ],
