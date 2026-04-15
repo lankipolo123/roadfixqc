@@ -242,9 +242,4 @@ class LanguageService extends ChangeNotifier {
       );
   String get selectDateOfBirth =>
       t('Select your date of birth', 'Piliin ang iyong petsa ng kapanganakan');
-  String get creatingAccount =>
-      t('Creating Account...', 'Ginagawa ang Account...');
-  String get alreadyHaveAccount =>
-      t('Already have an account?', 'Mayroon na bang account?');
-  String get signInAction => t('Sign In', 'Mag-sign In');
 }
