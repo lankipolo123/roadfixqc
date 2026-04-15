@@ -184,7 +184,6 @@ class LanguageService extends ChangeNotifier {
   }
 
   String get detectionResult => t('Detection Result', 'Resulta ng Pagtukoy');
-  String get detectedStatus => t('Status: Detected', 'Katayuan: Natukoy');
   String get detectedLabel => t('Detected', 'Natukoy');
   String get detectionResults => t('Detection Results:', 'Mga Resulta ng Pagtukoy:');
 
