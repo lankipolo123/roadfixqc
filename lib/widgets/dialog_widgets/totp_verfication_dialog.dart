@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:roadfix/services/totp_service.dart';
 import 'package:roadfix/services/user_service.dart';
+import 'package:roadfix/utils/responsive.dart';
 import 'package:roadfix/widgets/themes.dart';
 
 class TotpVerificationDialog extends StatefulWidget {
@@ -35,9 +36,7 @@ class _TotpVerificationDialogState extends State<TotpVerificationDialog> {
 
   Future<void> _verifyCode() async {
     if (_codeController.text.length != 6) {
-      setState(() {
-        _errorMessage = 'Please enter a 6-digit code';
-      });
+      setState(() => _errorMessage = 'Please enter a 6-digit code');
       return;
     }
 
@@ -78,15 +77,15 @@ class _TotpVerificationDialogState extends State<TotpVerificationDialog> {
   Widget build(BuildContext context) {
     return Dialog(
       backgroundColor: inputFill,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16.r)),
       child: Container(
         width: MediaQuery.of(context).size.width * 0.9,
-        padding: const EdgeInsets.all(24),
+        padding: EdgeInsets.all(24.w),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             _buildHeader(),
-            const SizedBox(height: 24),
+            SizedBox(height: 24.h),
             _buildContent(),
           ],
         ),
@@ -98,19 +97,19 @@ class _TotpVerificationDialogState extends State<TotpVerificationDialog> {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.all(8),
+          padding: EdgeInsets.all(8.w),
           decoration: BoxDecoration(
             color: primary,
-            borderRadius: BorderRadius.circular(8),
+            borderRadius: BorderRadius.circular(8.r),
           ),
-          child: const Icon(Icons.security, color: secondary, size: 24),
+          child: Icon(Icons.security, color: secondary, size: 24.w),
         ),
-        const SizedBox(width: 12),
-        const Expanded(
+        SizedBox(width: 12.w),
+        Expanded(
           child: Text(
             'Two-Factor Authentication',
             style: TextStyle(
-              fontSize: 18,
+              fontSize: 16.sp,
               fontWeight: FontWeight.w600,
               color: secondary,
             ),
@@ -123,12 +122,12 @@ class _TotpVerificationDialogState extends State<TotpVerificationDialog> {
   Widget _buildContent() {
     return Column(
       children: [
-        const Text(
+        Text(
           'Enter the 6-digit code from your authenticator app to continue:',
-          style: TextStyle(color: altSecondary, fontSize: 14),
+          style: TextStyle(color: altSecondary, fontSize: 13.sp),
           textAlign: TextAlign.center,
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         TextField(
           controller: _codeController,
           decoration: InputDecoration(
@@ -137,89 +136,83 @@ class _TotpVerificationDialogState extends State<TotpVerificationDialog> {
             filled: true,
             fillColor: inputFill,
             border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: BorderSide.none,
             ),
             focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: primary, width: 2),
             ),
             errorText: _errorMessage,
             errorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
             focusedErrorBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8),
+              borderRadius: BorderRadius.circular(8.r),
               borderSide: const BorderSide(color: statusDanger, width: 2),
             ),
           ),
           keyboardType: TextInputType.number,
           textAlign: TextAlign.center,
-          style: const TextStyle(
-            fontSize: 18,
+          style: TextStyle(
+            fontSize: 18.sp,
             fontWeight: FontWeight.w600,
             letterSpacing: 4,
             color: secondary,
           ),
           maxLength: 6,
-          buildCounter:
-              (
-                context, {
-                required currentLength,
-                required isFocused,
-                maxLength,
-              }) => null,
+          buildCounter: (context,
+                  {required currentLength,
+                  required isFocused,
+                  maxLength}) =>
+              null,
           inputFormatters: [FilteringTextInputFormatter.digitsOnly],
           onChanged: (value) {
-            if (_errorMessage != null) {
-              setState(() => _errorMessage = null);
-            }
+            if (_errorMessage != null) setState(() => _errorMessage = null);
           },
           onSubmitted: (_) {
-            if (!_isVerifying) {
-              _verifyCode();
-            }
+            if (!_isVerifying) _verifyCode();
           },
         ),
-        const SizedBox(height: 24),
+        SizedBox(height: 24.h),
         SizedBox(
           width: double.infinity,
           child: ElevatedButton(
             onPressed: _isVerifying ? null : _verifyCode,
             style: ElevatedButton.styleFrom(
               backgroundColor: primary,
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              padding: EdgeInsets.symmetric(vertical: 12.h),
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(8),
+                borderRadius: BorderRadius.circular(8.r),
               ),
             ),
             child: _isVerifying
-                ? const SizedBox(
-                    height: 16,
-                    width: 16,
-                    child: CircularProgressIndicator(
+                ? SizedBox(
+                    height: 16.w,
+                    width: 16.w,
+                    child: const CircularProgressIndicator(
                       strokeWidth: 2,
                       color: secondary,
                     ),
                   )
-                : const Text(
+                : Text(
                     'Verify',
                     style: TextStyle(
                       color: secondary,
                       fontWeight: FontWeight.w600,
+                      fontSize: 14.sp,
                     ),
                   ),
           ),
         ),
-        const SizedBox(height: 12),
+        SizedBox(height: 12.h),
         TextButton(
-          onPressed: _isVerifying
-              ? null
-              : () => Navigator.of(context).pop(false),
-          child: const Text(
+          onPressed:
+              _isVerifying ? null : () => Navigator.of(context).pop(false),
+          child: Text(
             'Cancel',
-            style: TextStyle(color: altSecondary, fontSize: 14),
+            style: TextStyle(color: altSecondary, fontSize: 14.sp),
           ),
         ),
       ],

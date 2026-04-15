@@ -114,44 +114,89 @@ class _ProfileScreenState extends State<ProfileScreen> {
     return AnimatedBuilder(
       animation: _languageService,
       builder: (context, _) {
+        final isTagalog = _languageService.isTagalog;
         return Column(
           children: [
             const Divider(height: 1),
-            ProfileOptionTile(
-              option: ProfileOption(
-                icon: Icons.language,
-                label: 'Language / Wika',
-                iconBackgroundColor: tealAccent,
-                mode: ProfileOptionMode.toggle,
-                toggleValue: _languageService.isTagalog,
-                onToggleChanged: (_) async {
-                  await _languageService.toggle();
-                  if (context.mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          _languageService.isTagalog
-                              ? 'Lumipat sa Filipino (Tagalog)'
-                              : 'Switched to English',
-                        ),
-                        backgroundColor: tealAccent,
-                        duration: const Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
-              ),
-            ),
             Padding(
-              padding: const EdgeInsets.only(left: 68, right: 16, bottom: 6),
-              child: Text(
-                _languageService.isTagalog
-                    ? 'Kasalukuyang wika: Filipino (Tagalog)'
-                    : 'Current language: English',
-                style: TextStyle(
-                  fontSize: 11,
-                  color: secondary.withValues(alpha: 0.55),
-                ),
+              padding: EdgeInsets.symmetric(horizontal: 16.w, vertical: 12.h),
+              child: Row(
+                children: [
+                  // Icon badge
+                  Container(
+                    width: 36.w,
+                    height: 36.w,
+                    decoration: BoxDecoration(
+                      color: tealAccent,
+                      borderRadius: BorderRadius.circular(8.r),
+                    ),
+                    child: Icon(Icons.language, color: Colors.white, size: 20.w),
+                  ),
+                  SizedBox(width: 12.w),
+                  Expanded(
+                    child: Text(
+                      'Language / Wika',
+                      style: TextStyle(
+                        fontSize: 14.sp,
+                        fontWeight: FontWeight.w500,
+                        color: secondary,
+                      ),
+                    ),
+                  ),
+                  // EN / TL segmented pill
+                  GestureDetector(
+                    onTap: isTagalog
+                        ? () async { await _languageService.toggle(); }
+                        : null,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: !isTagalog
+                            ? tealAccent
+                            : Colors.grey.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.only(
+                          topLeft: Radius.circular(20.r),
+                          bottomLeft: Radius.circular(20.r),
+                        ),
+                      ),
+                      child: Text(
+                        'EN',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: !isTagalog ? Colors.white : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: !isTagalog
+                        ? () async { await _languageService.toggle(); }
+                        : null,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                          horizontal: 12.w, vertical: 6.h),
+                      decoration: BoxDecoration(
+                        color: isTagalog
+                            ? tealAccent
+                            : Colors.grey.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(20.r),
+                          bottomRight: Radius.circular(20.r),
+                        ),
+                      ),
+                      child: Text(
+                        'TL',
+                        style: TextStyle(
+                          fontSize: 12.sp,
+                          fontWeight: FontWeight.w700,
+                          color: isTagalog ? Colors.white : Colors.grey,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],
