@@ -352,7 +352,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
         return 'Road Blocks';
       case 'Fallen-Pole':
       case 'Fallen_Pole':
-        return 'Fallen Utility Pole';
+        return 'Utility Pole';
       case 'Pothole':
         return 'Pothole';
       default:
@@ -362,13 +362,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
 
   // Shows what the model actually detected (used for chips and description)
   String _detectionDisplayName(String className) {
-    switch (className) {
-      case 'Fallen-Pole':
-      case 'Fallen_Pole':
-        return 'Fallen Utility Pole';
-      default:
-        return className.replaceAll('-', ' ').replaceAll('_', ' ');
-    }
+    return className.replaceAll('-', ' ').replaceAll('_', ' ');
   }
 
   void _retakePhoto() async {
