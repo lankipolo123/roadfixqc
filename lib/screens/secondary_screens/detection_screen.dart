@@ -335,6 +335,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
     }
   }
 
+  // Maps class name to category (used for reportType only)
   String _formatDisplayName(String className) {
     switch (className) {
       case 'Fallen-Cone':
@@ -350,6 +351,11 @@ class _DetectionScreenState extends State<DetectionScreen> {
       default:
         return className.replaceAll('-', ' ').replaceAll('_', ' ');
     }
+  }
+
+  // Shows what the model actually detected (used for chips and description)
+  String _detectionDisplayName(String className) {
+    return className.replaceAll('-', ' ').replaceAll('_', ' ');
   }
 
   void _retakePhoto() async {
