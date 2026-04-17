@@ -122,11 +122,13 @@ class DetectionBottomCard extends StatelessWidget {
                 children: [
                   Icon(Icons.check_circle, size: 14.w, color: statusDanger),
                   SizedBox(width: 6.w),
-                  Text(
-                    lang.detectionStatement(entry.key, entry.value),
-                    style: const TextStyle(
-                      color: statusDanger,
-                      fontWeight: FontWeight.w600,
+                  Flexible(
+                    child: Text(
+                      lang.detectionStatement(entry.key, entry.value),
+                      style: const TextStyle(
+                        color: statusDanger,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
                   ),
                 ],
