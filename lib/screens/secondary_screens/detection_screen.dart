@@ -225,9 +225,20 @@ class _DetectionScreenState extends State<DetectionScreen> {
           (detectionCounts[detection.className] ?? 0) + 1;
     }
 
+    // Chips/tags shown to user — actual detected class names
     final detectionTags = detectionCounts.keys
-        .map((className) => _formatDisplayName(className))
+        .map((className) => _detectionDisplayName(className))
         .toList();
+
+    // Category grouping — used only for reportType
+    final categorySet = detectionCounts.keys
+        .map((className) => _formatDisplayName(className))
+        .toSet()
+        .toList();
+
+    final reportType = categorySet.length > 1
+        ? 'Multiple Hazards'
+        : (categorySet.isNotEmpty ? categorySet.first : (widget.category?.label ?? 'Road Hazard'));
 
     final lang = LanguageService();
     final descriptionParts = <String>[];
@@ -241,10 +252,6 @@ class _DetectionScreenState extends State<DetectionScreen> {
     descriptionParts.add('');
 
     final autoDescription = descriptionParts.join('\n');
-
-    final reportType = detectionTags.length > 1
-        ? 'Multiple Hazards'
-        : (detectionTags.isNotEmpty ? detectionTags.first : (widget.category?.label ?? 'Road Hazard'));
 
     Navigator.push(
       context,
@@ -355,7 +362,13 @@ class _DetectionScreenState extends State<DetectionScreen> {
 
   // Shows what the model actually detected (used for chips and description)
   String _detectionDisplayName(String className) {
-    return className.replaceAll('-', ' ').replaceAll('_', ' ');
+    switch (className) {
+      case 'Fallen-Pole':
+      case 'Fallen_Pole':
+        return 'Fallen Utility Pole';
+      default:
+        return className.replaceAll('-', ' ').replaceAll('_', ' ');
+    }
   }
 
   void _retakePhoto() async {
