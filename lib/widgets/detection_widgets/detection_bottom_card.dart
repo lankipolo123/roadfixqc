@@ -140,22 +140,48 @@ class DetectionBottomCard extends StatelessWidget {
 
   Widget _buildButtons(LanguageService lang) {
     return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        TextButton(
-          onPressed: onCancel,
-          style: TextButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
+        Expanded(
+          child: OutlinedButton(
+            onPressed: onCancel,
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(vertical: 14.h),
+              side: BorderSide(color: secondary, width: 2),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: Text(
+              lang.cancel,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.bold,
+                color: secondary,
+              ),
+            ),
           ),
-          child: Text(lang.cancel, style: TextStyle(fontSize: 16.sp)),
         ),
-        SizedBox(width: 20.w),
-        ElevatedButton(
-          onPressed: onConfirm,
-          style: ElevatedButton.styleFrom(
-            padding: EdgeInsets.symmetric(horizontal: 30.w, vertical: 12.h),
+        SizedBox(width: 12.w),
+        Expanded(
+          flex: 2,
+          child: ElevatedButton(
+            onPressed: onConfirm,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: primary,
+              padding: EdgeInsets.symmetric(vertical: 14.h),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            child: Text(
+              lang.confirm,
+              style: TextStyle(
+                fontSize: 15.sp,
+                fontWeight: FontWeight.bold,
+                color: inputFill,
+              ),
+            ),
           ),
-          child: Text(lang.confirm, style: TextStyle(fontSize: 16.sp)),
         ),
       ],
     );
