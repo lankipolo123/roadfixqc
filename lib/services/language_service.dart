@@ -39,7 +39,7 @@ class LanguageService extends ChangeNotifier {
     await setLanguage(isEnglish ? langTagalog : langEnglish);
   }
 
-  // ─── Internal helper — mirrors detection_screen._formatDisplayName ──────────
+  // ─── Internal helper — mirrors detection_screen._detectionDisplayName ───────
 
   String _friendlyClassName(String className) {
     switch (className) {
