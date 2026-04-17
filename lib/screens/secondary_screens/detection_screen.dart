@@ -242,9 +242,9 @@ class _DetectionScreenState extends State<DetectionScreen> {
 
     final autoDescription = descriptionParts.join('\n');
 
-    final reportType = detectionTags.isNotEmpty
-        ? detectionTags.first
-        : (widget.category?.label ?? 'Road Hazard');
+    final reportType = detectionTags.length > 1
+        ? 'Multiple Hazards'
+        : (detectionTags.isNotEmpty ? detectionTags.first : (widget.category?.label ?? 'Road Hazard'));
 
     Navigator.push(
       context,
