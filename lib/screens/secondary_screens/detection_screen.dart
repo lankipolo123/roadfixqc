@@ -302,7 +302,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
         final rect = Rect.fromLTRB(left, top, right, bottom);
         canvas.drawRect(rect, boxPaint);
 
-        final label = '${_formatDisplayName(det.className)} — Detected';
+        final label = '${_detectionDisplayName(det.className)} — Detected';
         final builder = ui.ParagraphBuilder(
           ui.ParagraphStyle(textAlign: TextAlign.left, fontSize: fontSize),
         )
