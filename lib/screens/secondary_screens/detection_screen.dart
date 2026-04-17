@@ -203,12 +203,18 @@ class _DetectionScreenState extends State<DetectionScreen> {
     if (!mounted) return;
     CompactLoadingModal.hide(context);
 
+    if (!mounted) return;
+    CompactLoadingModal.show(context, message: "Preparing your report...");
+
     final annotatedFile = await _renderAnnotatedImage(
       _selectedImage!,
       _detections,
     );
     final String processedImagePath =
         annotatedFile?.path ?? _selectedImage!.path;
+
+    if (!mounted) return;
+    CompactLoadingModal.hide(context);
 
     if (!mounted) return;
 
@@ -236,12 +242,16 @@ class _DetectionScreenState extends State<DetectionScreen> {
 
     final autoDescription = descriptionParts.join('\n');
 
+    final reportType = detectionTags.length > 1
+        ? 'Multiple Hazards'
+        : (detectionTags.isNotEmpty ? detectionTags.first : (widget.category?.label ?? 'Road Hazard'));
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SendReportScreen(
           imagePath: processedImagePath,
-          reportType: widget.category?.label ?? 'Road Hazard',
+          reportType: reportType,
           detections: detectionTags,
           autoDescription: autoDescription,
           locationData: locationData,
