@@ -236,12 +236,16 @@ class _DetectionScreenState extends State<DetectionScreen> {
 
     final autoDescription = descriptionParts.join('\n');
 
+    final reportType = detectionTags.isNotEmpty
+        ? detectionTags.first
+        : (widget.category?.label ?? 'Road Hazard');
+
     Navigator.push(
       context,
       MaterialPageRoute(
         builder: (context) => SendReportScreen(
           imagePath: processedImagePath,
-          reportType: widget.category?.label ?? 'Road Hazard',
+          reportType: reportType,
           detections: detectionTags,
           autoDescription: autoDescription,
           locationData: locationData,
