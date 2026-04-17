@@ -352,7 +352,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
         return 'Road Blocks';
       case 'Fallen-Pole':
       case 'Fallen_Pole':
-        return 'Fallen Utility Pole';
+        return 'Utility Pole';
       case 'Pothole':
         return 'Pothole';
       default:
