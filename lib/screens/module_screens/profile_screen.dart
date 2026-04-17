@@ -130,7 +130,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   SizedBox(width: 8.w),
                   Expanded(
                     child: Text(
-                      'Language / Wika',
+                      'English / Tagalog',
                       style: TextStyle(fontSize: 14.sp, color: secondary),
                     ),
                   ),
