@@ -225,9 +225,20 @@ class _DetectionScreenState extends State<DetectionScreen> {
           (detectionCounts[detection.className] ?? 0) + 1;
     }
 
+    // Chips/tags shown to user — actual detected class names
     final detectionTags = detectionCounts.keys
-        .map((className) => _formatDisplayName(className))
+        .map((className) => _detectionDisplayName(className))
         .toList();
+
+    // Category grouping — used only for reportType
+    final categorySet = detectionCounts.keys
+        .map((className) => _formatDisplayName(className))
+        .toSet()
+        .toList();
+
+    final reportType = categorySet.length > 1
+        ? 'Multiple Hazards'
+        : (categorySet.isNotEmpty ? categorySet.first : (widget.category?.label ?? 'Road Hazard'));
 
     final lang = LanguageService();
     final descriptionParts = <String>[];
@@ -235,18 +246,12 @@ class _DetectionScreenState extends State<DetectionScreen> {
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
-      final name = _formatDisplayName(entry.key);
-      final count = entry.value;
-      descriptionParts.add(count > 1 ? '• $name (x$count)' : '• $name');
+      descriptionParts.add('• ${lang.detectionStatement(entry.key, entry.value)}');
     }
 
     descriptionParts.add('');
 
     final autoDescription = descriptionParts.join('\n');
-
-    final reportType = detectionTags.length > 1
-        ? 'Multiple Hazards'
-        : (detectionTags.isNotEmpty ? detectionTags.first : (widget.category?.label ?? 'Road Hazard'));
 
     Navigator.push(
       context,
@@ -337,6 +342,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
     }
   }
 
+  // Maps class name to category (used for reportType only)
   String _formatDisplayName(String className) {
     switch (className) {
       case 'Fallen-Cone':
@@ -349,6 +355,17 @@ class _DetectionScreenState extends State<DetectionScreen> {
         return 'Fallen Utility Pole';
       case 'Pothole':
         return 'Pothole';
+      default:
+        return className.replaceAll('-', ' ').replaceAll('_', ' ');
+    }
+  }
+
+  // Shows what the model actually detected (used for chips and description)
+  String _detectionDisplayName(String className) {
+    switch (className) {
+      case 'Fallen-Pole':
+      case 'Fallen_Pole':
+        return 'Fallen Utility Pole';
       default:
         return className.replaceAll('-', ' ').replaceAll('_', ' ');
     }

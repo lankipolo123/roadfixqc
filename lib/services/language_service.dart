@@ -43,16 +43,9 @@ class LanguageService extends ChangeNotifier {
 
   String _friendlyClassName(String className) {
     switch (className) {
-      case 'Fallen-Cone':
-      case 'Fallen_Cone':
-      case 'Fallen-Barrier':
-      case 'Fallen_Barrier':
-        return 'Road Block';
       case 'Fallen-Pole':
       case 'Fallen_Pole':
         return 'Fallen Utility Pole';
-      case 'Pothole':
-        return 'Pothole';
       default:
         return className.replaceAll('-', ' ').replaceAll('_', ' ');
     }
