@@ -203,12 +203,18 @@ class _DetectionScreenState extends State<DetectionScreen> {
     if (!mounted) return;
     CompactLoadingModal.hide(context);
 
+    if (!mounted) return;
+    CompactLoadingModal.show(context, message: "Preparing your report...");
+
     final annotatedFile = await _renderAnnotatedImage(
       _selectedImage!,
       _detections,
     );
     final String processedImagePath =
         annotatedFile?.path ?? _selectedImage!.path;
+
+    if (!mounted) return;
+    CompactLoadingModal.hide(context);
 
     if (!mounted) return;
 
