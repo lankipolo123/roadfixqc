@@ -235,9 +235,7 @@ class _DetectionScreenState extends State<DetectionScreen> {
     descriptionParts.add('');
 
     for (var entry in detectionCounts.entries) {
-      final name = _formatDisplayName(entry.key);
-      final count = entry.value;
-      descriptionParts.add(count > 1 ? '• $name (x$count)' : '• $name');
+      descriptionParts.add('• ${lang.detectionStatement(entry.key, entry.value)}');
     }
 
     descriptionParts.add('');
